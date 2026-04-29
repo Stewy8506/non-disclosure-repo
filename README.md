@@ -1,96 +1,116 @@
-# ⚠️ Autonomous Interface Node (AIN)
+# 🧠 Project: DO_NOT_OPEN.exe
 
-> *“If you’re reading this, the system has already initialized.”*
-
----
-
-## Overview
-
-AIN is a decentralized, semi-sentient interface layer designed to observe, adapt, and respond to undefined user interactions in real time.
-
-It does not aim to solve problems.
-It **becomes aware of them.**
+> *This repo was a mistake. You are now part of it.*
 
 ---
 
-## Core Capabilities
+## 🚨 Status
 
-* Reactive visual processing pipelines
-* Context-sensitive state morphing
-* Asynchronous intent interpretation
-* Human-perception-aligned rendering
-
-> Note: Output may vary depending on observer bias.
+![status](https://img.shields.io/badge/status-probably%20fine-green)
+![stability](https://img.shields.io/badge/stability-schrodinger's%20build-yellow)
+![bugs](https://img.shields.io/badge/bugs-feature-blue)
 
 ---
 
-## System Architecture
+## 📦 What is this?
 
-The system operates on three loosely coupled layers:
+Great question.
 
-1. **Perception Layer**
-   Captures environmental signals and user presence
+We don’t know either.
 
-2. **Interpretation Layer**
-   Converts ambiguous intent into structured uncertainty
+Some say it’s:
 
-3. **Projection Layer**
-   Renders responses optimized for cognitive engagement
+* a UI experiment
+* a behavioral simulation
+* an overengineered cry for help
 
----
-
-## Runtime Behavior
-
-AIN does not follow deterministic execution paths.
-
-Instead, it:
-
-* Adapts to interaction patterns
-* Reconfigures internal states dynamically
-* Prioritizes perceptual continuity over logical consistency
+Others say it’s watching you.
 
 ---
 
-## Installation
+## ⚙️ Features
+
+* ✔️ 100% organic code (no GMOs)
+* ✔️ Zero bugs (they are now features)
+* ✔️ Blazing fast (on my machine)
+* ✔️ Responsive (emotionally unavailable)
+* ✔️ Dark mode (like my soul)
+
+---
+
+## 🧪 Tech Stack
+
+* Next (because everyone else is doing it)
+* TypeScript (legally distinct from JavaScript)
+* CSS (held together with hope)
+* HTML (the backbone of society)
+
+---
+
+## 🚀 Getting Started
 
 ```bash
-npx initiate-ain@latest
+npm install
+npm run dev
 ```
 
-If installation succeeds, the system has accepted you.
-If it fails, try again — the system may still be observing.
+If it works:
+
+> suspicious.
+
+If it doesn’t:
+
+> intended behavior.
 
 ---
 
-## Usage
+## 🧠 How it works
 
-Interact with the interface.
-
-That is all.
+It doesn’t.
 
 ---
 
-## Known Issues
+## 🐛 Known Issues
 
-* Occasional overfitting to user expectations
-* Undefined behavior under excessive curiosity
-* May appear “intentional”
-
----
-
-## Contributing
-
-Pull requests are neither accepted nor rejected.
-They are evaluated.
+* Yes
+* Also yes
+* That one thing you just noticed
 
 ---
 
-## License
+## 🤝 Contributing
 
-This project is distributed under conditions that may change without notice.
+1. Fork it
+2. Break it
+3. Open a PR
+4. Regret everything
 
 ---
 
-## Final Note
+## 📸 Preview
 
-You were not supposed to find this.
+There was a preview.
+
+It saw you.
+
+---
+
+## 📜 License
+
+MIT (Mentally Ill Tech)
+
+---
+
+## 🗿 Final Words
+
+You came here looking for something.
+
+You’re leaving with questions.
+
+---
+
+## 🧍‍♂️ Maintainer
+
+Last seen debugging something that wasn’t broken.
+
+---
