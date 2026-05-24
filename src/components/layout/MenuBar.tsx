@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow } from "lucide-react";
+import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow, Volume2, VolumeX } from "lucide-react";
 import MenuDropdown, { MenuItem } from "../ui/MenuDropdown";
 import ToastContainer, { toast } from "../ui/Toast";
 import ChatWindow from "../ui/ChatWindow";
@@ -28,6 +28,127 @@ export default function MenuBar() {
 
   const menuRef = useRef<HTMLDivElement>(null);
   const spotlightInputRef = useRef<HTMLInputElement>(null);
+
+  // Lofi Audio Stream state and ref (YouTube Player API backend)
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.5); // Default to 50%
+  const playerRef = useRef<any>(null);
+
+  // Initialize YouTube Iframe Player on mount (client-side only)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // 1. Create a hidden element for YouTube player
+    let div = document.getElementById("youtube-lofi-player");
+    if (!div) {
+      div = document.createElement("div");
+      div.id = "youtube-lofi-player";
+      (div as HTMLElement).style.display = "none";
+      (div as HTMLElement).style.position = "absolute";
+      (div as HTMLElement).style.width = "0px";
+      (div as HTMLElement).style.height = "0px";
+      (div as HTMLElement).style.opacity = "0";
+      (div as HTMLElement).style.pointerEvents = "none";
+      document.body.appendChild(div);
+    }
+
+    // 2. Load YouTube Iframe API script if not present
+    if (!(window as any).YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+
+    // Define or override global callback
+    (window as any).onYouTubeIframeAPIReady = () => {
+      initPlayer();
+    };
+
+    const initPlayer = () => {
+      try {
+        if (playerRef.current) return;
+        playerRef.current = new (window as any).YT.Player("youtube-lofi-player", {
+          height: "0",
+          width: "0",
+          videoId: "CFGLoQIhmow", // Yasumu - We Met (requested soothing track)
+          playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            loop: 1,
+            playlist: "CFGLoQIhmow",
+            modestbranding: 1,
+            rel: 0,
+            showinfo: 0,
+          },
+          events: {
+            onReady: (event: any) => {
+              event.target.setVolume(volume * 100);
+            },
+            onStateChange: (event: any) => {
+              if (event.data === (window as any).YT.PlayerState.ENDED) {
+                event.target.playVideo();
+              }
+            }
+          },
+        });
+      } catch (e) {
+        console.error("YouTube Player initialization failed", e);
+      }
+    };
+
+    // If script is already loaded by other sessions, initialize immediately
+    if ((window as any).YT && (window as any).YT.Player) {
+      initPlayer();
+    }
+
+    return () => {
+      // Cleanup player
+      if (playerRef.current && typeof playerRef.current.destroy === "function") {
+        try {
+          playerRef.current.destroy();
+        } catch (e) {}
+        playerRef.current = null;
+      }
+      const existingDiv = document.getElementById("youtube-lofi-player");
+      if (existingDiv) {
+        existingDiv.remove();
+      }
+    };
+  }, []);
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setVolume(val);
+    if (playerRef.current && typeof playerRef.current.setVolume === "function") {
+      playerRef.current.setVolume(val * 100);
+    }
+  };
+
+  const toggleMusic = () => {
+    if (!playerRef.current || typeof playerRef.current.playVideo !== "function") {
+      toast("Player is loading... please try again in a moment.", "info");
+      return;
+    }
+
+    try {
+      if (isPlaying) {
+        playerRef.current.pauseVideo();
+        setIsPlaying(false);
+        toast("Soothing Stream Paused", "info");
+      } else {
+        playerRef.current.setVolume(volume * 100);
+        playerRef.current.playVideo();
+        setIsPlaying(true);
+        toast("Playing: Yasumu - We Met 🎧", "success");
+      }
+    } catch (e) {
+      console.error("Playback toggle failed", e);
+      toast("Playback blocked. Please interact with the page first.", "error");
+    }
+  };
 
   // Time & date cycle
   useEffect(() => {
@@ -287,6 +408,39 @@ export default function MenuBar() {
         {/* Right side */}
         <div className="flex items-center gap-4 md:text-white/80">
           <div className="flex items-center gap-2 md:gap-3">
+            {/* 🎵 Lofi Music Stream Control (Hover to expand volume slider) */}
+            <div className="group flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg hover:bg-white/5 transition-all duration-300">
+              <button 
+                onClick={toggleMusic}
+                className="flex items-center justify-center p-0.5 rounded active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+                title={isPlaying ? "Pause Lofi Stream" : "Stream Soothing Lofi"}
+              >
+                {isPlaying ? (
+                  <Volume2 className="w-4 h-4 md:w-3.5 md:h-3.5 text-sky-400 animate-pulse" />
+                ) : (
+                  <VolumeX className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-400 hover:text-white" />
+                )}
+              </button>
+              
+              {/* Slide-out Volume Slider */}
+              <div className="w-0 opacity-0 pointer-events-none group-hover:w-16 group-hover:opacity-100 group-hover:pointer-events-auto flex items-center transition-all duration-300 ease-out overflow-hidden">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  className="w-14 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-sky-400 focus:outline-none"
+                  style={{
+                    WebkitAppearance: "none",
+                    outline: "none",
+                  }}
+                  title={`Volume: ${Math.round(volume * 100)}%`}
+                />
+              </div>
+            </div>
+
             {/* 💬 Global Chat Trigger */}
             <button 
               onClick={() => setIsChatOpen(true)}
