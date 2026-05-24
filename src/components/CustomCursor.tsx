@@ -26,6 +26,13 @@ const CustomCursor = () => {
       if (!isVisible) setIsVisible(true);
 
       const target = e.target as HTMLElement;
+      
+      // Ignore elements explicitly marked with data-cursor="none"
+      if (target.closest("[data-cursor='none']")) {
+        setTargetRect(null);
+        return;
+      }
+
       const interactiveElement = target.closest("button, a, [data-cursor='target']");
 
       if (interactiveElement) {

@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import FadeIn from "../ui/FadeIn";
 import Button from "../ui/Button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 
 export default function Hero() {
   return (
@@ -23,34 +23,34 @@ export default function Hero() {
       />
 
       <div className="relative z-10 text-center px-6 max-w-4xl">
-        <FadeIn delay={0.1}>
-          <span className="inline-block py-1 px-3 rounded-full bg-white/[0.05] border border-white/[0.1] text-xs font-medium text-muted mb-6 tracking-wider uppercase">
-            Available for new opportunities
-          </span>
-        </FadeIn>
-
         <FadeIn delay={0.15}>
-          <div className="flex justify-center mb-6">
-            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.02)]">
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/[0.1] border border-emerald-500/[0.2] backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.1)]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span className="text-sm font-medium text-zinc-300 tracking-wide">
-                Hi, I'm <span className="text-white font-semibold">Anuvab</span>
+              <span className="text-sm font-medium text-emerald-400 tracking-wide uppercase text-xs">
+                Available for new opportunities
               </span>
             </div>
           </div>
         </FadeIn>
 
         <FadeIn delay={0.2}>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight mb-8">
-            Building the <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500">
-              future of digital
+          <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter leading-tight mb-4">
+            Hi, I'm <br className="md:hidden" />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-emerald-500">
+              Anuvab
             </span>
-            <br /> experiences.
+            <span className="text-emerald-500">.</span>
           </h1>
+        </FadeIn>
+
+        <FadeIn delay={0.25}>
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-zinc-400 mb-8 max-w-3xl mx-auto leading-tight">
+            Building the <span className="text-white">future of digital</span> experiences.
+          </h2>
         </FadeIn>
 
         <FadeIn delay={0.3}>
@@ -66,6 +66,12 @@ export default function Hero() {
               View Projects
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
+            <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1}>
+              <Button variant="outline" className="group flex items-center gap-2" data-cursor="button">
+                Download Resume
+                <Download className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
+              </Button>
+            </a>
             <Button variant="outline" data-cursor="button">
               Get in touch
             </Button>

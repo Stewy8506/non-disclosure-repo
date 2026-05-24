@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, LogOut, Save, ExternalLink, Upload, Image as ImageIcon, X } from "lucide-react";
+import { Plus, Trash2, LogOut, Save, ExternalLink, Upload, Image as ImageIcon, X, Search, Filter, Edit2 } from "lucide-react";
+import { toast } from "@/components/ui/Toast";
 
 export default function AdminDashboard() {
   const [projects, setProjects] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+
   const [newProject, setNewProject] = useState({
     title: "",
     description: "",
@@ -25,10 +31,15 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchProjects = async () => {
-    const res = await fetch("/api/projects");
-    const data = await res.json();
-    setProjects(data);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/projects");
+      const data = await res.json();
+      setProjects(data);
+    } catch (error) {
+      toast("Failed to fetch projects.", "error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveProject = async (e: React.FormEvent) => {
@@ -43,33 +54,31 @@ export default function AdminDashboard() {
     const method = editingId ? "PUT" : "POST";
     const url = editingId ? `/api/projects/${editingId}` : "/api/projects";
 
-    const res = await fetch(url, {
-      method: method,
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'placeholder'}` 
-      },
-      body: JSON.stringify(projectData),
-    });
-
-    if (res.ok) {
-      setNewProject({
-        title: "",
-        description: "",
-        tech: "",
-        link: "",
-        category: "Mobile App",
-        image: "/projects/default.jpg"
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'placeholder'}` 
+        },
+        body: JSON.stringify(projectData),
       });
-      setEditingId(null);
-      await fetchProjects();
-    } else {
-      alert(editingId ? "Failed to update project." : "Failed to add project. Check admin password.");
+
+      if (res.ok) {
+        toast(editingId ? "Project updated successfully!" : "Project added successfully!", "success");
+        closeModal();
+        await fetchProjects();
+      } else {
+        toast(editingId ? "Failed to update project." : "Failed to add project. Check admin password.", "error");
+      }
+    } catch (error) {
+      toast("An unexpected error occurred.", "error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleEditProject = (project: any) => {
+  const openEditModal = (project: any) => {
     setEditingId(project.id);
     setNewProject({
       title: project.title,
@@ -79,9 +88,11 @@ export default function AdminDashboard() {
       category: project.category,
       image: project.image || "/projects/default.jpg",
     });
+    setIsModalOpen(true);
   };
 
-  const handleCancelEdit = () => {
+  const closeModal = () => {
+    setIsModalOpen(false);
     setEditingId(null);
     setNewProject({
       title: "",
@@ -97,19 +108,25 @@ export default function AdminDashboard() {
     if (!confirm("Are you sure you want to delete this project?")) return;
     
     setLoading(true);
-    const res = await fetch(`/api/projects?id=${id}`, {
-      method: "DELETE",
-      headers: { 
-        "Authorization": `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'placeholder'}` 
-      },
-    });
+    try {
+      const res = await fetch(`/api/projects?id=${id}`, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'placeholder'}` 
+        },
+      });
 
-    if (res.ok) {
-      await fetchProjects();
-    } else {
-      alert("Failed to delete project.");
+      if (res.ok) {
+        toast("Project deleted successfully.", "success");
+        await fetchProjects();
+      } else {
+        toast("Failed to delete project.", "error");
+      }
+    } catch (error) {
+      toast("An unexpected error occurred.", "error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,88 +143,207 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    // Normally we'd call an API to clear the cookie
     router.push("/admin/login");
   };
 
-  if (loading && projects.length === 0) return <div className="min-h-screen bg-background text-white flex items-center justify-center">Loading...</div>;
+  const filteredProjects = useMemo(() => {
+    return projects.filter((p: any) => {
+      const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            p.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === "All" || p.category === categoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [projects, searchQuery, categoryFilter]);
+
+  if (loading && projects.length === 0) return <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-background text-white p-6 md:p-12">
-      <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center mb-12">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 md:p-8 font-sans">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-zinc-900 p-6 rounded-lg border border-zinc-800">
           <div>
-            <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-            <p className="text-muted">Manage your portfolio projects</p>
+            <h1 className="text-2xl font-semibold text-zinc-100">Admin Dashboard</h1>
+            <p className="text-sm text-zinc-400">Manage your portfolio projects and configurations.</p>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-          >
-            <LogOut size={18} /> Logout
-          </button>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-md bg-zinc-100 text-zinc-900 font-medium hover:bg-zinc-200 transition-colors text-sm"
+            >
+              <Plus size={16} /> New Project
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors text-sm"
+            >
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Add New Project Form */}
-          <div className="lg:col-span-1">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="glass-effect p-6 rounded-3xl border border-white/10 sticky top-12"
+        {/* Toolbar: Search and Filter */}
+        <div className="flex flex-col sm:flex-row gap-4 bg-zinc-900 p-4 rounded-lg border border-zinc-800">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <input 
+              type="text" 
+              placeholder="Search projects..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-sm focus:border-zinc-600 focus:outline-none transition-colors"
+            />
+          </div>
+          <div className="relative w-full sm:w-48">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+            <select 
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-sm focus:border-zinc-600 focus:outline-none transition-colors appearance-none cursor-pointer"
             >
-              <div className="flex items-center gap-2 mb-6">
-                {editingId ? <Save size={20} /> : <Plus size={20} />}
-                <h2 className="text-xl font-semibold">{editingId ? "Edit Project" : "Add New Project"}</h2>
-              </div>
-              
-              <form onSubmit={handleSaveProject} className="space-y-4">
+              <option value="All">All Categories</option>
+              <option value="Mobile App">Mobile App</option>
+              <option value="Embedded Systems">Embedded Systems</option>
+              <option value="AI Product">AI Product</option>
+              <option value="Website">Website</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Projects Data Table */}
+        <div className="bg-zinc-900 rounded-lg border border-zinc-800 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-zinc-950/50 border-b border-zinc-800 text-zinc-400">
+                <tr>
+                  <th className="px-6 py-4 font-medium w-16">Image</th>
+                  <th className="px-6 py-4 font-medium">Project Name</th>
+                  <th className="px-6 py-4 font-medium">Category</th>
+                  <th className="px-6 py-4 font-medium">Tech Stack</th>
+                  <th className="px-6 py-4 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/50">
+                {filteredProjects.map((project: any) => (
+                  <tr key={project.id || project.title} className="hover:bg-zinc-800/20 transition-colors">
+                    <td className="px-6 py-3">
+                      <div className="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-700">
+                        {project.image && project.image !== "/projects/default.jpg" ? (
+                          <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="font-bold text-zinc-500">{project.title[0]}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-3">
+                      <p className="font-medium text-zinc-100">{project.title}</p>
+                      <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1 mt-0.5 w-max">
+                        View Link <ExternalLink size={10} />
+                      </a>
+                    </td>
+                    <td className="px-6 py-3 text-zinc-300">{project.category}</td>
+                    <td className="px-6 py-3">
+                      <div className="flex gap-1 flex-wrap w-48 truncate">
+                        {project.tech.map((t: string) => (
+                          <span key={t} className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => openEditModal(project)}
+                          className="p-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteProject(project.id)}
+                          className="p-1.5 rounded-md bg-red-950/30 border border-red-900/50 text-red-400 hover:bg-red-900/50 hover:text-red-300 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredProjects.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                      No projects found matching your criteria.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Modal for Add/Edit Form */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-lg w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-950">
+              <h2 className="text-lg font-semibold">{editingId ? "Edit Project" : "Add New Project"}</h2>
+              <button onClick={closeModal} className="p-1 text-zinc-400 hover:text-white rounded-md hover:bg-zinc-800 transition-colors">
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              <form id="project-form" onSubmit={handleSaveProject} className="space-y-4 text-sm">
                 <div>
-                  <label className="text-xs font-medium text-muted ml-1">Title</label>
+                  <label className="block text-zinc-400 mb-1">Title</label>
                   <input 
                     type="text" 
                     value={newProject.title}
                     onChange={(e) => setNewProject({...newProject, title: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-white/30 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted ml-1">Description</label>
+                  <label className="block text-zinc-400 mb-1">Description</label>
                   <textarea 
                     value={newProject.description}
                     onChange={(e) => setNewProject({...newProject, description: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-white/30 focus:outline-none transition-colors h-24"
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors h-24 resize-none"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted ml-1">Tech Stack (comma separated)</label>
+                  <label className="block text-zinc-400 mb-1">Tech Stack (comma separated)</label>
                   <input 
                     type="text" 
                     value={newProject.tech}
                     onChange={(e) => setNewProject({...newProject, tech: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-white/30 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors"
                     placeholder="React, Next.js, Tailwind"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted ml-1">Project Link</label>
+                  <label className="block text-zinc-400 mb-1">Project Link</label>
                   <input 
                     type="url" 
                     value={newProject.link}
                     onChange={(e) => setNewProject({...newProject, link: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-white/30 focus:outline-none transition-colors"
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted ml-1">Category</label>
+                  <label className="block text-zinc-400 mb-1">Category</label>
                   <select 
                     value={newProject.category}
                     onChange={(e) => setNewProject({...newProject, category: e.target.value})}
-                    className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-white/30 focus:outline-none transition-colors appearance-none"
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors appearance-none"
                   >
                     <option value="Mobile App">Mobile App</option>
                     <option value="Embedded Systems">Embedded Systems</option>
@@ -216,37 +352,26 @@ export default function AdminDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted ml-1">Project Image</label>
-                  <div className="flex flex-col gap-3">
-                    <div className="relative h-32 w-full rounded-xl bg-white/5 border border-white/10 overflow-hidden group">
-                      {newProject.image ? (
-                        <>
-                          <img 
-                            src={newProject.image} 
-                            alt="Preview" 
-                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                          />
-                          <button 
-                            onClick={() => setNewProject({...newProject, image: "/projects/default.jpg"})}
-                            className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/80 transition-colors"
-                          >
-                            <X size={14} />
-                          </button>
-                        </>
+                  <label className="block text-zinc-400 mb-1">Project Image</label>
+                  <div className="flex gap-4 items-center">
+                    <div className="relative h-16 w-16 rounded-md bg-zinc-950 border border-zinc-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                      {newProject.image && newProject.image !== "/projects/default.jpg" ? (
+                        <img 
+                          src={newProject.image} 
+                          alt="Preview" 
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center text-muted">
-                          <ImageIcon size={24} className="mb-2 opacity-20" />
-                          <span className="text-[10px]">No image selected</span>
-                        </div>
+                        <ImageIcon size={20} className="text-zinc-600" />
                       )}
                     </div>
-                    <label className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer text-sm font-medium text-muted hover:text-white">
+                    <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-300">
                       {uploading ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <Upload size={14} />
                       )}
-                      {uploading ? "Uploading..." : "Upload Image"}
+                      {uploading ? "Uploading..." : "Upload New Image"}
                       <input 
                         type="file" 
                         className="hidden" 
@@ -256,69 +381,29 @@ export default function AdminDashboard() {
                     </label>
                   </div>
                 </div>
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-3 rounded-xl bg-white text-black font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors"
-                >
-                  <Save size={18} /> {editingId ? "Update Project" : "Save Project"}
-                </motion.button>
-                {editingId && (
-                  <button 
-                    onClick={handleCancelEdit}
-                    className="w-full py-3 rounded-xl bg-white/10 text-white font-medium hover:bg-white/20 transition-colors"
-                  >
-                    Cancel Edit
-                  </button>
-                )}
               </form>
-            </motion.div>
-          </div>
-
-          {/* Projects List */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="text-2xl font-semibold mb-6">Existing Projects</h2>
-            <div className="grid grid-cols-1 gap-4">
-              {projects.map((project: any) => (
-                <motion.div 
-                  key={project.id || project.title}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="glass-effect p-4 rounded-2xl border border-white/10 flex items-center justify-between group hover:border-white/20 transition-colors"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${project.color} flex items-center justify-center font-bold`}>
-                      {project.title[0]}
-                    </div>
-                    <div>
-                      <h3 className="font-medium">{project.title}</h3>
-                      <p className="text-xs text-muted">{project.category} • {project.tech.join(", ")}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-muted hover:text-white transition-colors">
-                      <ExternalLink size={16} />
-                    </a>
-                    <button 
-                      onClick={() => handleEditProject(project)}
-                      className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      <Save size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteProject(project.id)}
-                      className="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-              {projects.length === 0 && <p className="text-muted text-center py-12">No projects found. Add your first one!</p>}
+            </div>
+            
+            <div className="px-6 py-4 border-t border-zinc-800 bg-zinc-950 flex justify-end gap-3">
+              <button 
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 rounded-md bg-zinc-800 text-zinc-300 font-medium hover:bg-zinc-700 transition-colors text-sm border border-zinc-700"
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit"
+                form="project-form"
+                disabled={loading}
+                className="px-4 py-2 rounded-md bg-zinc-100 text-zinc-900 font-medium hover:bg-zinc-200 transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
+              >
+                <Save size={14} /> {editingId ? "Update" : "Save"}
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

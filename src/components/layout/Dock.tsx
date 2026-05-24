@@ -19,7 +19,7 @@ export default function Dock() {
         className="glass-effect rounded-2xl border border-white/10 p-3 flex items-center gap-4 shadow-2xl pointer-events-auto bg-zinc-900/60 backdrop-blur-2xl"
       >
         {dockItems.map((item) => (
-          <a key={item.name} href={item.href} className="group relative flex items-center justify-center">
+          <a key={item.name} href={item.href} data-cursor="none" className="group relative flex items-center justify-center">
             {/* Tooltip */}
             <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-800/95 backdrop-blur-md text-white text-xs font-medium rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
               {item.name}

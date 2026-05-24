@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Info } from "lucide-react";
+import { CheckCircle2, Info, XCircle } from "lucide-react";
 
-export type ToastType = "success" | "info";
+export type ToastType = "success" | "info" | "error";
 
 interface ToastProps {
   id: number;
@@ -50,11 +50,9 @@ export default function ToastContainer() {
             exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
             className="pointer-events-auto flex items-center gap-3 px-4 py-3 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl text-sm font-medium text-white/90 min-w-[200px]"
           >
-            {t.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            ) : (
-              <Info className="w-4 h-4 text-blue-400" />
-            )}
+            {t.type === "success" && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+            {t.type === "error" && <XCircle className="w-4 h-4 text-red-400" />}
+            {t.type === "info" && <Info className="w-4 h-4 text-blue-400" />}
             {t.message}
           </motion.div>
         ))}

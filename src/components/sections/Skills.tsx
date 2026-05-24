@@ -7,41 +7,41 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const ROW1 = [
-  { name: "React.js", icon: "⚛️" },
-  { name: "TypeScript", icon: "🔷" },
-  { name: "PostgreSQL", icon: "🐘" },
-  { name: "AWS", icon: "☁️" },
-  { name: "C++", icon: "⚙️" },
-  { name: "React Native", icon: "📱" },
-  { name: "Docker", icon: "🐳" },
-  { name: "Python", icon: "🐍" },
-  { name: "WebSockets", icon: "⚡" },
-  { name: "GraphQL", icon: "🕸️" }
+  { name: "React.js", slug: "react" },
+  { name: "TypeScript", slug: "typescript" },
+  { name: "PostgreSQL", slug: "postgresql" },
+  { name: "AWS", slug: "amazonaws", white: true },
+  { name: "C++", slug: "cplusplus" },
+  { name: "React Native", slug: "react" },
+  { name: "Docker", slug: "docker" },
+  { name: "Python", slug: "python" },
+  { name: "WebSockets", slug: "socketdotio", white: true },
+  { name: "GraphQL", slug: "graphql" }
 ];
 
 const ROW2 = [
-  { name: "Next.js 15", icon: "▲" },
-  { name: "Tailwind CSS", icon: "🌊" },
-  { name: "MongoDB", icon: "🍃" },
-  { name: "Kubernetes", icon: "☸️" },
-  { name: "Rust", icon: "🦀" },
-  { name: "Flutter", icon: "🦋" },
-  { name: "Serverless", icon: "⚡" },
-  { name: "PyTorch", icon: "🔥" },
-  { name: "TRPC", icon: "🔗" },
-  { name: "Embedded C", icon: "🔌" }
+  { name: "Next.js", slug: "nextdotjs", white: true },
+  { name: "Tailwind CSS", slug: "tailwindcss" },
+  { name: "MongoDB", slug: "mongodb" },
+  { name: "Kubernetes", slug: "kubernetes" },
+  { name: "Rust", slug: "rust", white: true },
+  { name: "Flutter", slug: "flutter" },
+  { name: "Serverless", slug: "serverless" },
+  { name: "PyTorch", slug: "pytorch" },
+  { name: "tRPC", slug: "trpc" },
+  { name: "Embedded C", slug: "c" }
 ];
 
 const ROW3 = [
-  { name: "Framer Motion", icon: "✨" },
-  { name: "Redis", icon: "🔴" },
-  { name: "Expo", icon: "🚀" },
-  { name: "Swift", icon: "🍎" },
-  { name: "Kotlin", icon: "🤖" },
-  { name: "OpenAI API", icon: "🧠" },
-  { name: "LangChain", icon: "🦜" },
-  { name: "RTOS", icon: "⏱️" },
-  { name: "ESP32", icon: "📡" }
+  { name: "Framer Motion", slug: "framer", white: true },
+  { name: "Redis", slug: "redis" },
+  { name: "Expo", slug: "expo", white: true },
+  { name: "Swift", slug: "swift" },
+  { name: "Kotlin", slug: "kotlin" },
+  { name: "OpenAI API", slug: "openai", white: true },
+  { name: "LangChain", slug: "langchain", white: true },
+  { name: "RTOS", slug: "freertos", white: true },
+  { name: "ESP32", slug: "espressif" }
 ];
 
 const MarqueeRow = ({ 
@@ -49,7 +49,7 @@ const MarqueeRow = ({
   speed = 40, 
   direction = "left" 
 }: { 
-  items: {name:string, icon:string}[], 
+  items: {name:string, slug:string, white?:boolean}[], 
   speed?: number, 
   direction?: "left" | "right" 
 }) => {
@@ -69,9 +69,16 @@ const MarqueeRow = ({
             key={`${item.name}-${idx}`}
             className="flex items-center gap-4 px-8 py-5 rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300 cursor-default group"
           >
-            <span className="text-3xl group-hover:scale-110 transition-transform duration-300 drop-shadow-md">
-              {item.icon}
-            </span>
+            <div className="w-8 h-8 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
+              <img 
+                src={`https://cdn.simpleicons.org/${item.slug}${item.white ? '/white' : ''}`} 
+                alt={item.name}
+                className="w-full h-full object-contain"
+                width={32}
+                height={32}
+                loading="lazy"
+              />
+            </div>
             <span className="text-xl font-semibold text-zinc-300 group-hover:text-white transition-colors tracking-tight">
               {item.name}
             </span>
