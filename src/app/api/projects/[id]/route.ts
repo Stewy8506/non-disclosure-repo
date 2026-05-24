@@ -1,38 +1,42 @@
-import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { NextResponse, NextRequest } from "next/server";
+import { verifySessionToken } from "@/lib/auth";
+import { db, isFirebaseConfigured } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 
-const DATA_PATH = path.join(process.cwd(), "src/data/projects.json");
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const token = req.cookies.get("admin_session")?.value;
+  if (!(await verifySessionToken(token))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!isFirebaseConfigured || !db) {
+    return NextResponse.json({ error: "Firebase not configured on server" }, { status: 503 });
+  }
+
   try {
     const { id } = await params;
     const body = await req.json();
-    
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
-    const data = await fs.readFile(DATA_PATH, "utf8");
-    let projects = JSON.parse(data);
-    
-    const projectIndex = projects.findIndex((p: any) => p.id === id);
-    if (projectIndex === -1) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
+    // Reference and set/update document directly on Firestore (creates if doesn't exist)
+    const projectRef = doc(db, "projects", id);
+    await setDoc(projectRef, {
+      title: body.title,
+      description: body.description,
+      tech: body.tech,
+      link: body.link,
+      category: body.category,
+      images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
 
-    // Update project while preserving ID
-    projects[projectIndex] = {
-      ...projects[projectIndex],
-      ...body,
-      id: id,
+    const updatedProject = {
+      id,
+      ...body
     };
 
-    await fs.writeFile(DATA_PATH, JSON.stringify(projects, null, 2));
-    
-    return NextResponse.json(projects[projectIndex]);
+    return NextResponse.json(updatedProject);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
+    console.error("Firestore Project PUT Error:", error);
+    return NextResponse.json({ error: "Failed to update project in Firestore" }, { status: 500 });
   }
 }

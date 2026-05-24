@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import FadeIn from "../ui/FadeIn";
 import Button from "../ui/Button";
 import { ArrowRight, Download } from "lucide-react";
+import { useSoundEffect } from "@/hooks/useSoundEffect";
 
 export default function Hero() {
+  const { playThocc } = useSoundEffect();
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Glow */}
@@ -62,17 +64,17 @@ export default function Hero() {
 
         <FadeIn delay={0.4}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-            <Button variant="primary" className="group flex items-center justify-center gap-2 w-full sm:w-auto" data-cursor="button">
+            <Button variant="primary" className="group flex items-center justify-center gap-2 w-full sm:w-auto" data-cursor="button" onMouseEnter={playThocc}>
               View Projects
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1} className="w-full sm:w-auto">
+            <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1} className="w-full sm:w-auto" onMouseEnter={playThocc}>
               <Button variant="outline" className="group flex items-center justify-center gap-2 w-full" data-cursor="button">
                 Download Resume
                 <Download className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
               </Button>
             </a>
-            <Button variant="outline" data-cursor="button" className="w-full sm:w-auto justify-center">
+            <Button variant="outline" data-cursor="button" className="w-full sm:w-auto justify-center" onMouseEnter={playThocc}>
               Get in touch
             </Button>
           </div>

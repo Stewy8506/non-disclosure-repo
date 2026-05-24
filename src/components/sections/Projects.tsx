@@ -7,8 +7,10 @@ import { ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { GitHubIcon } from "../ui/BrandIcons";
+import { useSoundEffect } from "@/hooks/useSoundEffect";
 
 export default function Projects() {
+  const { playThocc } = useSoundEffect();
   const [projects, setProjects] = useState([]);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
@@ -53,6 +55,7 @@ export default function Projects() {
             {categories.map((cat) => (
               <button
                 key={cat}
+                onMouseEnter={playThocc}
                 onClick={() => setFilter(cat)}
                 className={cn(
                   "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 border",
@@ -94,13 +97,34 @@ export default function Projects() {
 
 // Alternating Full-Width Case Studies
 function ProjectListCard({ project, idx }: { project: any; idx: number }) {
+  const { playThocc } = useSoundEffect();
   const isEven = idx % 2 === 0;
+  const [currentImageIdx, setCurrentImageIdx] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const images = project.images && project.images.length > 0 ? project.images : (project.image ? [project.image] : ["/projects/default.jpg"]);
+
+  useEffect(() => {
+    if (!isHovered || images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImageIdx((prev) => (prev + 1) % images.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [isHovered, images.length]);
   
   return (
     <motion.a
       href={project.link}
       target="_blank"
       rel="noopener noreferrer"
+      onMouseEnter={() => {
+        setIsHovered(true);
+        playThocc();
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setCurrentImageIdx(0);
+      }}
       className={cn(
         "relative flex flex-col w-full glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] group overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.02)]",
         isEven ? "md:flex-row" : "md:flex-row-reverse"
@@ -109,13 +133,41 @@ function ProjectListCard({ project, idx }: { project: any; idx: number }) {
     >
       {/* Image Half */}
       <div className="relative h-64 md:h-auto md:w-1/2 overflow-hidden bg-zinc-950 shrink-0">
-        <img 
-          src={project.image} 
-          alt={project.title} 
-          className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" 
-        />
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.img 
+            key={currentImageIdx}
+            src={images[currentImageIdx]} 
+            alt={`${project.title} - ${currentImageIdx + 1}`} 
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: isHovered ? 1.05 : 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
+            className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100" 
+          />
+        </AnimatePresence>
+
+        {/* Navigation Dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+            {images.map((_: string, i: number) => (
+              <button
+                key={i}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setCurrentImageIdx(i);
+                }}
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                  i === currentImageIdx ? "bg-white w-3" : "bg-white/40 hover:bg-white/80"
+                )}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/40 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/40 to-transparent pointer-events-none z-10" />
       </div>
 
       {/* Content Half */}

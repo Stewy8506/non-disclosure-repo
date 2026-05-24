@@ -1,72 +1,120 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
+import { verifySessionToken } from "@/lib/auth";
+import { db, isFirebaseConfigured } from "@/lib/firebase";
+import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 import fs from "fs/promises";
 import path from "path";
 
-const DATA_PATH = path.join(process.cwd(), "src/data/projects.json");
+const LOCAL_DATA_PATH = path.join(process.cwd(), "src/data/projects.json");
 
-export async function GET() {
+// Helper to load static fallback projects if Firestore is unconfigured or empty
+async function getLocalProjects() {
   try {
-    const data = await fs.readFile(DATA_PATH, "utf8");
-    return NextResponse.json(JSON.parse(data));
+    const data = await fs.readFile(LOCAL_DATA_PATH, "utf8");
+    const parsed = JSON.parse(data);
+    return parsed.map((p: any, idx: number) => ({
+      id: p.id || p.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") || `project-${idx}`,
+      ...p
+    }));
   } catch (error) {
-    return NextResponse.json({ error: "Failed to load projects" }, { status: 500 });
+    return [];
   }
 }
 
-export async function POST(req: Request) {
+export async function GET() {
+  // Fallback to local JSON if Firebase is not configured
+  if (!isFirebaseConfigured || !db) {
+    const localData = await getLocalProjects();
+    return NextResponse.json(localData);
+  }
+
+  try {
+    const querySnapshot = await getDocs(collection(db, "projects"));
+    const projects: any[] = [];
+    
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      projects.push({
+        id: docSnap.id,
+        ...data,
+        images: data.images || (data.image ? [data.image] : ["/projects/default.jpg"])
+      });
+    });
+
+    // If Firestore has no projects yet, seed with local projects so the UI remains beautiful
+    if (projects.length === 0) {
+      const localData = await getLocalProjects();
+      return NextResponse.json(localData);
+    }
+
+    return NextResponse.json(projects);
+  } catch (error) {
+    console.error("Firestore Projects Fetch Error:", error);
+    const localData = await getLocalProjects();
+    return NextResponse.json(localData);
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const token = req.cookies.get("admin_session")?.value;
+  if (!(await verifySessionToken(token))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!isFirebaseConfigured || !db) {
+    return NextResponse.json({ error: "Firebase not configured on server" }, { status: 503 });
+  }
+
   try {
     const body = await req.json();
     
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // Save to Firestore 'projects' collection
+    const docRef = await addDoc(collection(db, "projects"), {
+      title: body.title || "",
+      description: body.description || "",
+      tech: body.tech || [],
+      link: body.link || "",
+      category: body.category || "Mobile App",
+      images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
+      createdAt: new Date().toISOString()
+    });
 
-    const data = await fs.readFile(DATA_PATH, "utf8");
-    const projects = JSON.parse(data);
-    
     const newProject = {
-      ...body,
-      id: Date.now().toString(),
+      id: docRef.id,
+      ...body
     };
-    
-    projects.push(newProject);
-    await fs.writeFile(DATA_PATH, JSON.stringify(projects, null, 2));
-    
+
     return NextResponse.json(newProject);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to save project" }, { status: 500 });
+    console.error("Firestore Project POST Error:", error);
+    return NextResponse.json({ error: "Failed to save project to Firestore" }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
+  const token = req.cookies.get("admin_session")?.value;
+  if (!(await verifySessionToken(token))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!isFirebaseConfigured || !db) {
+    return NextResponse.json({ error: "Firebase not configured on server" }, { status: 503 });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-    
-    const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.ADMIN_PASSWORD}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     if (!id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
     }
 
-    const data = await fs.readFile(DATA_PATH, "utf8");
-    let projects = JSON.parse(data);
-    
-    const initialLength = projects.length;
-    projects = projects.filter((p: any) => p.id !== id);
-
-    if (projects.length === initialLength) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
-    }
-
-    await fs.writeFile(DATA_PATH, JSON.stringify(projects, null, 2));
+    // Delete document directly from Firestore
+    await deleteDoc(doc(db, "projects", id));
     
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Firestore Project DELETE Error:", error);
     return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });
   }
 }

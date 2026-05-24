@@ -83,7 +83,7 @@ const CustomCursor = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="hidden md:block fixed pointer-events-none z-[9999] mix-blend-difference"
+            className="hidden md:flex fixed pointer-events-none z-[9999] mix-blend-difference"
             style={{
               top: targetRect.top,
               left: targetRect.left,

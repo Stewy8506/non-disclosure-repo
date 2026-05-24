@@ -20,7 +20,7 @@ export default function AdminDashboard() {
     tech: "",
     link: "",
     category: "Mobile App",
-    image: "/projects/default.jpg"
+    images: [] as string[]
   });
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -58,8 +58,7 @@ export default function AdminDashboard() {
       const res = await fetch(url, {
         method: method,
         headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'placeholder'}` 
+          "Content-Type": "application/json"
         },
         body: JSON.stringify(projectData),
       });
@@ -69,7 +68,7 @@ export default function AdminDashboard() {
         closeModal();
         await fetchProjects();
       } else {
-        toast(editingId ? "Failed to update project." : "Failed to add project. Check admin password.", "error");
+        toast(editingId ? "Failed to update project. Check admin password." : "Failed to add project. Check admin password.", "error");
       }
     } catch (error) {
       toast("An unexpected error occurred.", "error");
@@ -86,7 +85,7 @@ export default function AdminDashboard() {
       tech: project.tech.join(", "),
       link: project.link,
       category: project.category,
-      image: project.image || "/projects/default.jpg",
+      images: project.images || (project.image ? [project.image] : []),
     });
     setIsModalOpen(true);
   };
@@ -100,7 +99,7 @@ export default function AdminDashboard() {
       tech: "",
       link: "",
       category: "Mobile App",
-      image: "/projects/default.jpg"
+      images: []
     });
   };
 
@@ -110,10 +109,7 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const res = await fetch(`/api/projects?id=${id}`, {
-        method: "DELETE",
-        headers: { 
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'placeholder'}` 
-        },
+        method: "DELETE"
       });
 
       if (res.ok) {
@@ -133,13 +129,44 @@ export default function AdminDashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Check file size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Image size must be less than 5MB.", "error");
+      return;
+    }
+
     setUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setNewProject({ ...newProject, image: reader.result as string });
+    try {
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+      // Graceful verification
+      if (!cloudName || !uploadPreset || cloudName === "your_cloud_name" || uploadPreset === "your_unsigned_upload_preset") {
+        throw new Error("Missing Cloudinary configuration in .env.local. Please configure NEXT_PUBLIC_CLOUDINARY_* variables.");
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", uploadPreset);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to upload image to Cloudinary.");
+      }
+
+      const data = await res.json();
+      setNewProject({ ...newProject, images: [...newProject.images, data.secure_url] });
+      toast("Image uploaded to Cloudinary successfully!", "success");
+    } catch (error: any) {
+      console.error("Cloudinary Upload Error:", error);
+      toast(error.message || "Failed to upload image.", "error");
+    } finally {
       setUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleLogout = () => {
@@ -228,8 +255,8 @@ export default function AdminDashboard() {
                   <tr key={project.id || project.title} className="hover:bg-zinc-800/20 transition-colors">
                     <td className="px-6 py-3">
                       <div className="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-700">
-                        {project.image && project.image !== "/projects/default.jpg" ? (
-                          <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                        {project.images?.length > 0 || project.image ? (
+                          <img src={project.images?.[0] || project.image} alt={project.title} className="w-full h-full object-cover" />
                         ) : (
                           <span className="font-bold text-zinc-500">{project.title[0]}</span>
                         )}
@@ -352,31 +379,42 @@ export default function AdminDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-zinc-400 mb-1">Project Image</label>
-                  <div className="flex gap-4 items-center">
-                    <div className="relative h-16 w-16 rounded-md bg-zinc-950 border border-zinc-800 overflow-hidden flex-shrink-0 flex items-center justify-center">
-                      {newProject.image && newProject.image !== "/projects/default.jpg" ? (
+                  <label className="block text-zinc-400 mb-2">Project Images</label>
+                  <div className="flex flex-wrap gap-4 items-start">
+                    {newProject.images.map((img, idx) => (
+                      <div key={idx} className="relative h-20 w-20 rounded-md bg-zinc-950 border border-zinc-800 overflow-hidden flex-shrink-0 group">
                         <img 
-                          src={newProject.image} 
-                          alt="Preview" 
+                          src={img} 
+                          alt={`Preview ${idx + 1}`} 
                           className="w-full h-full object-cover"
                         />
-                      ) : (
-                        <ImageIcon size={20} className="text-zinc-600" />
-                      )}
-                    </div>
-                    <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 transition-colors cursor-pointer text-zinc-300">
+                        <button
+                          type="button"
+                          onClick={() => setNewProject({ ...newProject, images: newProject.images.filter((_, i) => i !== idx) })}
+                          className="absolute top-1 right-1 p-0.5 bg-black/60 rounded text-zinc-300 hover:text-white hover:bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X size={14} />
+                        </button>
+                        {idx === 0 && (
+                          <div className="absolute bottom-0 inset-x-0 bg-emerald-500/80 text-[9px] text-white text-center py-0.5 font-bold uppercase tracking-wider">
+                            Cover
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <label className="h-20 w-32 flex flex-col items-center justify-center gap-2 rounded-md bg-zinc-950 border border-zinc-800 border-dashed hover:bg-zinc-900 transition-colors cursor-pointer text-zinc-400 text-xs">
                       {uploading ? (
                         <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Upload size={14} />
+                        <Upload size={16} />
                       )}
-                      {uploading ? "Uploading..." : "Upload New Image"}
+                      {uploading ? "Uploading..." : "Add Image"}
                       <input 
                         type="file" 
                         className="hidden" 
                         accept="image/*" 
                         onChange={handleImageUpload} 
+                        disabled={uploading}
                       />
                     </label>
                   </div>
