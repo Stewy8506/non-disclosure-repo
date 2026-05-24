@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow, Volume2, VolumeX } from "lucide-react";
+import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow, Volume2, VolumeX, Lock } from "lucide-react";
 import MenuDropdown, { MenuItem } from "../ui/MenuDropdown";
 import ToastContainer, { toast } from "../ui/Toast";
 import ChatWindow from "../ui/ChatWindow";
@@ -28,6 +28,27 @@ export default function MenuBar() {
 
   const menuRef = useRef<HTMLDivElement>(null);
   const spotlightInputRef = useRef<HTMLInputElement>(null);
+
+  // Check auth status for Admin Portal
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/check");
+        if (res.ok) {
+          const data = await res.json();
+          setIsAdmin(!!data.authenticated);
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        setIsAdmin(false);
+      }
+    };
+
+    checkAuth();
+  }, [isSpotlightOpen]);
 
   // Lofi Audio Stream state and ref (YouTube Player API backend)
   const [isPlaying, setIsPlaying] = useState(false);
@@ -274,6 +295,10 @@ export default function MenuBar() {
       link.click();
       toast("Downloading resume...", "success");
     } else if (action === "admin") {
+      if (!isAdmin) {
+        toast("Admin Portal requires authentication. Please log in first.", "error");
+        return;
+      }
       window.open("/admin", "_blank");
       toast("Opening Admin console...", "info");
     }
@@ -540,37 +565,66 @@ export default function MenuBar() {
                   filteredSearchItems.map((item, idx) => {
                     const isSelected = idx === searchIndex;
                     const IconComponent = item.icon;
+                    const isDisabledAdmin = item.action === "admin" && !isAdmin;
 
                     return (
                       <div
                         key={item.title}
-                        onClick={() => triggerSearchAction(item.action)}
-                        onMouseEnter={() => setSearchIndex(idx)}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
-                          isSelected 
-                            ? "bg-emerald-500 text-white" 
-                            : "hover:bg-white/5 text-zinc-300"
+                        onClick={() => {
+                          if (isDisabledAdmin) {
+                            toast("Admin Portal requires authentication. Please log in first.", "error");
+                            return;
+                          }
+                          triggerSearchAction(item.action);
+                        }}
+                        onMouseEnter={() => {
+                          if (!isDisabledAdmin) {
+                            setSearchIndex(idx);
+                          }
+                        }}
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
+                          isDisabledAdmin
+                            ? isSelected
+                              ? "bg-zinc-800/50 text-zinc-500 opacity-60 cursor-not-allowed"
+                              : "opacity-40 cursor-not-allowed text-zinc-500"
+                            : isSelected 
+                              ? "bg-emerald-500 text-white" 
+                              : "hover:bg-white/5 text-zinc-300"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`p-2 rounded-lg ${isSelected ? "bg-white/20 text-white" : "bg-white/5 text-zinc-400"} shrink-0`}>
+                          <div className={`p-2 rounded-lg ${
+                            isDisabledAdmin
+                              ? isSelected ? "bg-white/10 text-zinc-500" : "bg-white/5 text-zinc-600"
+                              : isSelected ? "bg-white/20 text-white" : "bg-white/5 text-zinc-400"
+                          } shrink-0`}>
                             <IconComponent className="w-4 h-4" />
                           </div>
                           <div className="truncate">
                             <p className="text-xs font-semibold">{item.title}</p>
-                            <p className={`text-[10px] mt-0.5 truncate ${isSelected ? "text-white/80" : "text-zinc-500"}`}>
+                            <p className={`text-[10px] mt-0.5 truncate ${
+                              isDisabledAdmin
+                                ? "text-zinc-600"
+                                : isSelected ? "text-white/80" : "text-zinc-500"
+                            }`}>
                               {item.desc}
                             </p>
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${
-                            isSelected ? "bg-white/25 text-white" : "bg-white/5 text-zinc-500"
-                          }`}>
-                            {item.category}
-                          </span>
-                          {isSelected && (
+                          {isDisabledAdmin ? (
+                            <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-red-950/30 border border-red-900/30 text-red-400 font-sans">
+                              <Lock className="w-2.5 h-2.5" /> Locked
+                            </span>
+                          ) : (
+                            <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${
+                              isSelected ? "bg-white/25 text-white" : "bg-white/5 text-zinc-500"
+                            }`}>
+                              {item.category}
+                            </span>
+                          )}
+                          {isSelected && !isDisabledAdmin && (
                             <CornerDownLeft className="w-3.5 h-3.5 opacity-80" />
                           )}
                         </div>
