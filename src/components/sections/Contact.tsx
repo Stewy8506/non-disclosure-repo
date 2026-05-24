@@ -32,35 +32,48 @@ const Contact = () => {
         >
           <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
           
-          <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+          <a 
+            href="mailto:dasanuvab38@gmail.com"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/20 hover:border-white/20 transition-all group duration-300"
+          >
             <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
               <Mail size={24} />
             </div>
             <div>
               <p className="text-sm text-gray-400">Email</p>
-              <p className="text-lg font-medium">hello@yourdomain.com</p>
+              <p className="text-lg font-medium select-all">dasanuvab38@gmail.com</p>
             </div>
-          </div>
+          </a>
 
-          <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+          <a 
+            href="https://www.linkedin.com/in/anv-dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/20 hover:border-white/20 transition-all group duration-300"
+          >
             <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
               <LinkedInIcon className="h-6 w-6" />
             </div>
             <div>
               <p className="text-sm text-gray-400">LinkedIn</p>
-              <p className="text-lg font-medium">linkedin.com/in/yourusername</p>
+              <p className="text-lg font-medium">linkedin.com/in/anv-dev</p>
             </div>
-          </div>
+          </a>
 
-          <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors group">
+          <a 
+            href="https://github.com/Stewy8506"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/20 hover:border-white/20 transition-all group duration-300"
+          >
             <div className="p-3 rounded-xl bg-gray-500/20 text-gray-400 group-hover:scale-110 transition-transform">
               <GitHubIcon className="h-6 w-6" />
             </div>
             <div>
               <p className="text-sm text-gray-400">GitHub</p>
-              <p className="text-lg font-medium">github.com/yourusername</p>
+              <p className="text-lg font-medium">github.com/Stewy8506</p>
             </div>
-          </div>
+          </a>
         </motion.div>
 
         <motion.form 

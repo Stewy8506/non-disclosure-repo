@@ -1,76 +1,76 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import React, { useRef, useMemo } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Points, PointMaterial } from "@react-three/drei";
+import * as THREE from "three";
 
-export default function DynamicBackground() {
-  // Mouse tracking values
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+function ParticleField() {
+  const ref = useRef<THREE.Points>(null!);
+  const mouse = useRef({ x: 0, y: 0 });
 
-  // Smooth spring physics for the "follower" glow
-  const springConfig = { damping: 25, stiffness: 150 };
-  const smoothX = useSpring(mouseX, springConfig);
-  const smoothY = useSpring(mouseY, springConfig);
+  // Generate 7000 particles in a wide spatial box
+  const particles = useMemo(() => {
+    const count = 7000;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count * 3; i++) {
+      positions[i] = (Math.random() - 0.5) * 40;
+    }
+    return positions;
+  }, []);
 
-  useEffect(() => {
+  // Track global mouse position for the parallax effect
+  React.useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      // Normalize mouse position to percentage of window (0 to 1)
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
+      // Normalize to -1 to +1 range
+      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
     };
-
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
+  }, []);
+
+  useFrame((state, delta) => {
+    if (!ref.current) return;
+    
+    // Slow, elegant drift
+    ref.current.rotation.x -= delta * 0.015;
+    ref.current.rotation.y -= delta * 0.025;
+
+    // Smooth camera parallax based on mouse
+    const targetX = mouse.current.x * 2.5;
+    const targetY = mouse.current.y * 2.5;
+    
+    state.camera.position.x += (targetX - state.camera.position.x) * 0.02;
+    state.camera.position.y += (targetY - state.camera.position.y) * 0.02;
+    state.camera.lookAt(0, 0, 0);
+  });
 
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none bg-background">
-      {/* INTERACTIVE GLOW: Follows the mouse */}
-      <motion.div 
-        style={{
-          x: smoothX,
-          y: smoothY,
-          translateX: "-50%",
-          translateY: "-50%",
-        }}
-        className="absolute w-[40%] h-[40%] rounded-full bg-blue-500/30 blur-[100px] opacity-60"
-      />
-      
-      {/* AMBIENT GLOW 1: Slow drift top-left */}
-      <motion.div 
-        animate={{
-          x: [0, 100, 0],
-          y: [0, 50, 0],
-          scale: [1, 1.2, 1],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="absolute -top-[10%] -left-[10%] w-[60%] h-[60%] rounded-full bg-purple-600/20 blur-[120px]"
-      />
-      
-      {/* AMBIENT GLOW 2: Slow drift bottom-right */}
-      <motion.div 
-        animate={{
-          x: [0, -100, 0],
-          y: [0, 100, 0],
-          scale: [1, 1.1, 1],
-        }}
-        transition={{
-          duration: 25,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-        className="absolute bottom-0 right-0 w-[50%] h-[50%] rounded-full bg-indigo-600/20 blur-[120px]"
-      />
+    <group rotation={[0, 0, Math.PI / 8]}>
+      <Points ref={ref} positions={particles} stride={3} frustumCulled={false}>
+        <PointMaterial
+          transparent
+          color="#ffffff"
+          size={0.04}
+          sizeAttenuation={true}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          opacity={0.4}
+        />
+      </Points>
+    </group>
+  );
+}
 
-      {/* Subtle Noise Texture Overlay */}
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none contrast-150 brightness-100" 
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
-      />
+export default function DynamicBackground() {
+  return (
+    <div className="fixed inset-0 -z-10 bg-black pointer-events-none">
+      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
+        {/* Soft fog to gently fade out distant particles into the black base */}
+        <fog attach="fog" args={["#000000", 8, 25]} />
+        <ParticleField />
+      </Canvas>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden bg-background">
+    <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Glow */}
       <motion.div 
         animate={{ 
@@ -29,8 +29,22 @@ export default function Hero() {
           </span>
         </FadeIn>
 
+        <FadeIn delay={0.15}>
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md shadow-[0_0_20px_rgba(255,255,255,0.02)]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-sm font-medium text-zinc-300 tracking-wide">
+                Hi, I'm <span className="text-white font-semibold">Dasan</span>
+              </span>
+            </div>
+          </div>
+        </FadeIn>
+
         <FadeIn delay={0.2}>
-          <h1 className="text-5xl md:text-8xl font-bold tracking-tighter leading-tight mb-8">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight mb-8">
             Building the <br /> 
             <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-zinc-500">
               future of digital
@@ -59,8 +73,6 @@ export default function Hero() {
         </FadeIn>
       </div>
 
-      {/* Subtle bottom fade to transition to next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 }

@@ -14,7 +14,7 @@ export default function Navbar() {
         <a href="#skills" className="hover:text-white text-muted transition-colors">Skills</a>
         <a href="#projects" className="hover:text-white text-muted transition-colors">Projects</a>
         <div className="w-px h-4 bg-zinc-800" />
-        <a href="mailto:hello@example.com" className="hover:text-white text-muted transition-colors">Contact</a>
+        <a href="mailto:dasanuvab38@gmail.com" className="hover:text-white text-muted transition-colors">Contact</a>
       </div>
     </motion.nav>
   );

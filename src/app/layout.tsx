@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "anv | Full Stack Developer",
+  title: "Anuvab Das | Full Stack Developer",
   description: "Premium portfolio of a full stack developer specializing in React Native, Flutter, and Next.js",
 };
 

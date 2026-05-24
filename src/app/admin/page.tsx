@@ -112,6 +112,19 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewProject({ ...newProject, image: reader.result as string });
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleLogout = () => {
     // Normally we'd call an API to clear the cookie
     router.push("/admin/login");
