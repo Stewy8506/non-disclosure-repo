@@ -111,10 +111,10 @@ export default function MenuBar() {
         ref={menuRef}
         initial={{ y: -50 }}
         animate={{ y: 0 }}
-        className="fixed top-0 inset-x-0 h-7 z-50 flex items-center justify-between px-4 bg-zinc-900/60 backdrop-blur-xl border-b border-white/10 text-[13px] font-medium text-white/90 select-none shadow-sm"
+        className="fixed top-0 inset-x-0 h-10 md:h-7 z-50 flex items-center justify-between px-6 md:px-4 bg-transparent md:bg-zinc-900/60 md:backdrop-blur-xl border-b-0 md:border-b border-white/10 text-[14px] md:text-[13px] font-medium text-white/90 select-none"
       >
-        {/* Left side */}
-        <div className="flex items-center gap-5">
+        {/* Desktop Left side */}
+        <div className="hidden md:flex items-center gap-5">
           <div className="relative">
             <div 
               onClick={() => handleMenuClick("anvos")}
@@ -143,14 +143,19 @@ export default function MenuBar() {
           </div>
         </div>
 
+        {/* Mobile Left side (iOS Time) */}
+        <div className="flex md:hidden items-center">
+          <span className="font-semibold">{time ? time.split(" ")[0] : "10:00"}</span>
+        </div>
+
         {/* Right side */}
-        <div className="flex items-center gap-4 text-white/80">
-          <div className="flex items-center gap-3">
-            <Wifi className="w-3.5 h-3.5 hover:text-white cursor-pointer" />
-            <Search className="w-3.5 h-3.5 hover:text-white cursor-pointer" />
-            <BatteryMedium className="w-4 h-4 hover:text-white cursor-pointer" />
+        <div className="flex items-center gap-4 md:text-white/80">
+          <div className="flex items-center gap-2 md:gap-3">
+            <Wifi className="w-4 h-4 md:w-3.5 md:h-3.5 md:hover:text-white cursor-pointer" />
+            <Search className="hidden md:block w-3.5 h-3.5 hover:text-white cursor-pointer" />
+            <BatteryMedium className="w-5 h-5 md:w-4 md:h-4 md:hover:text-white cursor-pointer" />
           </div>
-          <span className="text-white/90 cursor-default">{time || "10:00 AM"}</span>
+          <span className="hidden md:block text-white/90 cursor-default">{time || "10:00 AM"}</span>
         </div>
       </motion.div>
     </>

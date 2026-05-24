@@ -63,7 +63,7 @@ const CustomCursor = () => {
     <>
       {/* The actual mouse pointer dot */}
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        className="hidden md:block fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference"
         style={{
           x: cursorX,
           y: cursorY,
@@ -83,7 +83,7 @@ const CustomCursor = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed pointer-events-none z-[9999] mix-blend-difference"
+            className="hidden md:block fixed pointer-events-none z-[9999] mix-blend-difference"
             style={{
               top: targetRect.top,
               left: targetRect.left,

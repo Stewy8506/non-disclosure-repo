@@ -38,7 +38,7 @@ export default function Hero() {
         </FadeIn>
 
         <FadeIn delay={0.2}>
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter leading-tight mb-4">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter leading-tight mb-4">
             Hi, I'm <br className="md:hidden" />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-200 to-emerald-500">
               Anuvab
@@ -48,7 +48,7 @@ export default function Hero() {
         </FadeIn>
 
         <FadeIn delay={0.25}>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-zinc-400 mb-8 max-w-3xl mx-auto leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-zinc-400 mb-8 max-w-3xl mx-auto leading-tight">
             Building the <span className="text-white">future of digital</span> experiences.
           </h2>
         </FadeIn>
@@ -61,18 +61,18 @@ export default function Hero() {
         </FadeIn>
 
         <FadeIn delay={0.4}>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button variant="primary" className="group flex items-center gap-2" data-cursor="button">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
+            <Button variant="primary" className="group flex items-center justify-center gap-2 w-full sm:w-auto" data-cursor="button">
               View Projects
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1}>
-              <Button variant="outline" className="group flex items-center gap-2" data-cursor="button">
+            <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1} className="w-full sm:w-auto">
+              <Button variant="outline" className="group flex items-center justify-center gap-2 w-full" data-cursor="button">
                 Download Resume
                 <Download className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
               </Button>
             </a>
-            <Button variant="outline" data-cursor="button">
+            <Button variant="outline" data-cursor="button" className="w-full sm:w-auto justify-center">
               Get in touch
             </Button>
           </div>

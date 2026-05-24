@@ -12,11 +12,13 @@ export default function Dock() {
   ];
 
   return (
-    <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none">
+    <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
+      
+      {/* Desktop macOS Dock */}
       <motion.div 
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="glass-effect rounded-2xl border border-white/10 p-3 flex items-center gap-4 shadow-2xl pointer-events-auto bg-zinc-900/60 backdrop-blur-2xl"
+        className="hidden md:flex glass-effect rounded-2xl border border-white/10 p-3 items-center gap-4 shadow-2xl pointer-events-auto bg-zinc-900/60 backdrop-blur-2xl"
       >
         {dockItems.map((item) => (
           <a key={item.name} href={item.href} data-cursor="none" className="group relative flex items-center justify-center">
@@ -38,6 +40,23 @@ export default function Dock() {
           </a>
         ))}
       </motion.div>
+
+      {/* Mobile iOS Tab Bar */}
+      <motion.div 
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        className="flex md:hidden glass-effect rounded-full border border-white/10 py-2.5 px-6 items-center justify-between w-full max-w-sm shadow-2xl pointer-events-auto bg-zinc-900/80 backdrop-blur-2xl"
+      >
+        {dockItems.map((item) => (
+          <a key={item.name} href={item.href} data-cursor="none" className="flex flex-col items-center justify-center gap-0.5 opacity-70 hover:opacity-100 active:scale-95 transition-all">
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center`}>
+              <item.icon className={`w-5 h-5 text-white`} />
+            </div>
+            <span className="text-[10px] font-medium text-white/80">{item.name}</span>
+          </a>
+        ))}
+      </motion.div>
+
     </div>
   );
 }
