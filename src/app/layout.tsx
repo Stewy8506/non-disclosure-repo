@@ -5,6 +5,7 @@ import MenuBar from "@/components/layout/MenuBar";
 import Dock from "@/components/layout/Dock";
 import CustomCursor from "@/components/CustomCursor";
 import DynamicBackground from "@/components/ui/DynamicBackground";
+import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,11 +30,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <DynamicBackground />
-        <CustomCursor />
-        <MenuBar />
-        {children}
-        <Dock />
+        <ClientLayoutWrapper>
+          <DynamicBackground />
+          <CustomCursor />
+          <MenuBar />
+          {children}
+          <Dock />
+        </ClientLayoutWrapper>
       </body>
     </html>
   );

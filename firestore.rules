@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 💬 Global Anonymous Chat Rules
+    match /chat_messages/{messageId} {
+      // Anyone can read the global chat feed
+      allow read: if true; 
+      
+      // Only authenticated (including anonymous) users can post messages
+      // Blocks spam bots who aren't authenticated
+      allow create: if request.auth != null 
+                    && request.resource.data.text is string 
+                    && request.resource.data.text.size() > 0;
+                    
+      // Chat history is immutable: prevent editing or deleting others' messages
+      allow update, delete: if false; 
+    }
+    
+    // ✉️ Contact Form Submission Rules
+    match /contact_messages/{messageId} {
+      // Anyone visiting the site can submit a contact message
+      allow create: if true;
+      
+      // STRICT LOCKDOWN: Nobody can read, edit, or delete messages from the frontend client.
+      // You will read these directly from your secure Firebase Console backend.
+      allow read, update, delete: if false;
+    }
+  }
+}

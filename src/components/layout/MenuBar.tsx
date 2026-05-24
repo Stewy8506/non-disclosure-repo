@@ -1,26 +1,52 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { Command, Wifi, BatteryMedium, Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow } from "lucide-react";
 import MenuDropdown, { MenuItem } from "../ui/MenuDropdown";
 import ToastContainer, { toast } from "../ui/Toast";
+import ChatWindow from "../ui/ChatWindow";
+
+const SPOTLIGHT_ITEMS = [
+  { title: "About Anuvab", category: "Navigation", desc: "Background, timeline, and professional bio", icon: FileText, action: "about" },
+  { title: "Technical Ecosystem", category: "Navigation", desc: "Skills, frameworks, and programming languages", icon: Settings, action: "skills" },
+  { title: "Featured Projects", category: "Navigation", desc: "Check out web, mobile, and embedded creations", icon: AppWindow, action: "projects" },
+  { title: "Get in Touch", category: "Navigation", desc: "Contact details and message submission console", icon: FileText, action: "contact" },
+  { title: "Join Global Chat", category: "Lobby", desc: "Real-time anonymous discussions with other peers", icon: MessageSquare, action: "chat" },
+  { title: "Download Resume", category: "Utility", desc: "Get Anuvab's latest PDF resume directly", icon: FileText, action: "resume" },
+  { title: "Admin Portal", category: "System", desc: "Utility tools, analytics, and contact manager", icon: Settings, action: "admin" }
+];
 
 export default function MenuBar() {
   const [time, setTime] = useState("");
+  const [is24Hour, setIs24Hour] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchIndex, setSearchIndex] = useState(0);
 
+  const menuRef = useRef<HTMLDivElement>(null);
+  const spotlightInputRef = useRef<HTMLInputElement>(null);
+
+  // Time & date cycle
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setTime(now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }));
+      setTime(
+        now.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: !is24Hour,
+        })
+      );
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [is24Hour]);
 
+  // Click outside menu handling
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -30,6 +56,27 @@ export default function MenuBar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Cmd+K or Ctrl+K shortcut for Spotlight
+  useEffect(() => {
+    const handleGlobalKeys = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSpotlightOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeys);
+    return () => window.removeEventListener("keydown", handleGlobalKeys);
+  }, []);
+
+  // Reset indices and autofocus input when Spotlight is opened
+  useEffect(() => {
+    if (isSpotlightOpen) {
+      setSearchQuery("");
+      setSearchIndex(0);
+      setTimeout(() => spotlightInputRef.current?.focus(), 50);
+    }
+  }, [isSpotlightOpen]);
 
   const handleMenuHover = (menu: string) => {
     if (activeMenu) {
@@ -42,6 +89,97 @@ export default function MenuBar() {
       setActiveMenu(null);
     } else {
       setActiveMenu(menu);
+    }
+  };
+
+  // WiFi Action
+  const handleWifiClick = () => {
+    const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
+    if (isOnline) {
+      toast("Wi-Fi Connected: 'anv-os-secure' (Signal strength: Strong, 150 Mbps)", "success");
+    } else {
+      toast("Wi-Fi Disconnected: No active adapters detected.", "error");
+    }
+  };
+
+  // Battery Action
+  const handleBatteryClick = async () => {
+    if (typeof navigator !== "undefined" && "getBattery" in navigator) {
+      try {
+        const battery: any = await (navigator as any).getBattery();
+        const levelPct = Math.round(battery.level * 100);
+        const state = battery.charging ? "Charging ⚡" : "Discharging 🔋";
+        const remain = battery.chargingTime === Infinity || battery.dischargingTime === Infinity 
+          ? "Adapter Connected" 
+          : `${Math.round(battery.charging ? battery.chargingTime / 60 : battery.dischargingTime / 60)} mins remaining`;
+        toast(`Battery Level: ${levelPct}% (${state} - ${remain})`, "info");
+      } catch {
+        toast("Battery Level: 100% (AC Power Line Connected)", "info");
+      }
+    } else {
+      toast("Battery Level: 100% (AC Power Line Connected)", "info");
+    }
+  };
+
+  // Clock format and full date action
+  const handleClockClick = () => {
+    setIs24Hour((prev) => !prev);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    toast(`System Date: ${dateStr} (Switched format)`, "success");
+  };
+
+  // Spotlight Action Trigger
+  const triggerSearchAction = (action: string) => {
+    setIsSpotlightOpen(false);
+    
+    if (["about", "skills", "projects", "contact"].includes(action)) {
+      const section = document.getElementById(action);
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth" });
+        toast(`Scrolled to ${action.toUpperCase()} section`, "success");
+      }
+    } else if (action === "chat") {
+      setIsChatOpen(true);
+    } else if (action === "resume") {
+      const link = document.createElement("a");
+      link.href = "/resume.pdf";
+      link.download = "Anuvab_Das_Resume.pdf";
+      link.click();
+      toast("Downloading resume...", "success");
+    } else if (action === "admin") {
+      window.open("/admin", "_blank");
+      toast("Opening Admin console...", "info");
+    }
+  };
+
+  // Filter items in Spotlight Search
+  const filteredSearchItems = SPOTLIGHT_ITEMS.filter((item) =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Handle keys inside Spotlight Search modal
+  const handleSearchKeys = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSearchIndex((prev) => (prev + 1) % filteredSearchItems.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSearchIndex((prev) => (prev - 1 + filteredSearchItems.length) % filteredSearchItems.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (filteredSearchItems[searchIndex]) {
+        triggerSearchAction(filteredSearchItems[searchIndex].action);
+      }
+    } else if (e.key === "Escape") {
+      setIsSpotlightOpen(false);
     }
   };
 
@@ -59,11 +197,7 @@ export default function MenuBar() {
       { label: "New Window", shortcut: "⌘N", action: () => { window.open(window.location.href, "_blank"); setActiveMenu(null); } },
       { divider: true, label: "" },
       { label: "Download Resume", shortcut: "⌘D", action: () => { 
-        const link = document.createElement('a');
-        link.href = '/resume.pdf';
-        link.download = 'Anuvab_Das_Resume.pdf';
-        link.click();
-        toast("Downloading resume...", "success");
+        triggerSearchAction("resume");
         setActiveMenu(null); 
       } },
       { divider: true, label: "" },
@@ -111,7 +245,7 @@ export default function MenuBar() {
         ref={menuRef}
         initial={{ y: -50 }}
         animate={{ y: 0 }}
-        className="fixed top-0 inset-x-0 h-10 md:h-7 z-50 flex items-center justify-between px-6 md:px-4 bg-transparent md:bg-zinc-900/60 md:backdrop-blur-xl border-b-0 md:border-b border-white/10 text-[14px] md:text-[13px] font-medium text-white/90 select-none"
+        className="fixed top-0 inset-x-0 h-10 md:h-7 z-50 flex items-center justify-between px-6 md:px-4 bg-transparent md:bg-zinc-900/60 md:backdrop-blur-xl border-b-0 md:border-b border-white/10 text-[14px] md:text-[13px] font-medium text-white/90 select-none shadow-sm"
       >
         {/* Desktop Left side */}
         <div className="hidden md:flex items-center gap-5">
@@ -145,19 +279,156 @@ export default function MenuBar() {
 
         {/* Mobile Left side (iOS Time) */}
         <div className="flex md:hidden items-center">
-          <span className="font-semibold">{time ? time.split(" ")[0] : "10:00"}</span>
+          <span className="font-semibold cursor-pointer" onClick={handleClockClick}>
+            {time ? time.split(" ")[0] : "10:00"}
+          </span>
         </div>
 
         {/* Right side */}
         <div className="flex items-center gap-4 md:text-white/80">
           <div className="flex items-center gap-2 md:gap-3">
-            <Wifi className="w-4 h-4 md:w-3.5 md:h-3.5 md:hover:text-white cursor-pointer" />
-            <Search className="hidden md:block w-3.5 h-3.5 hover:text-white cursor-pointer" />
-            <BatteryMedium className="w-5 h-5 md:w-4 md:h-4 md:hover:text-white cursor-pointer" />
+            {/* 💬 Global Chat Trigger */}
+            <button 
+              onClick={() => setIsChatOpen(true)}
+              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+              title="Open Global Chat"
+            >
+              <MessageSquare className="w-4 h-4 md:w-3.5 md:h-3.5 text-emerald-400" />
+            </button>
+            
+            {/* 📶 WiFi Diagnostic */}
+            <button 
+              onClick={handleWifiClick}
+              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+              title="WiFi Status"
+            >
+              <Wifi className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
+            </button>
+            
+            {/* 🔍 Search / Spotlight Trigger */}
+            <button 
+              onClick={() => setIsSpotlightOpen(true)}
+              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+              title="Spotlight Search (Cmd+K)"
+            >
+              <Search className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
+            </button>
+            
+            {/* 🔋 Battery Diagnostic */}
+            <button 
+              onClick={handleBatteryClick}
+              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+              title="Power & Battery Status"
+            >
+              <BatteryMedium className="w-5 h-5 md:w-4 md:h-4 text-zinc-300 hover:text-white" />
+            </button>
           </div>
-          <span className="hidden md:block text-white/90 cursor-default">{time || "10:00 AM"}</span>
+          
+          {/* ⏰ Clock Trigger */}
+          <span 
+            className="hidden md:block text-white/90 cursor-pointer hover:text-white active:scale-95 transition-transform"
+            onClick={handleClockClick}
+            title="Toggle 24-hour clock / Show Date"
+          >
+            {time || "10:00 AM"}
+          </span>
         </div>
       </motion.div>
+
+      {/* Render Global Chat Widget */}
+      <ChatWindow isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+      {/* 🔍 SPOTLIGHT SEARCH OVERLAY */}
+      <AnimatePresence>
+        {isSpotlightOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-4 pointer-events-none">
+            {/* Background mask */}
+            <div 
+              onClick={() => setIsSpotlightOpen(false)}
+              className="absolute inset-0 bg-black/30 backdrop-blur-[2px] pointer-events-auto"
+            />
+            
+            {/* Spotlight Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -10 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="relative w-full max-w-xl bg-zinc-950/90 border border-white/10 rounded-2xl shadow-2xl p-3 flex flex-col pointer-events-auto backdrop-blur-2xl"
+              onKeyDown={handleSearchKeys}
+            >
+              {/* Query Input */}
+              <div className="flex items-center gap-3 px-3 py-2 border-b border-white/5">
+                <Search className="w-5 h-5 text-zinc-400" />
+                <input
+                  ref={spotlightInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSearchIndex(0);
+                  }}
+                  placeholder="Spotlight Search (Use arrows to navigate, Enter to select)"
+                  className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder-zinc-500 text-sm py-1"
+                />
+                <div className="hidden sm:flex items-center gap-1 bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[10px] text-zinc-400 select-none">
+                  ESC
+                </div>
+              </div>
+
+              {/* Search Results List */}
+              <div className="mt-2 max-h-80 overflow-y-auto scrollbar-thin">
+                {filteredSearchItems.length === 0 ? (
+                  <div className="text-center py-8 text-xs text-zinc-500 font-medium">
+                    No results found for &quot;{searchQuery}&quot;
+                  </div>
+                ) : (
+                  filteredSearchItems.map((item, idx) => {
+                    const isSelected = idx === searchIndex;
+                    const IconComponent = item.icon;
+
+                    return (
+                      <div
+                        key={item.title}
+                        onClick={() => triggerSearchAction(item.action)}
+                        onMouseEnter={() => setSearchIndex(idx)}
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
+                          isSelected 
+                            ? "bg-emerald-500 text-white" 
+                            : "hover:bg-white/5 text-zinc-300"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`p-2 rounded-lg ${isSelected ? "bg-white/20 text-white" : "bg-white/5 text-zinc-400"} shrink-0`}>
+                            <IconComponent className="w-4 h-4" />
+                          </div>
+                          <div className="truncate">
+                            <p className="text-xs font-semibold">{item.title}</p>
+                            <p className={`text-[10px] mt-0.5 truncate ${isSelected ? "text-white/80" : "text-zinc-500"}`}>
+                              {item.desc}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${
+                            isSelected ? "bg-white/25 text-white" : "bg-white/5 text-zinc-500"
+                          }`}>
+                            {item.category}
+                          </span>
+                          {isSelected && (
+                            <CornerDownLeft className="w-3.5 h-3.5 opacity-80" />
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

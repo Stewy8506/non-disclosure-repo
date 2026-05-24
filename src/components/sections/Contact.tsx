@@ -1,11 +1,52 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import { GitHubIcon, LinkedInIcon } from "../ui/BrandIcons";
+import { db, isFirebaseConfigured } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { toast } from "../ui/Toast";
 
 const Contact = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      toast("Please fill in all fields.", "error");
+      return;
+    }
+
+    if (!isFirebaseConfigured) {
+      toast("Firebase is not configured yet. Please configure it in .env.local", "error");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await addDoc(collection(db!, "contact_messages"), {
+        name: name.trim(),
+        email: email.trim(),
+        message: message.trim(),
+        timestamp: serverTimestamp(),
+      });
+      toast("Message sent successfully!", "success");
+      setName("");
+      setEmail("");
+      setMessage("");
+    } catch (err: any) {
+      console.error("Firestore Error:", err);
+      toast(err.message || "Failed to send message.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section id="contact" className="py-20 px-6 max-w-6xl mx-auto">
       <motion.div 
@@ -82,7 +123,7 @@ const Contact = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
           className="space-y-4 bg-white/5 pt-10 pb-8 px-8 rounded-3xl border border-white/10 backdrop-blur-sm relative"
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={handleSubmit}
         >
           {/* macOS Window Controls */}
           <div className="absolute top-4 left-5 flex items-center gap-1.5 z-20">
@@ -96,16 +137,22 @@ const Contact = () => {
               <label className="text-sm font-medium text-gray-400 ml-1">Name</label>
               <input 
                 type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-colors"
                 placeholder="John Doe"
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 ml-1">Email</label>
               <input 
                 type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-colors"
                 placeholder="john@example.com"
+                disabled={loading}
               />
             </div>
           </div>
@@ -113,17 +160,22 @@ const Contact = () => {
             <label className="text-sm font-medium text-gray-400 ml-1">Message</label>
             <textarea 
               rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 focus:outline-none transition-colors"
               placeholder="Your message here..."
+              disabled={loading}
             />
           </div>
           <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors"
+            whileHover={{ scale: loading ? 1 : 1.02 }}
+            whileTap={{ scale: loading ? 1 : 0.98 }}
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
             data-cursor="button"
           >
-            Send Message
+            {loading ? "Sending..." : "Send Message"}
           </motion.button>
         </motion.form>
       </div>
