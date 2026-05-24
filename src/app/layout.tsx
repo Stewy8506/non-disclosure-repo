@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
+import MenuBar from "@/components/layout/MenuBar";
+import Dock from "@/components/layout/Dock";
 import CustomCursor from "@/components/CustomCursor";
 import DynamicBackground from "@/components/ui/DynamicBackground";
 
@@ -30,8 +31,9 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <DynamicBackground />
         <CustomCursor />
-        <Navbar />
+        <MenuBar />
         {children}
+        <Dock />
       </body>
     </html>
   );

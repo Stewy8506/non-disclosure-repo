@@ -81,9 +81,16 @@ const Contact = () => {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="space-y-4 bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-sm"
+          className="space-y-4 bg-white/5 pt-10 pb-8 px-8 rounded-3xl border border-white/10 backdrop-blur-sm relative"
           onSubmit={(e) => e.preventDefault()}
         >
+          {/* macOS Window Controls */}
+          <div className="absolute top-4 left-5 flex items-center gap-1.5 z-20">
+            <div className="w-3 h-3 rounded-full bg-red-500/80 border border-red-500/50"></div>
+            <div className="w-3 h-3 rounded-full bg-amber-500/80 border border-amber-500/50"></div>
+            <div className="w-3 h-3 rounded-full bg-emerald-500/80 border border-emerald-500/50"></div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-400 ml-1">Name</label>
