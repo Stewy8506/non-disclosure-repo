@@ -1,109 +1,133 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import FadeIn from "../ui/FadeIn";
 import Section from "../ui/Section";
 import { ExternalLink } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { GitHubIcon } from "../ui/BrandIcons";
 
-const PROJECTS = [
-  {
-    title: "RN Habit Tracker",
-    description: "A premium productivity ecosystem featuring a Pomodoro focus timer, real-time task management, and automatic DND mode for deep work.",
-    tech: ["React Native", "TypeScript", "Expo"],
-    link: "https://github.com/Stewy8506/RN-Habit-Tracker",
-    category: "Mobile App",
-    color: "from-blue-500/20 to-cyan-500/20"
-  },
-  {
-    title: "Adaptive Noise Cancellation",
-    description: "High-performance embedded system implemented on STM32 to actively filter ambient noise using adaptive signal processing algorithms.",
-    tech: ["C", "STM32", "DSP"],
-    link: "https://github.com/Stewy8506/STM32-Adaptive-Noise-Cancellation",
-    category: "Embedded Systems",
-    color: "from-purple-500/20 to-indigo-500/20"
-  },
-  {
-    title: "AI Intelligence Suite",
-    description: "Next-generation AI application exploring the boundaries of LLM integration for personalized productivity and automation.",
-    tech: ["Next.js", "TypeScript", "OpenAI"],
-    link: "https://github.com/Stewy8506/AI-App",
-    category: "AI Product",
-    color: "from-emerald-500/20 to-teal-500/20"
-  },
-  {
-    title: "Smart Helmet OS",
-    description: "Comprehensive hardware and software integration for a motorcycle smart helmet, featuring real-time telemetry and safety alerts.",
-    tech: ["Embedded C", "Hardware", "IoT"],
-    link: "https://github.com/Stewy8506/Smart-Helmet-Full-Hardware-Code",
-    category: "Embedded Systems",
-    color: "from-orange-500/20 to-red-500/20"
-  }
-];
-
 export default function Projects() {
+  const [projects, setProjects] = useState([]);
+  const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const res = await fetch("/api/projects");
+        const data = await res.json();
+        setProjects(data);
+      } catch (e) {
+        console.error("Failed to fetch projects", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProjects();
+  }, []);
+
+  const categories = ["All", ...new Set(projects.map((p: any) => p.category))];
+  const filteredProjects = filter === "All" 
+    ? projects 
+    : projects.filter((p: any) => p.category === filter);
+
+  if (loading) return <Section className="py-32 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white" /></Section>;
+
   return (
     <Section id="projects" className="py-32">
       <FadeIn className="mb-16 text-center">
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
           Featured <span className="text-zinc-500">Works</span>
         </h2>
-        <p className="text-muted text-lg max-w-2xl mx-auto text-balance">
+        <p className="text-muted text-lg max-w-2xl mx-auto text-balance mb-10">
           A selection of projects where I merge technical complexity with 
           minimalist design and high performance.
         </p>
+
+        {/* Category Filters */}
+        <div className="flex flex-wrap justify-center gap-3">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 border",
+                filter === cat 
+                  ? "bg-white text-black border-white" 
+                  : "bg-white/5 text-muted border-white/10 hover:border-white/30 hover:text-white"
+              )}
+              data-cursor="button"
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </FadeIn>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {PROJECTS.map((project, idx) => (
-          <FadeIn key={project.title} delay={idx * 0.1}>
-            <motion.a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ y: -5 }}
-              className={cn(
-                "relative block glass-effect p-8 rounded-3xl border border-white/10 group overflow-hidden transition-all hover:border-white/20",
-              )}
+      <motion.div 
+        layout
+        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+      >
+        <AnimatePresence mode="popLayout">
+          {filteredProjects.map((project: any, idx: number) => (
+            <motion.div
+              key={project.id || project.title}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
             >
-              {/* Subtle Background Glow */}
-              <div className={cn(
-                "absolute -inset-px bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl",
-                project.color
-              )} />
+              <motion.a
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ y: -5 }}
+                data-cursor="scale"
+                className={cn(
+                  "relative block glass-effect p-8 rounded-3xl border border-white/10 group overflow-hidden transition-all hover:border-white/20 h-full",
+                )}
+              >
+                {/* Subtle Background Glow */}
+                <div className={cn(
+                  "absolute -inset-px bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl",
+                  project.color
+                )} />
 
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-medium px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-muted">
-                    {project.category}
-                  </span>
-                  <div className="flex gap-3">
-                    <GitHubIcon className="w-5 h-5 text-muted group-hover:text-white transition-colors" />
-                    <ExternalLink className="w-5 h-5 text-muted group-hover:text-white transition-colors" />
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-xs font-medium px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-muted">
+                      {project.category}
+                    </span>
+                    <div className="flex gap-3">
+                      <GitHubIcon className="w-5 h-5 text-muted group-hover:text-white transition-colors" />
+                      <ExternalLink className="w-5 h-5 text-muted group-hover:text-white transition-colors" />
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl font-bold mb-3 group-hover:text-white transition-colors">
+                    {project.title}
+                  </h3>
+                  
+                  <p className="text-muted leading-relaxed mb-6 group-hover:text-zinc-400 transition-colors">
+                    {project.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {project.tech.map((t: string) => (
+                      <span key={t} className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">
+                        {t}
+                      </span>
+                    ))}
                   </div>
                 </div>
-
-                <h3 className="text-2xl font-bold mb-3 group-hover:text-white transition-colors">
-                  {project.title}
-                </h3>
-                
-                <p className="text-muted leading-relaxed mb-6 group-hover:text-zinc-400 transition-colors">
-                  {project.description}
-                </p>
-
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((t) => (
-                    <span key={t} className="text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded bg-zinc-900 text-zinc-500 border border-zinc-800">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </motion.a>
-          </FadeIn>
-        ))}
-      </div>
+              </motion.a>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
     </Section>
   );
 }

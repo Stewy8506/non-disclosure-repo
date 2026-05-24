@@ -48,11 +48,11 @@ export default function Hero() {
 
         <FadeIn delay={0.4}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button variant="primary" className="group flex items-center gap-2">
+            <Button variant="primary" className="group flex items-center gap-2" data-cursor="button">
               View Projects
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" data-cursor="button">
               Get in touch
             </Button>
           </div>
