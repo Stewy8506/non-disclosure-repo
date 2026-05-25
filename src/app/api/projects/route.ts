@@ -22,9 +22,9 @@ async function getLocalProjects() {
 }
 
 export async function GET() {
-  // Fallback to local JSON if Firebase is not configured
   if (!isFirebaseConfigured || !db) {
     const localData = await getLocalProjects();
+    localData.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
     return NextResponse.json(localData);
   }
 
@@ -44,9 +44,11 @@ export async function GET() {
     // If Firestore has no projects yet, seed with local projects so the UI remains beautiful
     if (projects.length === 0) {
       const localData = await getLocalProjects();
+      localData.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
       return NextResponse.json(localData);
     }
 
+    projects.sort((a, b) => (a.order || 0) - (b.order || 0));
     return NextResponse.json(projects);
   } catch (error) {
     console.error("Firestore Projects Fetch Error:", error);
@@ -76,6 +78,7 @@ export async function POST(req: NextRequest) {
       link: body.link || "",
       category: body.category || "Mobile App",
       images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
+      order: body.order !== undefined ? body.order : 999,
       createdAt: new Date().toISOString()
     });
 

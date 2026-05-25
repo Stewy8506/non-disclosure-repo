@@ -26,6 +26,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       link: body.link,
       category: body.category,
       images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
+      ...(body.order !== undefined && { order: body.order }),
       updatedAt: new Date().toISOString()
     }, { merge: true });
 

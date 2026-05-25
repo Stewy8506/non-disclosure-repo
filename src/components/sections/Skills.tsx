@@ -121,37 +121,71 @@ export default function Skills() {
               transition={{ duration: 0.5 }}
               className="w-full max-w-6xl mx-auto px-6"
             >
-              <div className="flex flex-wrap justify-center gap-3 mb-12">
+              <div className="flex flex-wrap justify-center gap-3 mb-12 bg-white/[0.02] p-1.5 rounded-full border border-white/[0.05] max-w-max mx-auto backdrop-blur-md">
                 {categories.map(category => (
                   <button
                     key={category}
                     onClick={() => setActiveCategory(category)}
-                    className={cn(
-                      "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border backdrop-blur-md",
-                      activeCategory === category 
-                        ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
-                        : "bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10 hover:text-white"
-                    )}
+                    className="relative px-5 py-2.5 rounded-full text-sm font-medium transition-colors duration-300"
                   >
-                    {category}
+                    {activeCategory === category && (
+                      <motion.span
+                        layoutId="activeCategoryBg"
+                        className="absolute inset-0 bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+                        transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                      />
+                    )}
+                    <span className={cn(
+                      "relative z-10 transition-colors duration-300",
+                      activeCategory === category 
+                        ? "text-zinc-950 font-semibold" 
+                        : "text-zinc-400 hover:text-zinc-100"
+                    )}>
+                      {category}
+                    </span>
                   </button>
                 ))}
               </div>
 
-              <motion.div 
-                layout
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-              >
-                <AnimatePresence>
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  key={activeCategory}
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.04,
+                      }
+                    },
+                    exit: {
+                      opacity: 0,
+                      transition: {
+                        staggerChildren: 0.02,
+                        staggerDirection: -1,
+                      }
+                    }
+                  }}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                >
                   {filteredSkills.map((skill) => (
                     <motion.div
-                      layout
                       key={skill.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.3 }}
-                      className="flex flex-col items-center justify-center gap-4 p-6 rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:-translate-y-1 transition-all duration-300 group"
+                      variants={{
+                        hidden: { opacity: 0, y: 20, scale: 0.95, filter: "blur(4px)" },
+                        show: { 
+                          opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
+                          transition: { type: "spring", stiffness: 350, damping: 30 }
+                        },
+                        exit: { 
+                          opacity: 0, y: -20, scale: 0.95, filter: "blur(4px)",
+                          transition: { duration: 0.2, ease: "easeInOut" }
+                        }
+                      }}
+                      className="flex flex-col items-center justify-center gap-4 p-6 rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:-translate-y-2 transition-all duration-300 group cursor-default"
                     >
                       <div className="w-12 h-12 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
                         <img 
@@ -169,8 +203,8 @@ export default function Skills() {
                       </span>
                     </motion.div>
                   ))}
-                </AnimatePresence>
-              </motion.div>
+                </motion.div>
+              </AnimatePresence>
             </motion.div>
           )}
         </AnimatePresence>

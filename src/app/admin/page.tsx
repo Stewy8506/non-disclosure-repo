@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, LogOut, Save, ExternalLink, Upload, Image as ImageIcon, X, Search, Filter, Edit2, LayoutTemplate, Wrench } from "lucide-react";
+import { Plus, Trash2, LogOut, Save, ExternalLink, Upload, Image as ImageIcon, X, Search, Filter, Edit2, LayoutTemplate, Wrench, GripVertical } from "lucide-react";
 import { toast } from "@/components/ui/Toast";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<"projects" | "skills">("projects");
   const [projects, setProjects] = useState([]);
   const [skills, setSkills] = useState([]);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   
   // Projects Modal
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -200,6 +202,64 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    if (searchQuery || categoryFilter !== "All") {
+      e.preventDefault();
+      return;
+    }
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    if (draggedIndex === null || draggedIndex === index) return;
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      handleDragEnd();
+      return;
+    }
+
+    const updatedProjects = [...projects];
+    const [draggedProject] = updatedProjects.splice(draggedIndex, 1);
+    updatedProjects.splice(targetIndex, 0, draggedProject);
+
+    // Optimistically update the UI list instantly
+    setProjects(updatedProjects);
+    handleDragEnd();
+    setLoading(true);
+
+    try {
+      // Re-assign order for ALL projects to maintain consistency
+      const promises = updatedProjects.map((proj: any, idx: number) => {
+        return fetch(`/api/projects/${proj.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...proj, order: idx }),
+        });
+      });
+
+      await Promise.all(promises);
+      toast("Projects reordered successfully!", "success");
+      await fetchProjects();
+    } catch (error) {
+      toast("Failed to save project order.", "error");
+      await fetchProjects();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -359,6 +419,7 @@ export default function AdminDashboard() {
               <table className="w-full text-left text-sm whitespace-nowrap">
                 <thead className="bg-zinc-950/50 border-b border-zinc-800 text-zinc-400">
                   <tr>
+                    <th className="px-4 py-4 font-medium w-10"></th>
                     <th className="px-6 py-4 font-medium w-16">Image</th>
                     <th className="px-6 py-4 font-medium">Project Name</th>
                     <th className="px-6 py-4 font-medium">Category</th>
@@ -367,56 +428,84 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/50">
-                  {filteredProjects.map((project: any) => (
-                    <tr key={project.id || project.title} className="hover:bg-zinc-800/20 transition-colors">
-                      <td className="px-6 py-3">
-                        <div className="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-700">
-                          {project.images?.length > 0 || project.image ? (
-                            <img src={project.images?.[0] || project.image} alt={project.title} className="w-full h-full object-cover" />
+                  {filteredProjects.map((project: any, index: number) => {
+                    const isDraggable = !searchQuery && categoryFilter === "All";
+                    return (
+                      <tr 
+                        key={project.id || project.title} 
+                        draggable={isDraggable}
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDrop={(e) => handleDrop(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className={`hover:bg-zinc-800/20 transition-all duration-200 border-l-2 select-none ${
+                          draggedIndex === index
+                            ? "bg-zinc-900/60 border-l-zinc-500 opacity-40 scale-[0.99]"
+                            : dragOverIndex === index
+                            ? "bg-zinc-800/30 border-l-zinc-300"
+                            : "border-l-transparent"
+                        }`}
+                      >
+                        <td className="px-4 py-3 text-zinc-500 w-10">
+                          {isDraggable ? (
+                            <div className="cursor-grab active:cursor-grabbing hover:text-zinc-300 p-1 flex items-center justify-center">
+                              <GripVertical size={16} />
+                            </div>
                           ) : (
-                            <span className="font-bold text-zinc-500">{project.title[0]}</span>
+                            <div className="text-zinc-700 p-1 flex items-center justify-center opacity-30 cursor-not-allowed" title="Clear filters/search to drag and drop">
+                              <GripVertical size={16} />
+                            </div>
                           )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-3">
-                        <p className="font-medium text-zinc-100">{project.title}</p>
-                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1 mt-0.5 w-max">
-                          View Link <ExternalLink size={10} />
-                        </a>
-                      </td>
-                      <td className="px-6 py-3 text-zinc-300">{project.category}</td>
-                      <td className="px-6 py-3">
-                        <div className="flex gap-1 flex-wrap w-48 truncate">
-                          {project.tech.map((t: string) => (
-                            <span key={t} className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button 
-                            onClick={() => openEditProjectModal(project)}
-                            className="p-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
-                            title="Edit"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteProject(project.id)}
-                            className="p-1.5 rounded-md bg-red-950/30 border border-red-900/50 text-red-400 hover:bg-red-900/50 hover:text-red-300 transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="px-6 py-3">
+                          <div className="w-10 h-10 rounded bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-700">
+                            {project.images?.length > 0 || project.image ? (
+                              <img src={project.images?.[0] || project.image} alt={project.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="font-bold text-zinc-500">{project.title[0]}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-3">
+                          <p className="font-medium text-zinc-100">{project.title}</p>
+                          <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline flex items-center gap-1 mt-0.5 w-max">
+                            View Link <ExternalLink size={10} />
+                          </a>
+                        </td>
+                        <td className="px-6 py-3 text-zinc-300">{project.category}</td>
+                        <td className="px-6 py-3">
+                          <div className="flex gap-1 flex-wrap w-48 truncate">
+                            {project.tech.map((t: string) => (
+                              <span key={t} className="px-2 py-0.5 rounded-md bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button 
+                              onClick={() => openEditProjectModal(project)}
+                              className="p-1.5 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
+                              title="Edit"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteProject(project.id)}
+                              className="p-1.5 rounded-md bg-red-950/30 border border-red-900/50 text-red-400 hover:bg-red-900/50 hover:text-red-300 transition-colors"
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {filteredProjects.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                      <td colSpan={6} className="px-6 py-12 text-center text-zinc-500">
                         No projects found matching your criteria.
                       </td>
                     </tr>

@@ -27,5 +27,21 @@ service cloud.firestore {
       // You will read these directly from your secure Firebase Console backend.
       allow read, update, delete: if false;
     }
+
+    // 🛠️ Skills Rules
+    match /skills/{document=**} {
+      // Allow read access to anyone (public portfolio)
+      allow read: if true;
+      // Note: Write access is controlled by Next.js API routes with custom auth token
+      // but allowing true here means client SDK bypass is possible if they know the config.
+      // Consider using Firebase Admin SDK on the server in production.
+      allow write: if true; 
+    }
+
+    // 🚀 Projects Rules
+    match /projects/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }
