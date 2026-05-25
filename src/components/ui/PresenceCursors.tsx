@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Pusher from "pusher-js";
 
@@ -19,45 +19,30 @@ export default function PresenceCursors() {
     `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
   );
 
-  const pusherRef = useRef<Pusher | null>(null);
-  const channelRef = useRef<any>(null);
-
   useEffect(() => {
     const KEY = process.env.NEXT_PUBLIC_PUSHER_KEY;
     const CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
 
     if (!KEY || !CLUSTER) {
-      console.error("❌ PresenceCursors: Missing NEXT_PUBLIC_PUSHER_KEY or NEXT_PUBLIC_PUSHER_CLUSTER in .env.local");
+      console.error("❌ PresenceCursors: Missing Pusher keys in .env.local");
       return;
     }
 
-    console.log("🚀 Initializing Pusher connection...");
-    
     const pusher = new Pusher(KEY, {
       cluster: CLUSTER,
-      forceTLS: true
-    });
-    pusherRef.current = pusher;
-
-    // Use a PUBLIC channel. Public channels do not require server-side authentication.
-    // This is the only way to make it work without a custom backend API.
-    const channel = pusher.subscribe("portfolio-presence");
-    channelRef.current = channel;
-
-    pusher.connection.bind("connected", () => {
-      console.log("✅ Pusher connected successfully!");
+      forceTLS: true,
+      authEndpoint: "/api/pusher/auth", // Points to our new auth route
     });
 
-    pusher.connection.bind("error", (err: any) => {
-      console.error("❌ Pusher connection error:", err);
-    });
+    // Use a PRESENCE channel. This is exactly how Naresh's portfolio handles it.
+    // Presence channels allow client events AND track who is online.
+    const channel = pusher.subscribe("portfolio");
 
     const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth) * 100;
       const y = (e.clientY / window.innerHeight) * 100;
       
-      // IMPORTANT: All client-triggered events MUST start with 'client_'
-      // This must be enabled in Pusher Dashboard -> App Settings -> Enable Client Events
+      // client-events ONLY work on private/presence channels
       channel.trigger("client-cursor-move", {
         id: myId,
         x,
@@ -69,7 +54,7 @@ export default function PresenceCursors() {
 
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Listen for movements from other users
+    // Listen for cursor moves from other users
     channel.bind("client-cursor-move", (data: Cursor) => {
       if (data.id === myId) return;
       
@@ -79,34 +64,18 @@ export default function PresenceCursors() {
       }));
     });
 
-    // Clean up inactive cursors since we are using a public channel
-    const timeoutMap = new Map<string, NodeJS.Timeout>();
-    channel.bind("client-cursor-move", (data: Cursor) => {
-      if (data.id === myId) return;
-      
-      if (timeoutMap.has(data.id)) {
-        clearTimeout(timeoutMap.get(data.id)!);
-      }
-      
-      const timeout = setTimeout(() => {
-        setCursors(prev => {
-          const next = { ...prev };
-          delete next[data.id];
-          return next;
-        });
-        timeoutMap.delete(data.id);
-      }, 3000); // 3 seconds of inactivity = remove cursor
-      
-      timeoutMap.set(data.id, timeout);
+    // Presence channels have a built-in event for when a user leaves
+    channel.bind("pusher:member_removed", (member: { id: string }) => {
+      setCursors((prev) => {
+        const next = { ...prev };
+        delete next[member.id];
+        return next;
+      });
     });
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      if (channelRef.current) {
-        channelRef.current.unbind_all();
-        pusher.unsubscribe("portfolio-presence");
-      }
-      timeoutMap.forEach(t => clearTimeout(t));
+      pusher.unsubscribe("portfolio");
     };
   }, [myId, myColor]);
 
@@ -125,8 +94,8 @@ export default function PresenceCursors() {
             }}
             exit={{ opacity: 0, scale: 0 }}
             transition={{
-              left: { type: "spring", damping: 35, stiffness: 250 },
-              top: { type: "spring", damping: 35, stiffness: 250 },
+              left: { type: "spring", damping: 30, stiffness: 200 },
+              top: { type: "spring", damping: 30, stiffness: 200 },
             }}
             className="absolute w-4 h-4 pointer-events-none"
             style={{ transform: "translate(-50%, -50%)" }}
@@ -140,15 +109,15 @@ export default function PresenceCursors() {
               strokeWidth="3" 
               strokeLinecap="round" 
               strokeLinejoin="round"
-              className="drop-shadow-sm"
+              className="drop-shadow-md"
             >
               <path d="M3 3l7.07 16.97 2.51-7.39 4.93 4.93" />
             </svg>
             
             <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="absolute left-4 top-0 px-2 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap text-white shadow-lg"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="absolute left-4 top-0 px-2 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap text-white shadow-sm"
               style={{ backgroundColor: cursor.color }}
             >
               {cursor.name}
