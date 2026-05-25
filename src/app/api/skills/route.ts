@@ -4,6 +4,7 @@ import { db, isFirebaseConfigured } from "@/lib/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 import fs from "fs/promises";
 import path from "path";
+import { normalizeSkillCategory } from "@/lib/projects";
 
 const LOCAL_DATA_PATH = path.join(process.cwd(), "src/data/skills.json");
 
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
     const docRef = await addDoc(collection(db, "skills"), {
       name: body.name || "",
       slug: body.slug || "",
-      category: body.category || "Web Dev",
+      category: normalizeSkillCategory(body.category),
       white: !!body.white,
       createdAt: new Date().toISOString()
     });

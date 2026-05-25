@@ -4,6 +4,17 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, LogOut, Save, ExternalLink, Upload, Image as ImageIcon, X, Search, Filter, Edit2, LayoutTemplate, Wrench, GripVertical } from "lucide-react";
 import { toast } from "@/components/ui/Toast";
+import {
+  DEFAULT_PROJECT_CATEGORY,
+  DEFAULT_SKILL_CATEGORY,
+  PROJECT_CATEGORIES,
+  SKILL_CATEGORIES,
+  normalizeProjectCategory,
+  normalizeSkillCategory,
+} from "@/lib/projects";
+
+type ProjectCategory = (typeof PROJECT_CATEGORIES)[number];
+type SkillCategory = (typeof SKILL_CATEGORIES)[number];
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<"projects" | "skills">("projects");
@@ -24,7 +35,7 @@ export default function AdminDashboard() {
     sourceCodeUrl: "",
     tech: "",
     link: "",
-    category: "Mobile App",
+    category: DEFAULT_PROJECT_CATEGORY as ProjectCategory,
     hasLiveDemo: true,
     images: [] as string[]
   });
@@ -35,7 +46,7 @@ export default function AdminDashboard() {
   const [newSkill, setNewSkill] = useState({
     name: "",
     slug: "",
-    category: "Web Dev",
+    category: DEFAULT_SKILL_CATEGORY as SkillCategory,
     white: false
   });
 
@@ -146,7 +157,7 @@ export default function AdminDashboard() {
       sourceCodeUrl: project.sourceCodeUrl || "",
       tech: project.tech.join(", "),
       link: project.link,
-      category: project.category,
+      category: normalizeProjectCategory(project.category),
       hasLiveDemo: project.hasLiveDemo !== false,
       images: project.images || (project.image ? [project.image] : []),
     });
@@ -158,7 +169,7 @@ export default function AdminDashboard() {
     setNewSkill({
       name: skill.name,
       slug: skill.slug,
-      category: skill.category,
+      category: normalizeSkillCategory(skill.category),
       white: skill.white,
     });
     setIsSkillModalOpen(true);
@@ -167,13 +178,13 @@ export default function AdminDashboard() {
   const closeProjectModal = () => {
     setIsProjectModalOpen(false);
     setEditingProjectId(null);
-    setNewProject({ title: "", description: "", overview: "", problem: "", liveDemoUrl: "", sourceCodeUrl: "", tech: "", link: "", category: "Mobile App", hasLiveDemo: true, images: [] });
+    setNewProject({ title: "", description: "", overview: "", problem: "", liveDemoUrl: "", sourceCodeUrl: "", tech: "", link: "", category: DEFAULT_PROJECT_CATEGORY as ProjectCategory, hasLiveDemo: true, images: [] });
   };
 
   const closeSkillModal = () => {
     setIsSkillModalOpen(false);
     setEditingSkillId(null);
-    setNewSkill({ name: "", slug: "", category: "Web Dev", white: false });
+    setNewSkill({ name: "", slug: "", category: DEFAULT_SKILL_CATEGORY as SkillCategory, white: false });
   };
 
   const handleDeleteProject = async (id: string) => {
@@ -402,20 +413,15 @@ export default function AdminDashboard() {
               <option value="All">All Categories</option>
               {activeTab === "projects" ? (
                 <>
-                  <option value="Mobile App">Mobile App</option>
-                  <option value="Embedded Systems">Embedded Systems</option>
-                  <option value="AI Product">AI Product</option>
-                  <option value="Website">Website</option>
+                  {PROJECT_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
                 </>
               ) : (
                 <>
-                  <option value="Web Dev">Web Dev</option>
-                  <option value="App Dev">App Dev</option>
-                  <option value="Backend">Backend</option>
-                  <option value="Cloud/DevOps">Cloud/DevOps</option>
-                  <option value="AI/ML">AI/ML</option>
-                  <option value="Embedded Systems">Embedded Systems</option>
-                  <option value="IoT">IoT</option>
+                  {SKILL_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
                 </>
               )}
             </select>
@@ -687,13 +693,12 @@ export default function AdminDashboard() {
                   <label className="block text-zinc-400 mb-1">Category</label>
                   <select 
                     value={newProject.category}
-                    onChange={(e) => setNewProject({...newProject, category: e.target.value})}
+                    onChange={(e) => setNewProject({...newProject, category: normalizeProjectCategory(e.target.value)})}
                     className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors appearance-none"
                   >
-                    <option value="Mobile App">Mobile App</option>
-                    <option value="Embedded Systems">Embedded Systems</option>
-                    <option value="AI Product">AI Product</option>
-                    <option value="Website">Website</option>
+                    {PROJECT_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -775,16 +780,12 @@ export default function AdminDashboard() {
                   <label className="block text-zinc-400 mb-1">Category</label>
                   <select 
                     value={newSkill.category}
-                    onChange={(e) => setNewSkill({...newSkill, category: e.target.value})}
+                    onChange={(e) => setNewSkill({...newSkill, category: normalizeSkillCategory(e.target.value)})}
                     className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors appearance-none"
                   >
-                    <option value="Web Dev">Web Dev</option>
-                    <option value="App Dev">App Dev</option>
-                    <option value="Backend">Backend</option>
-                    <option value="Cloud/DevOps">Cloud/DevOps</option>
-                    <option value="AI/ML">AI/ML</option>
-                    <option value="Embedded Systems">Embedded Systems</option>
-                    <option value="IoT">IoT</option>
+                    {SKILL_CATEGORIES.map((category) => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="flex items-center gap-2 pt-2">

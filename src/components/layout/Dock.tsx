@@ -24,7 +24,7 @@ export default function Dock() {
     }
   });
 
-  if (pathname === "/projects") return null;
+  if (pathname === "/projects" || pathname.startsWith("/admin")) return null;
 
   const dockItems = [
     { name: "About", icon: User, href: "#about", color: "from-blue-400 to-blue-600" },

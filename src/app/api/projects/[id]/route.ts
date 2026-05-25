@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { verifySessionToken } from "@/lib/auth";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
+import { normalizeProjectCategory } from "@/lib/projects";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const token = req.cookies.get("admin_session")?.value;
@@ -28,7 +29,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       sourceCodeUrl: body.sourceCodeUrl,
       tech: body.tech,
       link: body.link,
-      category: body.category,
+      category: normalizeProjectCategory(body.category),
       images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
       ...(body.order !== undefined && { order: body.order }),
       updatedAt: new Date().toISOString()

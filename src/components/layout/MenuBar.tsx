@@ -390,7 +390,7 @@ export default function MenuBar() {
     ]
   };
 
-  if (pathname === "/projects") return null;
+  if (pathname === "/projects" || pathname.startsWith("/admin")) return null;
 
   return (
     <>

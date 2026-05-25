@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import { verifySessionToken } from "@/lib/auth";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
+import { normalizeSkillCategory } from "@/lib/projects";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const token = req.cookies.get("admin_session")?.value;
@@ -21,7 +22,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await updateDoc(docRef, {
       name: body.name,
       slug: body.slug,
-      category: body.category,
+      category: normalizeSkillCategory(body.category),
       white: !!body.white,
       updatedAt: new Date().toISOString()
     });

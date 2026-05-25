@@ -4,6 +4,7 @@ import { db, isFirebaseConfigured } from "@/lib/firebase";
 import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from "firebase/firestore";
 import fs from "fs/promises";
 import path from "path";
+import { normalizeProjectCategory } from "@/lib/projects";
 
 const LOCAL_DATA_PATH = path.join(process.cwd(), "src/data/projects.json");
 
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
       sourceCodeUrl: body.sourceCodeUrl || "",
       tech: body.tech || [],
       link: body.link || "",
-      category: body.category || "Mobile App",
+      category: normalizeProjectCategory(body.category),
       images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
       order: body.order !== undefined ? body.order : 999,
       createdAt: new Date().toISOString()
