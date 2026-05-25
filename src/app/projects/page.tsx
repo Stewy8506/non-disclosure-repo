@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, LayoutGrid, Rows, Maximize } from "lucide-react";
 import ProjectPreviewModal from "@/components/ui/ProjectPreviewModal";
-import ProjectsBento from "../../components/sections/ProjectsBento";
 import ProjectsCinematic from "../../components/sections/ProjectsCinematic";
 import ProjectsHorizontal from "../../components/sections/ProjectsHorizontal";
 

@@ -7,6 +7,7 @@ import CustomCursor from "@/components/CustomCursor";
 import DynamicBackground from "@/components/ui/DynamicBackground";
 import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
 import NoiseOverlay from "@/components/ui/NoiseOverlay";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           <MenuBar />
           {children}
           <Dock />
+          <ScrollToTop />
         </ClientLayoutWrapper>
       </body>
     </html>
