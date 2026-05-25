@@ -1,58 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import FadeIn from "../ui/FadeIn";
 import Section from "../ui/Section";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-
-const ROW1 = [
-  { name: "React.js", slug: "react" },
-  { name: "TypeScript", slug: "typescript" },
-  { name: "PostgreSQL", slug: "postgresql" },
-  { name: "AWS", slug: "amazonaws", white: true },
-  { name: "C++", slug: "cplusplus" },
-  { name: "React Native", slug: "react" },
-  { name: "Docker", slug: "docker" },
-  { name: "Python", slug: "python" },
-  { name: "WebSockets", slug: "socketdotio", white: true },
-  { name: "GraphQL", slug: "graphql" }
-];
-
-const ROW2 = [
-  { name: "Next.js", slug: "nextdotjs", white: true },
-  { name: "Tailwind CSS", slug: "tailwindcss" },
-  { name: "MongoDB", slug: "mongodb" },
-  { name: "Kubernetes", slug: "kubernetes" },
-  { name: "Rust", slug: "rust", white: true },
-  { name: "Flutter", slug: "flutter" },
-  { name: "Serverless", slug: "serverless" },
-  { name: "PyTorch", slug: "pytorch" },
-  { name: "tRPC", slug: "trpc" },
-  { name: "Embedded C", slug: "c" }
-];
-
-const ROW3 = [
-  { name: "Framer Motion", slug: "framer", white: true },
-  { name: "Redis", slug: "redis" },
-  { name: "Expo", slug: "expo", white: true },
-  { name: "Swift", slug: "swift" },
-  { name: "Kotlin", slug: "kotlin" },
-  { name: "OpenAI API", slug: "openai", white: true },
-  { name: "LangChain", slug: "langchain", white: true },
-  { name: "RTOS", slug: "freertos", white: true },
-  { name: "ESP32", slug: "espressif" }
-];
 
 const MarqueeRow = ({ 
   items, 
   speed = 40, 
   direction = "left" 
 }: { 
-  items: {name:string, slug:string, white?:boolean}[], 
+  items: any[], 
   speed?: number, 
   direction?: "left" | "right" 
 }) => {
+  if (!items || items.length === 0) return null;
   return (
     <div 
       className="flex w-full overflow-hidden relative py-3"
@@ -64,9 +27,9 @@ const MarqueeRow = ({
         animate={{ x: direction === "left" ? "-50%" : 0 }}
         transition={{ duration: speed, repeat: Infinity, ease: "linear" }}
       >
-        {[...items, ...items].map((item, idx) => (
+        {[...items, ...items, ...items].map((item, idx) => (
           <div 
-            key={`${item.name}-${idx}`}
+            key={`${item.id}-${idx}`}
             className="flex items-center gap-4 px-8 py-5 rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300 cursor-default group"
           >
             <div className="w-8 h-8 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
@@ -77,6 +40,7 @@ const MarqueeRow = ({
                 width={32}
                 height={32}
                 loading="lazy"
+                onError={(e) => (e.currentTarget.src = "/favicon.ico")}
               />
             </div>
             <span className="text-xl font-semibold text-zinc-300 group-hover:text-white transition-colors tracking-tight">
@@ -90,13 +54,39 @@ const MarqueeRow = ({
 }
 
 export default function Skills() {
+  const [skills, setSkills] = useState<any[]>([]);
+  const [showAll, setShowAll] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  useEffect(() => {
+    fetch("/api/skills")
+      .then(res => res.json())
+      .then(data => setSkills(data))
+      .catch(err => console.error("Failed to fetch skills", err));
+  }, []);
+
+  const categories = useMemo(() => {
+    const cats = new Set(skills.map(s => s.category));
+    return ["All", ...Array.from(cats).filter(Boolean)];
+  }, [skills]);
+
+  const filteredSkills = useMemo(() => {
+    if (activeCategory === "All") return skills;
+    return skills.filter(s => s.category === activeCategory);
+  }, [skills, activeCategory]);
+
+  // Split skills into 3 rows for the marquee
+  const row1 = skills.slice(0, Math.ceil(skills.length / 3));
+  const row2 = skills.slice(Math.ceil(skills.length / 3), Math.ceil((skills.length * 2) / 3));
+  const row3 = skills.slice(Math.ceil((skills.length * 2) / 3));
+
   return (
     <Section id="skills" className="py-32 relative overflow-hidden">
       {/* Dynamic Background Glows */}
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none -z-10" />
       <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-violet-500/10 rounded-full blur-[120px] pointer-events-none -z-10" />
 
-      <FadeIn className="mb-20 text-center relative z-10 px-6">
+      <FadeIn className="mb-12 text-center relative z-10 px-6">
         <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-5">
           Technical <span className="text-zinc-500">Ecosystem</span>
         </h2>
@@ -106,10 +96,98 @@ export default function Skills() {
         </p>
       </FadeIn>
 
-      <div className="relative z-10 flex flex-col gap-2 w-full max-w-[100vw]">
-        <MarqueeRow items={ROW1} speed={45} direction="left" />
-        <MarqueeRow items={ROW2} speed={55} direction="right" />
-        <MarqueeRow items={ROW3} speed={40} direction="left" />
+      <div className="relative z-10 flex flex-col items-center w-full max-w-[100vw]">
+        
+        <AnimatePresence mode="wait">
+          {!showAll ? (
+            <motion.div 
+              key="marquee"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+              transition={{ duration: 0.5 }}
+              className="w-full flex flex-col gap-2"
+            >
+              <MarqueeRow items={row1} speed={45} direction="left" />
+              <MarqueeRow items={row2} speed={55} direction="right" />
+              <MarqueeRow items={row3} speed={40} direction="left" />
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="grid"
+              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="w-full max-w-6xl mx-auto px-6"
+            >
+              <div className="flex flex-wrap justify-center gap-3 mb-12">
+                {categories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => setActiveCategory(category)}
+                    className={cn(
+                      "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border backdrop-blur-md",
+                      activeCategory === category 
+                        ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
+                        : "bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+
+              <motion.div 
+                layout
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+              >
+                <AnimatePresence>
+                  {filteredSkills.map((skill) => (
+                    <motion.div
+                      layout
+                      key={skill.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.3 }}
+                      className="flex flex-col items-center justify-center gap-4 p-6 rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:-translate-y-1 transition-all duration-300 group"
+                    >
+                      <div className="w-12 h-12 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
+                        <img 
+                          src={`https://cdn.simpleicons.org/${skill.slug}${skill.white ? '/white' : ''}`} 
+                          alt={skill.name}
+                          className="w-full h-full object-contain"
+                          width={48}
+                          height={48}
+                          loading="lazy"
+                          onError={(e) => (e.currentTarget.src = "/favicon.ico")}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-zinc-300 group-hover:text-white transition-colors text-center">
+                        {skill.name}
+                      </span>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          onClick={() => {
+            setShowAll(!showAll);
+            setActiveCategory("All");
+          }}
+          className="mt-16 px-8 py-4 rounded-full bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 flex items-center gap-2"
+        >
+          {showAll ? "Show Less" : "Show All Skills"}
+        </motion.button>
+        
       </div>
       
     </Section>

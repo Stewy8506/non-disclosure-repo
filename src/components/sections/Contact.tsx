@@ -22,25 +22,43 @@ const Contact = () => {
       return;
     }
 
-    if (!isFirebaseConfigured) {
-      toast("Firebase is not configured yet. Please configure it in .env.local", "error");
-      return;
-    }
-
     try {
       setLoading(true);
-      await addDoc(collection(db!, "contact_messages"), {
-        name: name.trim(),
-        email: email.trim(),
-        message: message.trim(),
-        timestamp: serverTimestamp(),
+      
+      // 1. Send Email via Nodemailer API
+      const emailRes = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), message: message.trim() })
       });
+      
+      const emailData = await emailRes.json();
+      
+      if (!emailRes.ok) {
+        throw new Error(emailData.error || "Failed to send email");
+      }
+
+      // 2. Log to Firebase (if configured)
+      if (isFirebaseConfigured && db) {
+        try {
+          await addDoc(collection(db, "contact_messages"), {
+            name: name.trim(),
+            email: email.trim(),
+            message: message.trim(),
+            timestamp: serverTimestamp(),
+          });
+        } catch (firebaseErr) {
+          console.error("Firebase Logging Error:", firebaseErr);
+          // We don't throw here because the email was already sent successfully
+        }
+      }
+
       toast("Message sent successfully!", "success");
       setName("");
       setEmail("");
       setMessage("");
     } catch (err: any) {
-      console.error("Firestore Error:", err);
+      console.error("Contact Form Error:", err);
       toast(err.message || "Failed to send message.", "error");
     } finally {
       setLoading(false);
