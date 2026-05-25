@@ -1,6 +1,7 @@
 export interface MenuItem {
   id: string;
   emoji: string;
+  emojiUrl?: string;
   label: string;
   color: string;
 }

@@ -253,7 +253,15 @@ export const RadialMenuPresentational = ({
                       color: isActive ? '#fff' : undefined,
                     }}
                   >
-                    <span className="text-2xl">{item.emoji}</span>
+                    {item.emojiUrl ? (
+                      <img 
+                        src={item.emojiUrl} 
+                        alt={item.emoji} 
+                        className="w-8 h-8 object-contain pointer-events-none"
+                      />
+                    ) : (
+                      <span className="text-2xl">{item.emoji}</span>
+                    )}
                     {isActive && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}

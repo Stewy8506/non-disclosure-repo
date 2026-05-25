@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import confetti from 'canvas-confetti';
 import { RadialMenuPresentational } from './radial-menu-presentational';
 import { Shockwave, ShockwaveData } from './shockwave';
@@ -9,21 +9,21 @@ import { RightClickHint } from './right-click-hint';
 import { useSoundEffect } from '../../hooks/useSoundEffect';
 import Pusher from 'pusher-js';
 
-// Define our menu items
+// We use high-quality SVG emojis from a CDN to ensure iOS/macOS style across all platforms
 const MENU_ITEMS: MenuItem[] = [
-  { id: 'love', emoji: '❤️', label: 'Love', color: '#ef4444' },
-  { id: 'laugh', emoji: '😂', label: 'Haha', color: '#fbbf24' },
-  { id: 'wow', emoji: '😮', label: 'Wow', color: '#3b82f6' },
-  { id: 'sad', emoji: '😢', label: 'Sad', color: '#60a5fa' },
-  { id: 'angry', emoji: '😡', label: 'Angry', color: '#f97316' },
-  { id: 'fire', emoji: '🔥', label: 'Lit', color: '#f59e0b' },
+  { id: 'love', emoji: '❤️', emojiUrl: 'https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/svg/1f494.svg', label: 'Love', color: '#ef4444' },
+  { id: 'laugh', emoji: '😂', emojiUrl: 'https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/svg/1f602.svg', label: 'Haha', color: '#fbbf24' },
+  { id: 'wow', emoji: '😮', emojiUrl: 'https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/svg/1f62e.svg', label: 'Wow', color: '#3b82f6' },
+  { id: 'sad', emoji: '😢', emojiUrl: 'https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/svg/1f622.svg', label: 'Sad', color: '#60a5fa' },
+  { id: 'angry', emoji: '😡', emojiUrl: 'https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/svg/1f621.svg', label: 'Angry', color: '#f97316' },
+  { id: 'fire', emoji: '🔥', emojiUrl: 'https://cdn.jsdelivr.net/gh/twitter/twemoji/assets/svg/1f525.svg', label: 'Lit', color: '#f59e0b' },
 ];
 
 const DEAD_ZONE = 20;
 const MAX_INTENSITY_DIST = 500;
 const HOLD_DELAY = 0;
-const COOLDOWN_MS = 2000; // 2s cooldown after high-intensity burst
-const COOLDOWN_THRESHOLD = 0.7; // only trigger cooldown above this intensity
+const COOLDOWN_MS = 2000; 
+const COOLDOWN_THRESHOLD = 0.7; 
 const INTERACTIVE_SELECTOR = 'a, button, input, textarea, select, [contenteditable], img, video, audio, [data-radix-popper-content-wrapper], [data-radix-popper-content-wrapper] *';
 
 export default function RadialMenu() {
@@ -34,7 +34,6 @@ export default function RadialMenu() {
   const [isDisabled, setIsDisabled] = useState(false);
   const [shockwaves, setShockwaves] = useState<ShockwaveData[]>([]);
 
-  // Refs
   const isOpenRef = useRef(false);
   const isDisabledRef = useRef(false);
   const menuPosRef = useRef<Position>({ x: 0, y: 0 });
@@ -43,14 +42,11 @@ export default function RadialMenu() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const suppressMenuRef = useRef(false);
 
-  // Cooldown
   const cooldownUntilRef = useRef(0);
-  const cooldownEndRef = useRef(0); // timestamp when cooldown ends (for ring animation)
+  const cooldownEndRef = useRef(0);
 
-  // Track our own triggers to ignore echos
   const myTriggersRef = useRef<Set<string>>(new Set());
 
-  // Sync refs
   useEffect(() => {
     isOpenRef.current = isOpen;
     isDisabledRef.current = isDisabled;
@@ -60,7 +56,6 @@ export default function RadialMenu() {
 
   const isOnCooldown = () => Date.now() < cooldownUntilRef.current;
 
-  // Handle Confetti — intensity scales everything
   const fireConfetti = useCallback((pageX: number, pageY: number, emoji: string, int: number) => {
     const normalizedX = (pageX - window.scrollX) / window.innerWidth;
     const normalizedY = (pageY - window.scrollY) / window.innerHeight;
@@ -70,6 +65,7 @@ export default function RadialMenu() {
 
     for (let i = 0; i < burstCount; i++) {
       const scalar = 1.5 + Math.random() * (3 + int * 4);
+      // Use text emoji for confetti as SVG shapes are complex to pass to canvas-confetti
       const emojiShape = confetti.shapeFromText({ text: emoji, scalar });
 
       confetti({
@@ -102,7 +98,6 @@ export default function RadialMenu() {
     const cy = y - window.scrollY;
     spawnShockwave(cx, cy, item.color, item.emoji, int);
 
-    // Start cooldown if intensity was high enough
     if (int >= COOLDOWN_THRESHOLD) {
       const cooldownDuration = Math.round(COOLDOWN_MS * int);
       cooldownUntilRef.current = Date.now() + cooldownDuration;
@@ -110,7 +105,6 @@ export default function RadialMenu() {
     }
   };
 
-  // Listen for remote confetti
   useEffect(() => {
     const KEY = process.env.NEXT_PUBLIC_PUSHER_KEY;
     const CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
@@ -245,6 +239,8 @@ export default function RadialMenu() {
 
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('contextmenu', handleContextMenu);
