@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Pusher from "pusher-js";
 
@@ -19,44 +19,45 @@ export default function PresenceCursors() {
     `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
   );
 
+  const pusherRef = useRef<Pusher | null>(null);
+  const channelRef = useRef<any>(null);
+
   useEffect(() => {
     const KEY = process.env.NEXT_PUBLIC_PUSHER_KEY;
     const CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
 
     if (!KEY || !CLUSTER) {
-      console.error("PresenceCursors: Pusher keys missing in .env.local. Real-time cursors disabled.");
+      console.error("❌ PresenceCursors: Missing NEXT_PUBLIC_PUSHER_KEY or NEXT_PUBLIC_PUSHER_CLUSTER in .env.local");
       return;
     }
 
-    // Initialize Pusher
+    console.log("🚀 Initializing Pusher connection...");
+    
     const pusher = new Pusher(KEY, {
       cluster: CLUSTER,
       forceTLS: true
     });
+    pusherRef.current = pusher;
 
-    // CRITICAL FIX: Using 'client-' channel instead of 'presence-'.
-    // 'presence-' requires a server-side authentication endpoint.
-    // 'client-' allows us to subscribe and trigger events directly from the client,
-    // provided "Client Events" are enabled in the Pusher Dashboard.
-    const channel = pusher.subscribe("client-portfolio");
+    // Use a PUBLIC channel. Public channels do not require server-side authentication.
+    // This is the only way to make it work without a custom backend API.
+    const channel = pusher.subscribe("portfolio-presence");
+    channelRef.current = channel;
 
-    console.log("Attempting to connect to Pusher channel: client-portfolio...");
-
-    // Handle connection success
     pusher.connection.bind("connected", () => {
-      console.log("✅ Connected to Pusher!");
+      console.log("✅ Pusher connected successfully!");
     });
 
-    // Handle connection error
     pusher.connection.bind("error", (err: any) => {
-      console.error("❌ Pusher Connection Error:", err);
+      console.error("❌ Pusher connection error:", err);
     });
 
     const handleMouseMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth) * 100;
       const y = (e.clientY / window.innerHeight) * 100;
       
-      // client-events MUST start with 'client_'
+      // IMPORTANT: All client-triggered events MUST start with 'client_'
+      // This must be enabled in Pusher Dashboard -> App Settings -> Enable Client Events
       channel.trigger("client-cursor-move", {
         id: myId,
         x,
@@ -68,42 +69,44 @@ export default function PresenceCursors() {
 
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Listen for other cursors
+    // Listen for movements from other users
     channel.bind("client-cursor-move", (data: Cursor) => {
       if (data.id === myId) return;
+      
       setCursors((prev) => ({
         ...prev,
         [data.id]: data,
       }));
     });
 
-    // Clean up when user leaves
-    // Note: client- channels don't have built-in 'member_removed'.
-    // We implement a simple timeout to remove inactive cursors.
+    // Clean up inactive cursors since we are using a public channel
     const timeoutMap = new Map<string, NodeJS.Timeout>();
     channel.bind("client-cursor-move", (data: Cursor) => {
-        if (data.id === myId) return;
-        
-        if (timeoutMap.has(data.id)) {
-            clearTimeout(timeoutMap.get(data.id)!);
-        }
-        
-        const timeout = setTimeout(() => {
-            setCursors(prev => {
-                const next = { ...prev };
-                delete next[data.id];
-                return next;
-            });
-            timeoutMap.delete(data.id);
-        }, 5000); // Remove cursor after 5 seconds of inactivity
-        
-        timeoutMap.set(data.id, timeout);
+      if (data.id === myId) return;
+      
+      if (timeoutMap.has(data.id)) {
+        clearTimeout(timeoutMap.get(data.id)!);
+      }
+      
+      const timeout = setTimeout(() => {
+        setCursors(prev => {
+          const next = { ...prev };
+          delete next[data.id];
+          return next;
+        });
+        timeoutMap.delete(data.id);
+      }, 3000); // 3 seconds of inactivity = remove cursor
+      
+      timeoutMap.set(data.id, timeout);
     });
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      pusher.unsubscribe("client-portfolio");
-      timeoutMap.forEach(timeout => clearTimeout(timeout));
+      if (channelRef.current) {
+        channelRef.current.unbind_all();
+        pusher.unsubscribe("portfolio-presence");
+      }
+      timeoutMap.forEach(t => clearTimeout(t));
     };
   }, [myId, myColor]);
 
@@ -122,8 +125,8 @@ export default function PresenceCursors() {
             }}
             exit={{ opacity: 0, scale: 0 }}
             transition={{
-              left: { type: "spring", damping: 30, stiffness: 200 },
-              top: { type: "spring", damping: 30, stiffness: 200 },
+              left: { type: "spring", damping: 35, stiffness: 250 },
+              top: { type: "spring", damping: 35, stiffness: 250 },
             }}
             className="absolute w-4 h-4 pointer-events-none"
             style={{ transform: "translate(-50%, -50%)" }}
@@ -137,15 +140,15 @@ export default function PresenceCursors() {
               strokeWidth="3" 
               strokeLinecap="round" 
               strokeLinejoin="round"
-              className="drop-shadow-md"
+              className="drop-shadow-sm"
             >
               <path d="M3 3l7.07 16.97 2.51-7.39 4.93 4.93" />
             </svg>
             
             <motion.div 
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute left-4 top-0 px-2 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap text-white shadow-sm"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute left-4 top-0 px-2 py-0.5 rounded-full text-[9px] font-bold whitespace-nowrap text-white shadow-lg"
               style={{ backgroundColor: cursor.color }}
             >
               {cursor.name}
