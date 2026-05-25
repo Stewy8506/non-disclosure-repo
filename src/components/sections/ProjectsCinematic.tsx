@@ -16,14 +16,15 @@ export default function ProjectsCinematic({ projects, onSelect }: ProjectsCinema
         <div 
           key={project.id || project.title}
           onClick={() => onSelect(project)}
-          className="relative w-full h-[85vh] lg:h-[80vh] group cursor-pointer overflow-hidden border-b border-white/5"
+          data-cursor="view"
+          className="relative w-full h-[85vh] lg:h-[80vh] group cursor-none overflow-hidden border-b border-white/5"
         >
-          {/* Background Ambient Glow */}
           <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
             <Image
               src={project.image || "/projects/default.jpg"}
               alt={project.title}
               fill
+              sizes="100vw"
               className="object-cover opacity-20 blur-3xl scale-125 group-hover:opacity-40 transition-opacity duration-1000"
             />
           </div>
@@ -62,7 +63,7 @@ export default function ProjectsCinematic({ projects, onSelect }: ProjectsCinema
                 </p>
 
                 {/* View Project Button */}
-                <div className="mt-8 overflow-hidden h-0 group-hover:h-auto opacity-0 group-hover:opacity-100 transition-all duration-500 hidden md:block">
+                <div className="mt-8 overflow-hidden h-auto md:h-0 group-hover:h-auto opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-500">
                   <div className="inline-flex px-8 py-3.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-white uppercase tracking-widest text-xs font-semibold hover:bg-white hover:text-black transition-colors">
                     View Case Study
                   </div>
@@ -76,6 +77,7 @@ export default function ProjectsCinematic({ projects, onSelect }: ProjectsCinema
                     src={project.image || "/projects/default.jpg"}
                     alt={project.title}
                     fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                   />
                 </div>

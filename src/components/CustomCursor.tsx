@@ -5,6 +5,7 @@ import { motion, useSpring, useMotionValue, AnimatePresence } from "framer-motio
 
 const CustomCursor = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false);
   const [targetRect, setTargetRect] = useState<{
     top: number;
     left: number;
@@ -30,12 +31,21 @@ const CustomCursor = () => {
       // Ignore elements explicitly marked with data-cursor="none"
       if (target.closest("[data-cursor='none']")) {
         setTargetRect(null);
+        setIsViewMode(false);
+        return;
+      }
+
+      const viewElement = target.closest("[data-cursor='view']");
+      if (viewElement) {
+        setIsViewMode(true);
+        setTargetRect(null);
         return;
       }
 
       const interactiveElement = target.closest("button, a, [data-cursor='target']");
 
       if (interactiveElement) {
+        setIsViewMode(false);
         const rect = interactiveElement.getBoundingClientRect();
         setTargetRect({
           top: rect.top,
@@ -45,6 +55,7 @@ const CustomCursor = () => {
         });
       } else {
         setTargetRect(null);
+        setIsViewMode(false);
       }
     };
 
@@ -63,7 +74,7 @@ const CustomCursor = () => {
     <>
       {/* The actual mouse pointer dot */}
       <motion.div
-        className="hidden md:block fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        className="hidden md:flex fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference items-center justify-center overflow-hidden"
         style={{
           x: cursorX,
           y: cursorY,
@@ -72,13 +83,26 @@ const CustomCursor = () => {
         }}
         animate={{
           opacity: isVisible ? 1 : 0,
-          scale: targetRect ? 0.5 : 1,
+          scale: isViewMode ? 10 : targetRect ? 0.5 : 1,
         }}
-        transition={{ type: "spring", damping: 30, stiffness: 800 }}
-      />
+        transition={{ type: "spring", damping: 30, stiffness: 400 }}
+      >
+        <AnimatePresence>
+          {isViewMode && (
+            <motion.span 
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 0.1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              className="text-[14px] font-bold tracking-widest text-black"
+            >
+              VIEW
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       <AnimatePresence>
-        {targetRect && (
+        {targetRect && !isViewMode && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

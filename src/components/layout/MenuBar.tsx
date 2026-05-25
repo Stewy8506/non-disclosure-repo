@@ -8,6 +8,7 @@ import ToastContainer, { toast } from "../ui/Toast";
 import ChatWindow from "../ui/ChatWindow";
 import { usePathname } from "next/navigation";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
+import Magnetic from "../ui/Magnetic";
 
 const SPOTLIGHT_ITEMS = [
   { title: "About Anuvab", category: "Navigation", desc: "Background, timeline, and professional bio", icon: FileText, action: "about" },
@@ -478,40 +479,48 @@ export default function MenuBar() {
 
 
             {/* 💬 Global Chat Trigger */}
-            <button 
-              onClick={() => setIsChatOpen(true)}
-              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-              title="Open Global Chat"
-            >
-              <MessageSquare className="w-4 h-4 md:w-3.5 md:h-3.5 text-emerald-400" />
-            </button>
+            <Magnetic strength={0.4}>
+              <button 
+                onClick={() => setIsChatOpen(true)}
+                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+                title="Open Global Chat"
+              >
+                <MessageSquare className="w-4 h-4 md:w-3.5 md:h-3.5 text-emerald-400" />
+              </button>
+            </Magnetic>
             
             {/* 📶 WiFi Diagnostic */}
-            <button 
-              onClick={handleWifiClick}
-              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-              title="WiFi Status"
-            >
-              <Wifi className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
-            </button>
+            <Magnetic strength={0.4}>
+              <button 
+                onClick={handleWifiClick}
+                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+                title="WiFi Status"
+              >
+                <Wifi className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
+              </button>
+            </Magnetic>
             
             {/* 🔍 Search / Spotlight Trigger */}
-            <button 
-              onClick={() => setIsSpotlightOpen(true)}
-              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-              title="Spotlight Search (Cmd+K)"
-            >
-              <Search className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
-            </button>
+            <Magnetic strength={0.4}>
+              <button 
+                onClick={() => setIsSpotlightOpen(true)}
+                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+                title="Spotlight Search (Cmd+K)"
+              >
+                <Search className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
+              </button>
+            </Magnetic>
             
             {/* 🔋 Battery Diagnostic */}
-            <button 
-              onClick={handleBatteryClick}
-              className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-              title="Power & Battery Status"
-            >
-              <BatteryMedium className="w-5 h-5 md:w-4 md:h-4 text-zinc-300 hover:text-white" />
-            </button>
+            <Magnetic strength={0.4}>
+              <button 
+                onClick={handleBatteryClick}
+                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+                title="Power & Battery Status"
+              >
+                <BatteryMedium className="w-5 h-5 md:w-4 md:h-4 text-zinc-300 hover:text-white" />
+              </button>
+            </Magnetic>
           </div>
           
           {/* ⏰ Clock Trigger */}

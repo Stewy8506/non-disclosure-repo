@@ -27,7 +27,8 @@ export default function ProjectsHorizontal({ projects, onSelect }: ProjectsHoriz
             <div 
               key={project.id || project.title}
               onClick={() => onSelect(project)}
-              className="group relative w-[80vw] md:w-[60vw] max-w-4xl aspect-video shrink-0 cursor-pointer"
+              className="group relative w-[80vw] md:w-[60vw] max-w-4xl aspect-video shrink-0 cursor-none"
+              data-cursor="view"
             >
               {/* Image Container with 3D hover effect */}
               <motion.div 
@@ -40,6 +41,7 @@ export default function ProjectsHorizontal({ projects, onSelect }: ProjectsHoriz
                   src={project.image || "/projects/default.jpg"}
                   alt={project.title}
                   fill
+                  sizes="(max-width: 768px) 80vw, 60vw"
                   className="object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

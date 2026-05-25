@@ -201,6 +201,7 @@ export default function ProjectPreviewModal({ project, isOpen, onClose }: Projec
                       alt={`${project.title} screenshot ${idx + 1}`}
                       width={1600}
                       height={1200}
+                      sizes="(max-width: 1024px) 100vw, 60vw"
                       className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-1000 ease-out"
                       unoptimized={img.startsWith('http')}
                     />

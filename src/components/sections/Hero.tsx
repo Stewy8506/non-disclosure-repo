@@ -5,6 +5,8 @@ import FadeIn from "../ui/FadeIn";
 import Button from "../ui/Button";
 import { ArrowRight, Download } from "lucide-react";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
+import Magnetic from "../ui/Magnetic";
+import TextReveal from "../ui/TextReveal";
 
 export default function Hero() {
   const { playThocc } = useSoundEffect();
@@ -63,40 +65,43 @@ export default function Hero() {
           </h2>
         </FadeIn>
 
-        <FadeIn delay={0.3}>
-          <p className="text-lg md:text-xl text-muted mb-10 max-w-2xl mx-auto text-balance">
-            Full stack developer specializing in high-performance apps with React Native,
-            Flutter, and AI-driven products. Crafting minimal, premium interfaces.
-          </p>
-        </FadeIn>
+          <TextReveal delay={0.3} className="text-lg md:text-xl text-muted mb-10 max-w-2xl mx-auto text-balance justify-center text-center">
+            Full stack developer specializing in high-performance apps with React Native, Flutter, and AI-driven products. Crafting minimal, premium interfaces.
+          </TextReveal>
 
         <FadeIn delay={0.4}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-            <Button 
-              variant="primary" 
-              className="group flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap" 
-              data-cursor="button" 
-              onMouseEnter={playThocc}
-              onClick={() => handleScroll("projects")}
-            >
-              View Projects
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Button>
-            <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1} className="w-full sm:w-auto flex" onMouseEnter={playThocc}>
-              <Button variant="outline" className="group flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap" data-cursor="button">
-                Download Resume
-                <Download className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
+            <Magnetic strength={0.2}>
+              <Button 
+                variant="primary" 
+                className="group flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap" 
+                data-cursor="button" 
+                onMouseEnter={playThocc}
+                onClick={() => handleScroll("projects")}
+              >
+                View Projects
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
-            </a>
-            <Button 
-              variant="outline" 
-              data-cursor="button" 
-              className="w-full sm:w-auto justify-center whitespace-nowrap" 
-              onMouseEnter={playThocc}
-              onClick={() => handleScroll("contact")}
-            >
-              Get in touch
-            </Button>
+            </Magnetic>
+            <Magnetic strength={0.2}>
+              <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1} className="w-full sm:w-auto flex" onMouseEnter={playThocc}>
+                <Button variant="outline" className="group flex items-center justify-center gap-2 w-full sm:w-auto whitespace-nowrap" data-cursor="button">
+                  Download Resume
+                  <Download className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
+                </Button>
+              </a>
+            </Magnetic>
+            <Magnetic strength={0.2}>
+              <Button 
+                variant="outline" 
+                data-cursor="button" 
+                className="w-full sm:w-auto justify-center whitespace-nowrap" 
+                onMouseEnter={playThocc}
+                onClick={() => handleScroll("contact")}
+              >
+                Get in touch
+              </Button>
+            </Magnetic>
           </div>
         </FadeIn>
       </div>

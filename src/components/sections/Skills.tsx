@@ -5,6 +5,7 @@ import FadeIn from "../ui/FadeIn";
 import Section from "../ui/Section";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import HoverSpotlight from "../ui/HoverSpotlight";
 
 const MarqueeRow = ({ 
   items, 
@@ -28,9 +29,10 @@ const MarqueeRow = ({
         transition={{ duration: speed, repeat: Infinity, ease: "linear" }}
       >
         {[...items, ...items, ...items].map((item, idx) => (
-          <div 
+          <HoverSpotlight 
             key={`${item.id}-${idx}`}
-            className="flex items-center gap-4 px-8 py-5 rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300 cursor-default group"
+            className="rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300 cursor-default group"
+            innerClassName="flex items-center gap-4 px-8 py-5 w-full h-full"
           >
             <div className="w-8 h-8 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
               <img 
@@ -46,7 +48,7 @@ const MarqueeRow = ({
             <span className="text-xl font-semibold text-zinc-300 group-hover:text-white transition-colors tracking-tight">
               {item.name}
             </span>
-          </div>
+          </HoverSpotlight>
         ))}
       </motion.div>
     </div>
@@ -185,22 +187,27 @@ export default function Skills() {
                           transition: { duration: 0.2, ease: "easeInOut" }
                         }
                       }}
-                      className="flex flex-col items-center justify-center gap-4 p-6 rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:-translate-y-2 transition-all duration-300 group cursor-default"
+                      className="cursor-default"
                     >
-                      <div className="w-12 h-12 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
-                        <img 
-                          src={`https://cdn.simpleicons.org/${skill.slug}${skill.white ? '/white' : ''}`} 
-                          alt={skill.name}
-                          className="w-full h-full object-contain"
-                          width={48}
-                          height={48}
-                          loading="lazy"
-                          onError={(e) => (e.currentTarget.src = "/favicon.ico")}
-                        />
-                      </div>
-                      <span className="text-sm font-semibold text-zinc-300 group-hover:text-white transition-colors text-center">
-                        {skill.name}
-                      </span>
+                      <HoverSpotlight 
+                        className="rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:-translate-y-2 transition-all duration-300 group h-full"
+                        innerClassName="flex flex-col items-center justify-center gap-4 p-6 w-full h-full"
+                      >
+                        <div className="w-12 h-12 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
+                          <img 
+                            src={`https://cdn.simpleicons.org/${skill.slug}${skill.white ? '/white' : ''}`} 
+                            alt={skill.name}
+                            className="w-full h-full object-contain"
+                            width={48}
+                            height={48}
+                            loading="lazy"
+                            onError={(e) => (e.currentTarget.src = "/favicon.ico")}
+                          />
+                        </div>
+                        <span className="text-sm font-semibold text-zinc-300 group-hover:text-white transition-colors text-center">
+                          {skill.name}
+                        </span>
+                      </HoverSpotlight>
                     </motion.div>
                   ))}
                 </motion.div>

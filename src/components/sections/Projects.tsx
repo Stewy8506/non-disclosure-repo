@@ -11,6 +11,7 @@ import { GitHubIcon } from "../ui/BrandIcons";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import ProjectPreviewModal from "../ui/ProjectPreviewModal";
 import Link from "next/link";
+import HoverSpotlight from "../ui/HoverSpotlight";
 
 export default function Projects({ limit }: { limit?: number }) {
   const { playThocc } = useSoundEffect();
@@ -147,12 +148,16 @@ function ProjectListCard({ project, idx, onClick }: { project: any; idx: number;
         setIsHovered(false);
         setCurrentImageIdx(0);
       }}
-      className={cn(
-        "relative flex flex-col w-full glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] group overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.02)] cursor-pointer text-left",
-        isEven ? "md:flex-row" : "md:flex-row-reverse"
-      )}
-      data-cursor="scale"
+      className="relative w-full rounded-3xl cursor-none text-left"
+      data-cursor="view"
     >
+      <HoverSpotlight 
+        className="relative w-full glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] group overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.02)] h-full"
+        innerClassName={cn(
+          "flex flex-col w-full h-full",
+          isEven ? "md:flex-row" : "md:flex-row-reverse"
+        )}
+      >
       {/* Image Half */}
       <div className="relative h-64 md:h-auto md:w-1/2 overflow-hidden bg-zinc-950 shrink-0">
         <AnimatePresence mode="popLayout" initial={false}>
@@ -168,6 +173,7 @@ function ProjectListCard({ project, idx, onClick }: { project: any; idx: number;
               src={images[currentImageIdx]}
               alt={`${project.title} - ${currentImageIdx + 1}`}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               unoptimized={images[currentImageIdx].startsWith('http')}
               className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
             />
@@ -210,7 +216,7 @@ function ProjectListCard({ project, idx, onClick }: { project: any; idx: number;
                 <GitHubIcon className="w-5 h-5 text-muted hover:text-white transition-colors" />
               </a>
             )}
-            {(project.liveDemoUrl || project.link) && (
+            {(project.hasLiveDemo !== false) && (project.liveDemoUrl || project.link) && (
               <a href={project.liveDemoUrl || project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
                 <ExternalLink className="w-5 h-5 text-muted hover:text-white transition-colors" />
               </a>
@@ -234,6 +240,7 @@ function ProjectListCard({ project, idx, onClick }: { project: any; idx: number;
           ))}
         </div>
       </div>
+      </HoverSpotlight>
     </motion.div>
   );
 }
