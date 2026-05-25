@@ -74,6 +74,10 @@ export async function POST(req: NextRequest) {
     const docRef = await addDoc(collection(db, "projects"), {
       title: body.title || "",
       description: body.description || "",
+      overview: body.overview || "",
+      problem: body.problem || "",
+      liveDemoUrl: body.liveDemoUrl || "",
+      sourceCodeUrl: body.sourceCodeUrl || "",
       tech: body.tech || [],
       link: body.link || "",
       category: body.category || "Mobile App",

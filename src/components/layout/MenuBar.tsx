@@ -6,6 +6,7 @@ import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, Fi
 import MenuDropdown, { MenuItem } from "../ui/MenuDropdown";
 import ToastContainer, { toast } from "../ui/Toast";
 import ChatWindow from "../ui/ChatWindow";
+import { usePathname } from "next/navigation";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 
 const SPOTLIGHT_ITEMS = [
@@ -19,6 +20,7 @@ const SPOTLIGHT_ITEMS = [
 ];
 
 export default function MenuBar() {
+  const pathname = usePathname();
   const [time, setTime] = useState("");
   const [is24Hour, setIs24Hour] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -388,6 +390,8 @@ export default function MenuBar() {
       { label: "Contact Support", action: () => { document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}); setActiveMenu(null); } }
     ]
   };
+
+  if (pathname === "/projects") return null;
 
   return (
     <>

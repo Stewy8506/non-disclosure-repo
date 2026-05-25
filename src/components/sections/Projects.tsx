@@ -9,10 +9,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { GitHubIcon } from "../ui/BrandIcons";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
+import ProjectPreviewModal from "../ui/ProjectPreviewModal";
+import Link from "next/link";
 
-export default function Projects() {
+export default function Projects({ limit }: { limit?: number }) {
   const { playThocc } = useSoundEffect();
   const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
 
@@ -32,9 +35,13 @@ export default function Projects() {
   }, []);
 
   const categories = ["All", ...new Set(projects.map((p: any) => p.category))];
-  const filteredProjects = filter === "All" 
+  let filteredProjects = filter === "All" 
     ? projects 
     : projects.filter((p: any) => p.category === filter);
+
+  if (limit) {
+    filteredProjects = filteredProjects.slice(0, limit);
+  }
 
   if (loading) return <Section className="py-32 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500" /></Section>;
 
@@ -50,11 +57,12 @@ export default function Projects() {
         </p>
 
         {/* Controls Row */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6 w-full max-w-5xl mx-auto">
-          {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-2">
-            {categories.map((cat) => (
-              <button
+        {!limit && (
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 w-full max-w-5xl mx-auto">
+            {/* Category Filters */}
+            <div className="flex flex-wrap justify-center gap-2">
+              {categories.map((cat) => (
+                <button
                 key={cat}
                 onMouseEnter={playThocc}
                 onClick={() => setFilter(cat)}
@@ -68,9 +76,10 @@ export default function Projects() {
               >
                 {cat as string}
               </button>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </FadeIn>
 
       <motion.div 
@@ -87,17 +96,31 @@ export default function Projects() {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              <ProjectListCard project={project} idx={idx} />
+              <ProjectListCard project={project} idx={idx} onClick={() => setSelectedProject(project)} />
             </motion.div>
           ))}
         </AnimatePresence>
       </motion.div>
+
+      {limit && (
+        <div className="mt-16 flex justify-center">
+          <Link href="/projects" className="px-8 py-4 rounded-full bg-white text-black font-semibold tracking-wide hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            View All Projects
+          </Link>
+        </div>
+      )}
+
+      <ProjectPreviewModal 
+        project={selectedProject} 
+        isOpen={!!selectedProject} 
+        onClose={() => setSelectedProject(null)} 
+      />
     </Section>
   );
 }
 
 // Alternating Full-Width Case Studies
-function ProjectListCard({ project, idx }: { project: any; idx: number }) {
+function ProjectListCard({ project, idx, onClick }: { project: any; idx: number; onClick?: () => void }) {
   const { playThocc } = useSoundEffect();
   const isEven = idx % 2 === 0;
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
@@ -114,10 +137,8 @@ function ProjectListCard({ project, idx }: { project: any; idx: number }) {
   }, [isHovered, images.length]);
   
   return (
-    <motion.a
-      href={project.link}
-      target="_blank"
-      rel="noopener noreferrer"
+    <motion.div
+      onClick={onClick}
       onMouseEnter={() => {
         setIsHovered(true);
         playThocc();
@@ -127,7 +148,7 @@ function ProjectListCard({ project, idx }: { project: any; idx: number }) {
         setCurrentImageIdx(0);
       }}
       className={cn(
-        "relative flex flex-col w-full glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] group overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.02)]",
+        "relative flex flex-col w-full glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] group overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.02)] cursor-pointer text-left",
         isEven ? "md:flex-row" : "md:flex-row-reverse"
       )}
       data-cursor="scale"
@@ -184,8 +205,16 @@ function ProjectListCard({ project, idx }: { project: any; idx: number }) {
             {project.category}
           </span>
           <div className="flex gap-4">
-            <GitHubIcon className="w-5 h-5 text-muted group-hover:text-white transition-colors" />
-            <ExternalLink className="w-5 h-5 text-muted group-hover:text-white transition-colors" />
+            {project.sourceCodeUrl && (
+              <a href={project.sourceCodeUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                <GitHubIcon className="w-5 h-5 text-muted hover:text-white transition-colors" />
+              </a>
+            )}
+            {(project.liveDemoUrl || project.link) && (
+              <a href={project.liveDemoUrl || project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+                <ExternalLink className="w-5 h-5 text-muted hover:text-white transition-colors" />
+              </a>
+            )}
           </div>
         </div>
 
@@ -205,6 +234,6 @@ function ProjectListCard({ project, idx }: { project: any; idx: number }) {
           ))}
         </div>
       </div>
-    </motion.a>
+    </motion.div>
   );
 }

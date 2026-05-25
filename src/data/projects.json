@@ -2,8 +2,12 @@
   {
     "title": "RN Habit Tracker",
     "description": "A premium productivity ecosystem featuring a Pomodoro focus timer, real-time task management, and automatic DND mode for deep work.",
+    "overview": "A comprehensive mobile application designed to enhance productivity by integrating task management seamlessly with a Pomodoro timer.",
+    "problem": "Users often struggle to balance focused work sessions with organized task lists. Most existing solutions separate these into different apps, leading to context switching.",
     "tech": ["React Native", "TypeScript", "Expo"],
     "link": "https://github.com/Stewy8506/RN-Habit-Tracker",
+    "sourceCodeUrl": "https://github.com/Stewy8506/RN-Habit-Tracker",
+    "liveDemoUrl": "",
     "category": "Mobile App",
     "images": ["/projects/habit-tracker.jpg"],
     "order": 0
@@ -11,8 +15,12 @@
   {
     "title": "Adaptive Noise Cancellation",
     "description": "High-performance embedded system implemented on STM32 to actively filter ambient noise using adaptive signal processing algorithms.",
+    "overview": "Hardware-level active noise cancellation utilizing advanced DSP techniques on a low-power STM32 microcontroller.",
+    "problem": "Software-based noise cancellation often introduces latency. A hardware-level approach is needed for real-time, zero-latency processing.",
     "tech": ["C", "STM32", "DSP"],
     "link": "https://github.com/Stewy8506/STM32-Adaptive-Noise-Cancellation",
+    "sourceCodeUrl": "https://github.com/Stewy8506/STM32-Adaptive-Noise-Cancellation",
+    "liveDemoUrl": "",
     "category": "Embedded Systems",
     "images": ["/projects/noise-cancel.jpg"],
     "order": 1
@@ -20,8 +28,12 @@
   {
     "title": "AI Intelligence Suite",
     "description": "Next-generation AI application exploring the boundaries of LLM integration for personalized productivity and automation.",
+    "overview": "A web-based platform that leverages OpenAI's APIs to provide a suite of intelligent tools tailored for personal and professional automation.",
+    "problem": "Generic AI chatbots lack context and specialized tools for complex, multi-step workflows. Users need a centralized hub for custom AI tasks.",
     "tech": ["Next.js", "TypeScript", "OpenAI"],
     "link": "https://github.com/Stewy8506/AI-App",
+    "sourceCodeUrl": "https://github.com/Stewy8506/AI-App",
+    "liveDemoUrl": "",
     "category": "AI Product",
     "images": ["/projects/ai-suite.jpg"],
     "order": 2
@@ -29,8 +41,12 @@
   {
     "title": "Smart Helmet OS",
     "description": "Comprehensive hardware and software integration for a motorcycle smart helmet, featuring real-time telemetry and safety alerts.",
+    "overview": "An integrated embedded operating system for a smart motorcycle helmet, managing sensors, Bluetooth communication, and a heads-up display.",
+    "problem": "Motorcyclists need to access navigation and safety alerts without taking their eyes off the road. Current solutions are either bulky or lack integration.",
     "tech": ["Embedded C", "Hardware", "IoT"],
     "link": "https://github.com/Stewy8506/Smart-Helmet-Full-Hardware-Code",
+    "sourceCodeUrl": "https://github.com/Stewy8506/Smart-Helmet-Full-Hardware-Code",
+    "liveDemoUrl": "",
     "category": "Embedded Systems",
     "images": ["/projects/smart-helmet.jpg"],
     "order": 3

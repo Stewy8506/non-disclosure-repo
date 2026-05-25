@@ -22,6 +22,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     await setDoc(projectRef, {
       title: body.title,
       description: body.description,
+      overview: body.overview,
+      problem: body.problem,
+      liveDemoUrl: body.liveDemoUrl,
+      sourceCodeUrl: body.sourceCodeUrl,
       tech: body.tech,
       link: body.link,
       category: body.category,

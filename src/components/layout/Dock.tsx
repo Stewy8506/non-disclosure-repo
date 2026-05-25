@@ -4,9 +4,11 @@ import React, { useState } from "react";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { User, Code2, FolderGit2, Mail } from "lucide-react";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
+import { usePathname } from "next/navigation";
 import Magnetic from "@/components/ui/Magnetic";
 
 export default function Dock() {
+  const pathname = usePathname();
   const { playThocc } = useSoundEffect();
   const { scrollY } = useScroll();
   const [isHidden, setIsHidden] = useState(false);
@@ -20,6 +22,8 @@ export default function Dock() {
       setIsHidden(false); // Scrolling up, reveal
     }
   });
+
+  if (pathname === "/projects") return null;
 
   const dockItems = [
     { name: "About", icon: User, href: "#about", color: "from-blue-400 to-blue-600" },

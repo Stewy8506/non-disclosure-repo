@@ -18,9 +18,14 @@ export default function AdminDashboard() {
   const [newProject, setNewProject] = useState({
     title: "",
     description: "",
+    overview: "",
+    problem: "",
+    liveDemoUrl: "",
+    sourceCodeUrl: "",
     tech: "",
     link: "",
     category: "Mobile App",
+    hasLiveDemo: true,
     images: [] as string[]
   });
 
@@ -135,9 +140,14 @@ export default function AdminDashboard() {
     setNewProject({
       title: project.title,
       description: project.description,
+      overview: project.overview || "",
+      problem: project.problem || "",
+      liveDemoUrl: project.liveDemoUrl || "",
+      sourceCodeUrl: project.sourceCodeUrl || "",
       tech: project.tech.join(", "),
       link: project.link,
       category: project.category,
+      hasLiveDemo: project.hasLiveDemo !== false,
       images: project.images || (project.image ? [project.image] : []),
     });
     setIsProjectModalOpen(true);
@@ -157,7 +167,7 @@ export default function AdminDashboard() {
   const closeProjectModal = () => {
     setIsProjectModalOpen(false);
     setEditingProjectId(null);
-    setNewProject({ title: "", description: "", tech: "", link: "", category: "Mobile App", images: [] });
+    setNewProject({ title: "", description: "", overview: "", problem: "", liveDemoUrl: "", sourceCodeUrl: "", tech: "", link: "", category: "Mobile App", hasLiveDemo: true, images: [] });
   };
 
   const closeSkillModal = () => {
@@ -608,6 +618,22 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div>
+                  <label className="block text-zinc-400 mb-1">Overview</label>
+                  <textarea 
+                    value={newProject.overview}
+                    onChange={(e) => setNewProject({...newProject, overview: e.target.value})}
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors h-24 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">The Problem</label>
+                  <textarea 
+                    value={newProject.problem}
+                    onChange={(e) => setNewProject({...newProject, problem: e.target.value})}
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors h-24 resize-none"
+                  />
+                </div>
+                <div>
                   <label className="block text-zinc-400 mb-1">Tech Stack (comma separated)</label>
                   <input 
                     type="text" 
@@ -626,6 +652,35 @@ export default function AdminDashboard() {
                     onChange={(e) => setNewProject({...newProject, link: e.target.value})}
                     className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors"
                     required
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Live Demo URL</label>
+                  <input 
+                    type="url" 
+                    value={newProject.liveDemoUrl}
+                    onChange={(e) => setNewProject({...newProject, liveDemoUrl: e.target.value})}
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 text-zinc-400 mb-4 cursor-pointer mt-2 w-fit">
+                    <input 
+                      type="checkbox" 
+                      checked={newProject.hasLiveDemo}
+                      onChange={(e) => setNewProject({...newProject, hasLiveDemo: e.target.checked})}
+                      className="w-4 h-4 rounded border-zinc-800 bg-zinc-950 text-white focus:ring-0 focus:ring-offset-0 cursor-pointer accent-white"
+                    />
+                    <span>Has Live Demo / Live Site link?</span>
+                  </label>
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1">Source Code URL</label>
+                  <input 
+                    type="url" 
+                    value={newProject.sourceCodeUrl}
+                    onChange={(e) => setNewProject({...newProject, sourceCodeUrl: e.target.value})}
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 focus:border-zinc-600 focus:outline-none transition-colors"
                   />
                 </div>
                 <div>
