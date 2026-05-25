@@ -15,6 +15,7 @@ export default function AllProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("cinematic");
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [filter, setFilter] = useState("All");
 
   useEffect(() => {
     async function loadProjects() {
@@ -30,6 +31,11 @@ export default function AllProjectsPage() {
     }
     loadProjects();
   }, []);
+
+  const categories = ["All", ...new Set(projects.map((p: any) => p.category))];
+  const filteredProjects = filter === "All" 
+    ? projects 
+    : projects.filter((p: any) => p.category === filter);
 
   if (loading) {
     return (
@@ -50,34 +56,53 @@ export default function AllProjectsPage() {
           >
             <ArrowLeft size={18} />
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight uppercase">Selected Works</h1>
+          <h1 className="text-2xl font-semibold tracking-tight uppercase hidden md:block">Selected Works</h1>
+        </div>
+
+        {/* Category Filters */}
+        <div className="flex flex-1 justify-center overflow-x-auto no-scrollbar py-1">
+          <div className="flex items-center gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat as string}
+                onClick={() => setFilter(cat as string)}
+                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-300 border ${
+                  filter === cat 
+                    ? "bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.2)]" 
+                    : "bg-white/5 text-zinc-400 border-white/10 hover:border-white/30 hover:text-white"
+                }`}
+              >
+                {cat as string}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* View Toggle */}
-        <div className="flex items-center gap-2 p-1 bg-white/5 rounded-full border border-white/10">
+        <div className="flex items-center gap-2 p-1 bg-white/5 rounded-full border border-white/10 shrink-0">
           <button
             onClick={() => setViewMode("cinematic")}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
               viewMode === "cinematic" ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105" : "text-zinc-400 hover:text-white"
             }`}
           >
-            <Rows size={14} /> Cinematic
+            <Rows size={14} /> <span className="hidden sm:inline">Cinematic</span>
           </button>
           <button
             onClick={() => setViewMode("horizontal")}
-            className={`flex items-center gap-2 px-6 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all ${
               viewMode === "horizontal" ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105" : "text-zinc-400 hover:text-white"
             }`}
           >
-            <Maximize size={14} /> 3D Gallery
+            <Maximize size={14} /> <span className="hidden sm:inline">Gallery</span>
           </button>
         </div>
       </header>
       
       {/* Dynamic Viewport */}
-      <div className="flex-1 w-full relative pt-[130px] md:pt-[88px]">
-        {viewMode === "cinematic" && <ProjectsCinematic projects={projects} onSelect={setSelectedProject} />}
-        {viewMode === "horizontal" && <ProjectsHorizontal projects={projects} onSelect={setSelectedProject} />}
+      <div className="flex-1 w-full relative pt-[150px] md:pt-[88px]">
+        {viewMode === "cinematic" && <ProjectsCinematic projects={filteredProjects} onSelect={setSelectedProject} />}
+        {viewMode === "horizontal" && <ProjectsHorizontal projects={filteredProjects} onSelect={setSelectedProject} />}
       </div>
 
       <ProjectPreviewModal 

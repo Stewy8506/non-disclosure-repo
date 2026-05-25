@@ -58,15 +58,14 @@ export default function Projects({ limit }: { limit?: number }) {
         </p>
 
         {/* Controls Row */}
-        {!limit && (
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 w-full max-w-5xl mx-auto">
-            {/* Category Filters */}
-            <div className="flex flex-wrap justify-center gap-2">
-              {categories.map((cat) => (
-                <button
+        <div className="flex flex-col md:flex-row items-center justify-center gap-6 w-full max-w-5xl mx-auto">
+          {/* Category Filters */}
+          <div className="flex flex-wrap justify-center gap-2">
+            {categories.map((cat) => (
+              <button
                 key={cat}
                 onMouseEnter={playThocc}
-                onClick={() => setFilter(cat)}
+                onClick={() => setFilter(cat as string)}
                 className={cn(
                   "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 border",
                   filter === cat 
@@ -77,10 +76,9 @@ export default function Projects({ limit }: { limit?: number }) {
               >
                 {cat as string}
               </button>
-              ))}
-            </div>
+            ))}
           </div>
-        )}
+        </div>
       </FadeIn>
 
       <motion.div 

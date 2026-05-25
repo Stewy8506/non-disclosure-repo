@@ -49,6 +49,9 @@ export default function About() {
         </FadeIn>
 
         <div className="lg:col-span-1 flex flex-col gap-6">
+          {/* GitHub Stats Card */}
+          <GitHubStats />
+
           {/* AI & Embedded Card */}
           <FadeIn delay={0.1} className="flex-1 group relative glass-effect rounded-3xl p-8 border border-white/[0.04] bg-white/[0.01] overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(139,92,246,0.05)]" data-cursor="scale">
              <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-violet-500/15 rounded-full blur-[80px] pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity duration-700" />
@@ -80,9 +83,6 @@ export default function About() {
                </p>
              </div>
           </FadeIn>
-
-          {/* GitHub Stats Card */}
-          <GitHubStats />
         </div>
 
       </div>
