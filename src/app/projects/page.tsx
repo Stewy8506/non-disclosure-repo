@@ -51,6 +51,7 @@ export default function AllProjectsPage() {
         <div className="flex items-center gap-6">
           <Link 
             href="/#projects" 
+            replace
             className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
           >
             <ArrowLeft size={18} />

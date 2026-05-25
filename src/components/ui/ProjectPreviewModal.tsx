@@ -2,18 +2,22 @@
 
 import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, ArrowRight } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { GitHubIcon } from "./BrandIcons";
+import { getProjectLiveUrl, type Project } from "@/lib/projects";
 
 interface ProjectPreviewModalProps {
-  project: any;
+  project: Project | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function ProjectPreviewModal({ project, isOpen, onClose }: ProjectPreviewModalProps) {
-  const images = project?.images?.length > 0 ? project.images : (project?.image ? [project.image] : ["/projects/default.jpg"]);
+  const images = project && Array.isArray(project.images) && project.images.length > 0
+    ? project.images
+    : (project?.image ? [project.image] : ["/projects/default.jpg"]);
+  const liveUrl = project ? getProjectLiveUrl(project) : "";
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Prevent background scrolling when open
@@ -151,9 +155,9 @@ export default function ProjectPreviewModal({ project, isOpen, onClose }: Projec
 
                   {/* Actions */}
                   <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                    {project.hasLiveDemo !== false && (project.liveDemoUrl || project.link) && (
+                    {liveUrl && (
                       <a
-                        href={project.liveDemoUrl || project.link}
+                        href={liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group relative flex-1 overflow-hidden rounded-xl bg-white text-black font-bold text-sm h-14 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"

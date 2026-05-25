@@ -9,6 +9,7 @@ import ChatWindow from "../ui/ChatWindow";
 import { usePathname } from "next/navigation";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import Magnetic from "../ui/Magnetic";
+import { scrollToSection } from "@/lib/navigation";
 
 const SPOTLIGHT_ITEMS = [
   { title: "About Anuvab", category: "Navigation", desc: "Background, timeline, and professional bio", icon: FileText, action: "about" },
@@ -289,11 +290,8 @@ export default function MenuBar() {
     setIsSpotlightOpen(false);
     
     if (["about", "skills", "projects", "contact"].includes(action)) {
-      const section = document.getElementById(action);
-      if (section) {
-        section.scrollIntoView({ behavior: "smooth" });
-        toast(`Scrolled to ${action.toUpperCase()} section`, "success");
-      }
+      scrollToSection(action);
+      toast(`Scrolled to ${action.toUpperCase()} section`, "success");
     } else if (action === "chat") {
       setIsChatOpen(true);
     } else if (action === "resume") {
@@ -339,7 +337,7 @@ export default function MenuBar() {
 
   const menuData: Record<string, MenuItem[]> = {
     anvos: [
-      { label: "About anv os", action: () => { setActiveMenu(null); document.getElementById('about')?.scrollIntoView({behavior: 'smooth'}) } },
+      { label: "About anv os", action: () => { setActiveMenu(null); scrollToSection("about") } },
       { divider: true, label: "" },
       { label: "System Preferences...", disabled: true },
       { label: "App Store...", disabled: true },
@@ -388,7 +386,7 @@ export default function MenuBar() {
     ],
     Help: [
       { label: "anv os Help", action: () => { toast("You are looking at it!", "success"); setActiveMenu(null); } },
-      { label: "Contact Support", action: () => { document.getElementById('contact')?.scrollIntoView({behavior: 'smooth'}); setActiveMenu(null); } }
+      { label: "Contact Support", action: () => { scrollToSection("contact"); setActiveMenu(null); } }
     ]
   };
 

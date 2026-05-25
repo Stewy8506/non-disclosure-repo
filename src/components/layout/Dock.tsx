@@ -6,6 +6,7 @@ import { User, Code2, FolderGit2, Mail } from "lucide-react";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import { usePathname } from "next/navigation";
 import Magnetic from "@/components/ui/Magnetic";
+import { scrollToSection } from "@/lib/navigation";
 
 export default function Dock() {
   const pathname = usePathname();
@@ -48,7 +49,16 @@ export default function Dock() {
       <div className="hidden md:flex glass-effect rounded-2xl border border-white/10 p-3 items-center gap-4 shadow-2xl pointer-events-auto bg-zinc-900/60 backdrop-blur-2xl">
         {dockItems.map((item) => (
           <Magnetic key={item.name} strength={0.4}>
-            <a href={item.href} onMouseEnter={playThocc} data-cursor="none" className="group relative flex items-center justify-center">
+            <a
+              href={item.href}
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToSection(item.href.slice(1));
+              }}
+              onMouseEnter={playThocc}
+              data-cursor="none"
+              className="group relative flex items-center justify-center"
+            >
               {/* Tooltip */}
               <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-800/95 backdrop-blur-md text-white text-xs font-medium rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
                 {item.name}
@@ -75,6 +85,10 @@ export default function Dock() {
           <a 
             key={item.name} 
             href={item.href} 
+            onClick={(event) => {
+              event.preventDefault();
+              scrollToSection(item.href.slice(1));
+            }}
             onMouseEnter={playThocc}
             data-cursor="none" 
             className="flex flex-col items-center justify-center gap-0.5 opacity-70 hover:opacity-100 active:scale-95 transition-all"

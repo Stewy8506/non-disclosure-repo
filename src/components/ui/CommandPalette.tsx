@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, Download, Volume2, ArrowRight, Settings } from "lucide-react";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import { toast } from "@/components/ui/Toast";
+import { scrollToSection } from "@/lib/navigation";
 
 export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,9 +42,9 @@ export default function CommandPalette() {
   }, [isOpen]);
 
   const actions = [
-    { id: "projects", label: "View Projects", icon: ArrowRight, action: () => { window.location.hash = "projects"; setIsOpen(false); } },
-    { id: "about", label: "Go to About", icon: ArrowRight, action: () => { window.location.hash = "about"; setIsOpen(false); } },
-    { id: "contact", label: "Get in Touch", icon: ArrowRight, action: () => { window.location.hash = "contact"; setIsOpen(false); } },
+    { id: "projects", label: "View Projects", icon: ArrowRight, action: () => { scrollToSection("projects"); setIsOpen(false); } },
+    { id: "about", label: "Go to About", icon: ArrowRight, action: () => { scrollToSection("about"); setIsOpen(false); } },
+    { id: "contact", label: "Get in Touch", icon: ArrowRight, action: () => { scrollToSection("contact"); setIsOpen(false); } },
     { id: "resume", label: "Download Resume", icon: Download, action: () => { 
         const link = document.createElement("a");
         link.href = "/resume.pdf";

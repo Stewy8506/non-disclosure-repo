@@ -7,15 +7,13 @@ import { ArrowRight, Download } from "lucide-react";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
 import Magnetic from "../ui/Magnetic";
 import TextReveal from "../ui/TextReveal";
+import { scrollToSection } from "@/lib/navigation";
 
 export default function Hero() {
   const { playThocc } = useSoundEffect();
 
   const handleScroll = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    scrollToSection(id);
   };
 
   return (

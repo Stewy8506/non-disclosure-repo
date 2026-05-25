@@ -12,11 +12,12 @@ import { useSoundEffect } from "@/hooks/useSoundEffect";
 import ProjectPreviewModal from "../ui/ProjectPreviewModal";
 import Link from "next/link";
 import HoverSpotlight from "../ui/HoverSpotlight";
+import { getProjectLiveUrl, type Project } from "@/lib/projects";
 
 export default function Projects({ limit }: { limit?: number }) {
   const { playThocc } = useSoundEffect();
-  const [projects, setProjects] = useState([]);
-  const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filter, setFilter] = useState("All");
   const [loading, setLoading] = useState(true);
 
@@ -35,10 +36,10 @@ export default function Projects({ limit }: { limit?: number }) {
     loadProjects();
   }, []);
 
-  const categories = ["All", ...new Set(projects.map((p: any) => p.category))];
+  const categories = ["All", ...new Set(projects.map((p) => p.category).filter(Boolean))];
   let filteredProjects = filter === "All" 
     ? projects 
-    : projects.filter((p: any) => p.category === filter);
+    : projects.filter((p) => p.category === filter);
 
   if (limit) {
     filteredProjects = filteredProjects.slice(0, limit);
@@ -86,7 +87,7 @@ export default function Projects({ limit }: { limit?: number }) {
         className="max-w-5xl mx-auto grid gap-8 grid-cols-1"
       >
         <AnimatePresence mode="popLayout">
-          {filteredProjects.map((project: any, idx: number) => (
+          {filteredProjects.map((project, idx) => (
             <motion.div
               key={project.id || project.title}
               layout
@@ -119,13 +120,14 @@ export default function Projects({ limit }: { limit?: number }) {
 }
 
 // Alternating Full-Width Case Studies
-function ProjectListCard({ project, idx, onClick }: { project: any; idx: number; onClick?: () => void }) {
+function ProjectListCard({ project, idx, onClick }: { project: Project; idx: number; onClick?: () => void }) {
   const { playThocc } = useSoundEffect();
   const isEven = idx % 2 === 0;
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
   const images = project.images && project.images.length > 0 ? project.images : (project.image ? [project.image] : ["/projects/default.jpg"]);
+  const liveUrl = getProjectLiveUrl(project);
 
   useEffect(() => {
     if (!isHovered || images.length <= 1) return;
@@ -214,8 +216,8 @@ function ProjectListCard({ project, idx, onClick }: { project: any; idx: number;
                 <GitHubIcon className="w-5 h-5 text-muted hover:text-white transition-colors" />
               </a>
             )}
-            {(project.hasLiveDemo !== false) && (project.liveDemoUrl || project.link) && (
-              <a href={project.liveDemoUrl || project.link} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+            {liveUrl && (
+              <a href={liveUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
                 <ExternalLink className="w-5 h-5 text-muted hover:text-white transition-colors" />
               </a>
             )}
@@ -231,7 +233,7 @@ function ProjectListCard({ project, idx, onClick }: { project: any; idx: number;
         </p>
 
         <div className="flex flex-wrap gap-2">
-          {project.tech.map((t: string) => (
+          {project.tech?.map((t) => (
             <span key={t} className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-white/[0.03] text-zinc-400 border border-white/[0.05]">
               {t}
             </span>

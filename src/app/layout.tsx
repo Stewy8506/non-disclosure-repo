@@ -8,6 +8,7 @@ import DynamicBackground from "@/components/ui/DynamicBackground";
 import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
 import NoiseOverlay from "@/components/ui/NoiseOverlay";
 import ScrollToTop from "@/components/ui/ScrollToTop";
+import HashCanonicalizer from "@/components/layout/HashCanonicalizer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ClientLayoutWrapper>
+          <HashCanonicalizer />
           <NoiseOverlay />
           <DynamicBackground />
           <CustomCursor />
