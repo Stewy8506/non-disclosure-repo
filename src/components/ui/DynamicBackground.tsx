@@ -5,6 +5,15 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
 
+// Suppress THREE.Clock deprecation warning from @react-three/fiber
+if (typeof window !== "undefined") {
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    if (args[0] && typeof args[0] === "string" && args[0].includes("THREE.Clock")) return;
+    originalWarn(...args);
+  };
+}
+
 function ParticleField() {
   const ref = useRef<THREE.Points>(null!);
   const mouse = useRef({ x: 0, y: 0 });

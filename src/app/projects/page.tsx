@@ -40,7 +40,7 @@ export default function AllProjectsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white relative z-0 flex flex-col overflow-hidden">
+    <main className="min-h-screen bg-zinc-950 text-white relative z-0 flex flex-col">
       {/* Header */}
       <header className="fixed top-0 z-40 w-full bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 py-4 px-6 lg:px-12 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-6">
