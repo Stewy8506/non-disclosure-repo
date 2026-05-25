@@ -9,6 +9,8 @@ import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
 import NoiseOverlay from "@/components/ui/NoiseOverlay";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import HashCanonicalizer from "@/components/layout/HashCanonicalizer";
+import PresenceCursors from "@/components/ui/PresenceCursors";
+import CommandPalette from "@/components/ui/CommandPalette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +40,8 @@ export default function RootLayout({
           <NoiseOverlay />
           <DynamicBackground />
           <CustomCursor />
+          <PresenceCursors />
+          <CommandPalette />
           <MenuBar />
           {children}
           <Dock />

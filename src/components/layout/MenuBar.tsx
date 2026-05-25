@@ -137,7 +137,7 @@ export default function MenuBar() {
       if (playerRef.current && typeof playerRef.current.destroy === "function") {
         try {
           playerRef.current.destroy();
-        } catch (e) {}
+        } catch (e) { }
         playerRef.current = null;
       }
       const existingDiv = document.getElementById("youtube-lofi-player");
@@ -170,7 +170,7 @@ export default function MenuBar() {
         playerRef.current.setVolume(volume * 100);
         playerRef.current.playVideo();
         setIsPlaying(true);
-        toast("Playing: Yasumu - We Met 🎧", "success");
+        toast("Playing: Lofi Music 🎧", "success");
       }
     } catch (e) {
       console.error("Playback toggle failed", e);
@@ -260,8 +260,8 @@ export default function MenuBar() {
         const battery: any = await (navigator as any).getBattery();
         const levelPct = Math.round(battery.level * 100);
         const state = battery.charging ? "Charging ⚡" : "Discharging 🔋";
-        const remain = battery.chargingTime === Infinity || battery.dischargingTime === Infinity 
-          ? "Adapter Connected" 
+        const remain = battery.chargingTime === Infinity || battery.dischargingTime === Infinity
+          ? "Adapter Connected"
           : `${Math.round(battery.charging ? battery.chargingTime / 60 : battery.dischargingTime / 60)} mins remaining`;
         toast(`Battery Level: ${levelPct}% (${state} - ${remain})`, "info");
       } catch {
@@ -288,7 +288,7 @@ export default function MenuBar() {
   // Spotlight Action Trigger
   const triggerSearchAction = (action: string) => {
     setIsSpotlightOpen(false);
-    
+
     if (["about", "skills", "projects", "contact"].includes(action)) {
       scrollToSection(action);
       toast(`Scrolled to ${action.toUpperCase()} section`, "success");
@@ -348,10 +348,12 @@ export default function MenuBar() {
     File: [
       { label: "New Window", shortcut: "⌘N", action: () => { window.open(window.location.href, "_blank"); setActiveMenu(null); } },
       { divider: true, label: "" },
-      { label: "Download Resume", shortcut: "⌘D", action: () => { 
-        triggerSearchAction("resume");
-        setActiveMenu(null); 
-      } },
+      {
+        label: "Download Resume", shortcut: "⌘D", action: () => {
+          triggerSearchAction("resume");
+          setActiveMenu(null);
+        }
+      },
       { divider: true, label: "" },
       { label: "Print...", shortcut: "⌘P", action: () => { window.print(); setActiveMenu(null); } },
       { label: "Close Window", shortcut: "⌘W", action: () => { toast("Cannot close main window.", "info"); setActiveMenu(null); } },
@@ -367,14 +369,16 @@ export default function MenuBar() {
     ],
     View: [
       { label: "Reload", shortcut: "⌘R", action: () => { window.location.reload(); } },
-      { label: "Toggle Fullscreen", shortcut: "⌃⌘F", action: () => { 
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
-        } else {
-          document.exitFullscreen();
+      {
+        label: "Toggle Fullscreen", shortcut: "⌃⌘F", action: () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+          } else {
+            document.exitFullscreen();
+          }
+          setActiveMenu(null);
         }
-        setActiveMenu(null);
-      } },
+      },
       { divider: true, label: "" },
       { label: "View Source", shortcut: "⌥⌘U", action: () => { window.open("https://github.com/Stewy8506/portfolio-app", "_blank"); setActiveMenu(null); } },
     ],
@@ -404,7 +408,7 @@ export default function MenuBar() {
         {/* Desktop Left side */}
         <div className="hidden md:flex items-center gap-5">
           <div className="relative" id="tour-anvos">
-            <div 
+            <div
               onClick={() => handleMenuClick("anvos")}
               onMouseEnter={() => handleMenuHover("anvos")}
               className={`flex items-center gap-2 px-2 py-0.5 rounded cursor-pointer transition-colors ${activeMenu === "anvos" ? "bg-white/20" : "hover:bg-white/10"}`}
@@ -443,7 +447,7 @@ export default function MenuBar() {
           <div className="flex items-center gap-2 md:gap-3">
             {/* 🎵 Lofi Music Stream Control (Hover to expand volume slider) */}
             <div id="tour-lofi" className="group flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg hover:bg-white/5 transition-all duration-300">
-              <button 
+              <button
                 onClick={toggleMusic}
                 className="flex items-center justify-center p-0.5 rounded active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
                 title={isPlaying ? "Pause Lofi Stream" : "Stream Soothing Lofi"}
@@ -454,7 +458,7 @@ export default function MenuBar() {
                   <VolumeX className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-400 hover:text-white" />
                 )}
               </button>
-              
+
               {/* Slide-out Volume Slider */}
               <div className="w-0 opacity-0 pointer-events-none group-hover:w-16 group-hover:opacity-100 group-hover:pointer-events-auto flex items-center transition-all duration-300 ease-out overflow-hidden">
                 <input
@@ -478,7 +482,7 @@ export default function MenuBar() {
 
             {/* 💬 Global Chat Trigger */}
             <Magnetic strength={0.4}>
-              <button 
+              <button
                 id="tour-chat"
                 onClick={() => setIsChatOpen(true)}
                 className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
@@ -487,10 +491,10 @@ export default function MenuBar() {
                 <MessageSquare className="w-4 h-4 md:w-3.5 md:h-3.5 text-emerald-400" />
               </button>
             </Magnetic>
-            
+
             {/* 📶 WiFi Diagnostic */}
             <Magnetic strength={0.4}>
-              <button 
+              <button
                 onClick={handleWifiClick}
                 className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
                 title="WiFi Status"
@@ -498,10 +502,10 @@ export default function MenuBar() {
                 <Wifi className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
               </button>
             </Magnetic>
-            
+
             {/* 🔍 Search / Spotlight Trigger */}
             <Magnetic strength={0.4}>
-              <button 
+              <button
                 id="tour-spotlight"
                 onClick={() => setIsSpotlightOpen(true)}
                 className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
@@ -510,10 +514,10 @@ export default function MenuBar() {
                 <Search className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
               </button>
             </Magnetic>
-            
+
             {/* 🔋 Battery Diagnostic */}
             <Magnetic strength={0.4}>
-              <button 
+              <button
                 onClick={handleBatteryClick}
                 className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
                 title="Power & Battery Status"
@@ -522,9 +526,9 @@ export default function MenuBar() {
               </button>
             </Magnetic>
           </div>
-          
+
           {/* ⏰ Clock Trigger */}
-          <span 
+          <span
             className="hidden md:block text-white/90 cursor-pointer hover:text-white active:scale-95 transition-transform"
             onClick={handleClockClick}
             title="Toggle 24-hour clock / Show Date"
@@ -542,11 +546,11 @@ export default function MenuBar() {
         {isSpotlightOpen && (
           <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-4 pointer-events-none">
             {/* Background mask */}
-            <div 
+            <div
               onClick={() => setIsSpotlightOpen(false)}
               className="absolute inset-0 bg-black/30 backdrop-blur-[2px] pointer-events-auto"
             />
-            
+
             {/* Spotlight Card */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: -10 }}
@@ -602,45 +606,41 @@ export default function MenuBar() {
                             setSearchIndex(idx);
                           }
                         }}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
-                          isDisabledAdmin
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${isDisabledAdmin
                             ? isSelected
                               ? "bg-zinc-800/50 text-zinc-500 opacity-60 cursor-not-allowed"
                               : "opacity-40 cursor-not-allowed text-zinc-500"
-                            : isSelected 
-                              ? "bg-emerald-500 text-white" 
+                            : isSelected
+                              ? "bg-emerald-500 text-white"
                               : "hover:bg-white/5 text-zinc-300"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className={`p-2 rounded-lg ${
-                            isDisabledAdmin
+                          <div className={`p-2 rounded-lg ${isDisabledAdmin
                               ? isSelected ? "bg-white/10 text-zinc-500" : "bg-white/5 text-zinc-600"
                               : isSelected ? "bg-white/20 text-white" : "bg-white/5 text-zinc-400"
-                          } shrink-0`}>
+                            } shrink-0`}>
                             <IconComponent className="w-4 h-4" />
                           </div>
                           <div className="truncate">
                             <p className="text-xs font-semibold">{item.title}</p>
-                            <p className={`text-[10px] mt-0.5 truncate ${
-                              isDisabledAdmin
+                            <p className={`text-[10px] mt-0.5 truncate ${isDisabledAdmin
                                 ? "text-zinc-600"
                                 : isSelected ? "text-white/80" : "text-zinc-500"
-                            }`}>
+                              }`}>
                               {item.desc}
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 shrink-0">
                           {isDisabledAdmin ? (
                             <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-red-950/30 border border-red-900/30 text-red-400 font-sans">
                               <Lock className="w-2.5 h-2.5" /> Locked
                             </span>
                           ) : (
-                            <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${
-                              isSelected ? "bg-white/25 text-white" : "bg-white/5 text-zinc-500"
-                            }`}>
+                            <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${isSelected ? "bg-white/25 text-white" : "bg-white/5 text-zinc-500"
+                              }`}>
                               {item.category}
                             </span>
                           )}
