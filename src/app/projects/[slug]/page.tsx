@@ -13,6 +13,8 @@ import path from "path";
 
 const LOCAL_DATA_PATH = path.join(process.cwd(), "src/data/projects.json");
 
+export const revalidate = 0;
+
 async function getLocalProjects() {
   try {
     const data = await fs.readFile(LOCAL_DATA_PATH, "utf8");
