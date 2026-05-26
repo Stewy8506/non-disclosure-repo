@@ -8,15 +8,16 @@ import { signInAnonymously } from "firebase/auth";
 import { collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
 import { toast } from "./Toast";
 
-const ANIMALS = ["Panda", "Cheetah", "Beaver", "Otter", "Fox", "Koala", "Falcon", "Dolphin", "Badger", "Squirrel"];
+
 const ADJECTIVES = ["Swift", "Clever", "Jolly", "Mystic", "Zen", "Bold", "Bright", "Quiet", "Fierce", "Nifty"];
+const NOUNS = ["Panda", "Cheetah", "Beaver", "Otter", "Fox", "Koala", "Falcon", "Dolphin", "Badger", "Squirrel"];
 
 interface Message {
   id: string;
   text: string;
   senderName: string;
   senderId: string;
-  timestamp: any;
+  timestamp: unknown;
 }
 
 interface ChatWindowProps {
@@ -42,26 +43,27 @@ export default function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
   // Reset positions and size on reopen
   useEffect(() => {
     if (isOpen) {
-      setDimensions({ width: 360, height: 480 });
+      setTimeout(() => setDimensions({ width: 360, height: 480 }), 0);
     }
   }, [isOpen]);
 
   // Generate anonymous nickname
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    const initChat = () => {
       const stored = localStorage.getItem("chat_nickname");
       if (stored) {
         setNickname(stored);
         setTempName(stored);
       } else {
         const randAdj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-        const randAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
-        const generated = `Anonymous ${randAdj} ${randAnimal}`;
-        localStorage.setItem("chat_nickname", generated);
-        setNickname(generated);
-        setTempName(generated);
+        const randNoun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
+        const name = `${randAdj}${randNoun}${Math.floor(Math.random() * 100)}`;
+        setNickname(name);
+        setTempName(name);
+        localStorage.setItem("chat_nickname", name);
       }
-    }
+    };
+    setTimeout(initChat, 0);
   }, []);
 
   // Firebase anonymous auth
@@ -80,7 +82,7 @@ export default function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
   useEffect(() => {
     if (!isOpen || !isFirebaseConfigured || !db) return;
 
-    setLoading(true);
+    setTimeout(() => setLoading(true), 0);
     const q = query(
       collection(db, "chat_messages"),
       orderBy("timestamp", "asc"),
@@ -137,7 +139,7 @@ export default function ChatWindow({ isOpen, onClose }: ChatWindowProps) {
         senderId: auth.currentUser?.uid || "anon",
         timestamp: serverTimestamp(),
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error("Send Error:", err);
       toast("Failed to send message.", "error");
     }

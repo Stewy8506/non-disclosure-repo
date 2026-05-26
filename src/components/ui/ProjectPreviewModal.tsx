@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -13,12 +14,18 @@ interface ProjectPreviewModalProps {
   onClose: () => void;
 }
 
-export default function ProjectPreviewModal({ project, isOpen, onClose }: ProjectPreviewModalProps) {
-  const images = project && Array.isArray(project.images) && project.images.length > 0
-    ? project.images
-    : (project?.image ? [project.image] : ["/projects/default.jpg"]);
-  const liveUrl = project ? getProjectLiveUrl(project) : "";
+export default function ProjectPreviewModal({ project: incomingProject, isOpen, onClose }: ProjectPreviewModalProps) {
+  const [mounted, setMounted] = useState(false);
+  const [project, setProject] = useState<Project | null>(incomingProject);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (incomingProject) setProject(incomingProject);
+  }, [incomingProject]);
 
   // Prevent background scrolling when open
   useEffect(() => {
@@ -30,9 +37,14 @@ export default function ProjectPreviewModal({ project, isOpen, onClose }: Projec
       document.body.style.overflow = "unset";
     }
     return () => { document.body.style.overflow = "unset"; };
-  }, [isOpen, project]);
+  }, [isOpen]);
 
-  if (!project) return null;
+  if (!project || !mounted || typeof document === 'undefined') return null;
+
+  const images = Array.isArray(project.images) && project.images.length > 0
+    ? project.images
+    : (project?.image ? [project.image] : ["/projects/default.jpg"]);
+  const liveUrl = project ? getProjectLiveUrl(project) : "";
 
   // Stagger variants for content
   const containerVariants = {
@@ -48,7 +60,7 @@ export default function ProjectPreviewModal({ project, isOpen, onClose }: Projec
     visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center p-2 md:p-6 lg:p-8">
@@ -228,4 +240,6 @@ export default function ProjectPreviewModal({ project, isOpen, onClose }: Projec
       )}
     </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 }

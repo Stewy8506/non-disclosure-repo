@@ -42,7 +42,7 @@ export default function About() {
                 focus on creating seamless, uncompromised user experiences.
               </p>
               <p className="text-lg text-muted leading-relaxed">
-                When I'm not architecting large-scale web platforms, I dive deep into systems programming—always looking for the most elegant solution to the hardest problems.
+                When I&apos;m not architecting large-scale web platforms, I dive deep into systems programming—always looking for the most elegant solution to the hardest problems.
               </p>
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function About() {
                  <h4 className="text-xl font-bold text-white tracking-tight">Design Ethos</h4>
                </div>
                <p className="text-sm text-muted leading-relaxed">
-                 Minimalism isn't just a visual style—it's an engineering principle. I believe in writing code that is as clean and maintainable under the hood as the interfaces it powers.
+                 Minimalism isn&apos;t just a visual style—it&apos;s an engineering principle. I believe in writing code that is as clean and maintainable under the hood as the interfaces it powers.
                </p>
              </div>
           </FadeIn>

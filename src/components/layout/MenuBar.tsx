@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow, Volume2, VolumeX, Lock } from "lucide-react";
+import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow, Volume2, VolumeX, Lock, Terminal } from "lucide-react";
 import MenuDropdown, { MenuItem } from "../ui/MenuDropdown";
 import ToastContainer, { toast } from "../ui/Toast";
 import ChatWindow from "../ui/ChatWindow";
@@ -58,8 +58,10 @@ export default function MenuBar() {
   // Lofi Audio Stream state and ref (YouTube Player API backend)
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.5); // Default to 50%
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { playThocc } = useSoundEffect();
 
   // Initialize YouTube Iframe Player on mount (client-side only)
@@ -81,6 +83,7 @@ export default function MenuBar() {
     }
 
     // 2. Load YouTube Iframe API script if not present
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!(window as any).YT) {
       const tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
@@ -89,6 +92,7 @@ export default function MenuBar() {
     }
 
     // Define or override global callback
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).onYouTubeIframeAPIReady = () => {
       initPlayer();
     };
@@ -96,6 +100,7 @@ export default function MenuBar() {
     const initPlayer = () => {
       try {
         if (playerRef.current) return;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         playerRef.current = new (window as any).YT.Player("youtube-lofi-player", {
           height: "0",
           width: "0",
@@ -112,10 +117,13 @@ export default function MenuBar() {
             showinfo: 0,
           },
           events: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onReady: (event: any) => {
               event.target.setVolume(volume * 100);
             },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onStateChange: (event: any) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               if (event.data === (window as any).YT.PlayerState.ENDED) {
                 event.target.playVideo();
               }
@@ -128,6 +136,7 @@ export default function MenuBar() {
     };
 
     // If script is already loaded by other sessions, initialize immediately
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).YT && (window as any).YT.Player) {
       initPlayer();
     }
@@ -137,7 +146,7 @@ export default function MenuBar() {
       if (playerRef.current && typeof playerRef.current.destroy === "function") {
         try {
           playerRef.current.destroy();
-        } catch (e) { }
+        } catch { }
         playerRef.current = null;
       }
       const existingDiv = document.getElementById("youtube-lofi-player");
@@ -145,7 +154,8 @@ export default function MenuBar() {
         existingDiv.remove();
       }
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [volume]);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
@@ -223,9 +233,11 @@ export default function MenuBar() {
   // Reset indices and autofocus input when Spotlight is opened
   useEffect(() => {
     if (isSpotlightOpen) {
-      setSearchQuery("");
-      setSearchIndex(0);
-      setTimeout(() => spotlightInputRef.current?.focus(), 50);
+      setTimeout(() => {
+        setSearchQuery("");
+        setSearchIndex(0);
+        spotlightInputRef.current?.focus();
+      }, 50);
     }
   }, [isSpotlightOpen]);
 
@@ -257,12 +269,13 @@ export default function MenuBar() {
   const handleBatteryClick = async () => {
     if (typeof navigator !== "undefined" && "getBattery" in navigator) {
       try {
-        const battery: any = await (navigator as any).getBattery();
-        const levelPct = Math.round(battery.level * 100);
-        const state = battery.charging ? "Charging ⚡" : "Discharging 🔋";
-        const remain = battery.chargingTime === Infinity || battery.dischargingTime === Infinity
+        const battery: unknown = await (navigator as unknown as { getBattery: () => Promise<unknown> }).getBattery();
+        const navBattery = battery as { level: number; charging: boolean; chargingTime: number; dischargingTime: number };
+        const levelPct = Math.round(navBattery.level * 100);
+        const state = navBattery.charging ? "Charging ⚡" : "Discharging 🔋";
+        const remain = navBattery.chargingTime === Infinity || navBattery.dischargingTime === Infinity
           ? "Adapter Connected"
-          : `${Math.round(battery.charging ? battery.chargingTime / 60 : battery.dischargingTime / 60)} mins remaining`;
+          : `${Math.round(navBattery.charging ? navBattery.chargingTime / 60 : navBattery.dischargingTime / 60)} mins remaining`;
         toast(`Battery Level: ${levelPct}% (${state} - ${remain})`, "info");
       } catch {
         toast("Battery Level: 100% (AC Power Line Connected)", "info");
@@ -512,6 +525,17 @@ export default function MenuBar() {
                 title="Spotlight Search (Cmd+K)"
               >
                 <Search className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
+              </button>
+            </Magnetic>
+
+            {/* 💻 Terminal Trigger */}
+            <Magnetic strength={0.4}>
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('toggleTerminal'))}
+                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
+                title="Open Terminal (Cmd+Q)"
+              >
+                <Terminal className="w-4 h-4 md:w-3.5 md:h-3.5 text-emerald-400 hover:text-white" />
               </button>
             </Magnetic>
 

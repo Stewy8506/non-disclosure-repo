@@ -26,7 +26,7 @@ export function RightClickHint({ dismissed }: { dismissed: boolean }) {
   // Dismiss permanently when user opens the radial menu
   useEffect(() => {
     if (dismissed && visible) {
-      setVisible(false);
+      setTimeout(() => setVisible(false), 0);
       localStorage.setItem(STORAGE_KEY, '1');
     }
   }, [dismissed, visible]);

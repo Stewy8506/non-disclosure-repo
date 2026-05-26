@@ -27,7 +27,7 @@ export async function verifySessionToken(token: string | undefined | null): Prom
   try {
     const expectedToken = await createSessionToken();
     return token === expectedToken;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

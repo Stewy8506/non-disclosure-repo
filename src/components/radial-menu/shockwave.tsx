@@ -35,11 +35,9 @@ function cameraShake(intensity: number) {
 export function Shockwave({ data }: { data: ShockwaveData }) {
   const int = data.intensity;
   const s = 0.4 + int * 0.8; // size scale: 0.4x–1.2x
-
   useEffect(() => {
     cameraShake(int);
-  }, []);
-
+  }, [int]);
   return (
     <div
       className="fixed pointer-events-none z-[9998]"

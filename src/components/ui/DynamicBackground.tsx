@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
@@ -19,14 +19,14 @@ function ParticleField() {
   const mouse = useRef({ x: 0, y: 0 });
 
   // Generate 7000 particles in a wide spatial box
-  const originalPositions = useMemo(() => {
+  const [originalPositions] = useState(() => {
     const count = 7000;
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count * 3; i++) {
       pos[i] = (Math.random() - 0.5) * 40;
     }
     return pos;
-  }, []);
+  });
 
   const particles = useMemo(() => new Float32Array(originalPositions), [originalPositions]);
 

@@ -10,7 +10,8 @@ import NoiseOverlay from "@/components/ui/NoiseOverlay";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import HashCanonicalizer from "@/components/layout/HashCanonicalizer";
 import PresenceCursors from "@/components/ui/PresenceCursors";
-import CommandPalette from "@/components/ui/CommandPalette";
+import TerminalWindow from "@/components/ui/TerminalWindow";
+import KonamiCode from "@/components/ui/KonamiCode";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,7 +42,8 @@ export default function RootLayout({
           <DynamicBackground />
           <CustomCursor />
           <PresenceCursors />
-          <CommandPalette />
+          <TerminalWindow />
+          <KonamiCode />
           <MenuBar />
           {children}
           <Dock />

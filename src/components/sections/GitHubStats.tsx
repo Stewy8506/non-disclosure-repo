@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import FadeIn from "../ui/FadeIn";
 
@@ -22,9 +22,9 @@ export default function GitHubStats() {
       .catch(() => {});
   }, []);
 
-  const squares = useMemo(() => {
+  const [squares] = useState(() => {
     return Array.from({ length: 28 }, () => Math.floor(Math.random() * 4));
-  }, []);
+  });
 
   if (!data) return null;
 

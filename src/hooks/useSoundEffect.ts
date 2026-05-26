@@ -6,12 +6,12 @@ export const useSoundEffect = () => {
 
   useEffect(() => {
     // Pre-warm the audio context on mount (some browsers might keep it suspended until interaction)
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (AudioContextClass && !audioCtxRef.current) {
       try {
         audioCtxRef.current = new AudioContextClass();
-      } catch (e) {
-        console.error("Audio context creation failed", e);
+      } catch {
+        console.error("Audio context creation failed");
       }
     }
   }, []);
@@ -20,7 +20,7 @@ export const useSoundEffect = () => {
     try {
       let audioCtx = audioCtxRef.current;
       if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         if (!AudioContextClass) return;
         audioCtx = new AudioContextClass();
         audioCtxRef.current = audioCtx;
@@ -64,7 +64,7 @@ export const useSoundEffect = () => {
       tapOsc.start(t);
       popOsc.stop(t + 0.05);
       tapOsc.stop(t + 0.02);
-    } catch (e) {
+    } catch {
       // Ignore audio errors gracefully
     }
   }, []);
@@ -73,7 +73,7 @@ export const useSoundEffect = () => {
     try {
       let audioCtx = audioCtxRef.current;
       if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
         if (!AudioContextClass) return;
         audioCtx = new AudioContextClass();
         audioCtxRef.current = audioCtx;
@@ -130,7 +130,7 @@ export const useSoundEffect = () => {
       thumpOsc.stop(t + 0.07);
       popOsc.stop(t + 0.1);
       snapOsc.stop(t + 0.02);
-    } catch (e) {
+    } catch {
       // Ignore audio errors gracefully
     }
   }, []);

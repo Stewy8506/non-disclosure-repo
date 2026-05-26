@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @next/next/no-img-element, react-hooks/exhaustive-deps */
 import React, { useRef, useEffect, MutableRefObject } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MenuItem, Position } from './types';

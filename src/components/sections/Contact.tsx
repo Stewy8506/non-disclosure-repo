@@ -57,9 +57,9 @@ const Contact = () => {
       setName("");
       setEmail("");
       setMessage("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Contact Form Error:", err);
-      toast(err.message || "Failed to send message.", "error");
+      toast(err instanceof Error ? err.message : "Failed to send message.", "error");
     } finally {
       setLoading(false);
     }
