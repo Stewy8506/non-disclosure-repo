@@ -29,6 +29,13 @@ export const metadata: Metadata = {
   description: "Premium portfolio of a full stack developer specializing in React Native, Flutter, and Next.js",
 };
 
+export const viewport: import("next").Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
