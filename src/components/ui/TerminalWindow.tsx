@@ -220,7 +220,7 @@ export default function TerminalWindow() {
             <div
               ref={scrollRef}
               className="flex-1 p-4 overflow-y-auto text-sm text-emerald-500/90 leading-relaxed custom-scrollbar"
-              style={{ textShadow: "0 0 5px rgba(16, 185, 129, 0.4)" }}
+              style={{ textShadow: "0 0 5px rgba(6, 182, 212, 0.4)" }}
             >
               {history.map((entry) => (
                 <div key={entry.id} className="mb-1">

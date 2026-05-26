@@ -4,6 +4,9 @@ export type Project = {
   description?: string;
   overview?: string;
   problem?: string;
+  solution?: string;
+  approach?: string;
+  learnings?: string;
   category?: string;
   date?: string;
   tech?: string[];

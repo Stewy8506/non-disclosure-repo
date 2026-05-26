@@ -37,43 +37,43 @@ export default function MermaidDiagram({ code, id }: MermaidDiagramProps) {
           themeVariables: {
             // Base
             background: "transparent",
-            mainBkg: "rgba(16, 185, 129, 0.06)",
-            // Primary nodes
-            primaryColor: "rgba(16, 185, 129, 0.08)",
-            primaryBorderColor: "rgba(16, 185, 129, 0.4)",
+            mainBkg: "rgba(6, 182, 212, 0.06)",
+            // Primary nodes (Cyan / Diamond Blue)
+            primaryColor: "rgba(6, 182, 212, 0.08)",
+            primaryBorderColor: "rgba(6, 182, 212, 0.4)",
             primaryTextColor: "#f4f4f5",
-            // Secondary nodes
-            secondaryColor: "rgba(6, 182, 212, 0.06)",
-            secondaryBorderColor: "rgba(6, 182, 212, 0.35)",
+            // Secondary nodes (Sky Blue)
+            secondaryColor: "rgba(14, 165, 233, 0.06)",
+            secondaryBorderColor: "rgba(14, 165, 233, 0.35)",
             secondaryTextColor: "#e4e4e7",
             // Tertiary nodes
             tertiaryColor: "rgba(139, 92, 246, 0.06)",
             tertiaryBorderColor: "rgba(139, 92, 246, 0.35)",
             tertiaryTextColor: "#e4e4e7",
             // Edges
-            lineColor: "rgba(52, 211, 153, 0.5)",
+            lineColor: "rgba(34, 211, 238, 0.5)",
             edgeLabelBackground: "rgba(9, 9, 11, 0.9)",
             // Text
             textColor: "#d4d4d8",
             labelTextColor: "#e4e4e7",
             // ER Diagram
-            attributeBackgroundColorEven: "rgba(16, 185, 129, 0.04)",
-            attributeBackgroundColorOdd: "rgba(6, 182, 212, 0.04)",
+            attributeBackgroundColorEven: "rgba(6, 182, 212, 0.04)",
+            attributeBackgroundColorOdd: "rgba(14, 165, 233, 0.04)",
             // Sequence diagram
-            actorBorder: "rgba(16, 185, 129, 0.4)",
-            actorBkg: "rgba(16, 185, 129, 0.06)",
+            actorBorder: "rgba(6, 182, 212, 0.4)",
+            actorBkg: "rgba(6, 182, 212, 0.06)",
             actorTextColor: "#f4f4f5",
-            actorLineColor: "rgba(52, 211, 153, 0.3)",
-            signalColor: "#34d399",
+            actorLineColor: "rgba(34, 211, 238, 0.3)",
+            signalColor: "#22d3ee",
             signalTextColor: "#f4f4f5",
             labelBoxBkgColor: "rgba(9, 9, 11, 0.9)",
-            labelBoxBorderColor: "rgba(16, 185, 129, 0.3)",
+            labelBoxBorderColor: "rgba(6, 182, 212, 0.3)",
             loopTextColor: "#a1a1aa",
-            noteBorderColor: "rgba(6, 182, 212, 0.3)",
-            noteBkgColor: "rgba(6, 182, 212, 0.06)",
+            noteBorderColor: "rgba(14, 165, 233, 0.3)",
+            noteBkgColor: "rgba(14, 165, 233, 0.06)",
             noteTextColor: "#e4e4e7",
-            activationBorderColor: "rgba(52, 211, 153, 0.5)",
-            activationBkgColor: "rgba(16, 185, 129, 0.08)",
+            activationBorderColor: "rgba(34, 211, 238, 0.5)",
+            activationBkgColor: "rgba(6, 182, 212, 0.08)",
           },
         });
 

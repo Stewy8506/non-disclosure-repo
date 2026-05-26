@@ -28,7 +28,7 @@ function ModalPhoneFrame({ src, title, idx }: { src: string; title: string; idx:
           background: "linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 40%, #0f0f12 100%)",
           padding: "3px",
           boxShadow:
-            "0 0 0 1px rgba(255,255,255,0.08), 0 40px 100px -16px rgba(0,0,0,0.95), 0 0 60px -20px rgba(16,185,129,0.10), inset 0 1px 0 rgba(255,255,255,0.12)",
+            "0 0 0 1px rgba(255,255,255,0.08), 0 40px 100px -16px rgba(0,0,0,0.95), 0 0 60px -20px rgba(6,182,212,0.10), inset 0 1px 0 rgba(255,255,255,0.12)",
         }}
       >
         {/* Side buttons */}
@@ -248,17 +248,6 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
                       </h4>
                       <p className="text-base text-zinc-300 leading-loose">
                         {project.overview}
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {project.problem && (
-                    <motion.div variants={itemVariants}>
-                      <h4 className="text-sm font-semibold tracking-widest text-zinc-500 uppercase mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-rose-500" /> The Problem
-                      </h4>
-                      <p className="text-base text-zinc-300 leading-loose">
-                        {project.problem}
                       </p>
                     </motion.div>
                   )}

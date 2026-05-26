@@ -21,7 +21,7 @@ export default function SkillGraph() {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", damping: 15 }}
-        className="absolute z-10 w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.2)]"
+        className="absolute z-10 w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 backdrop-blur-md flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.2)]"
       >
         <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
           <span className="text-emerald-400 font-bold tracking-tight">CORE</span>

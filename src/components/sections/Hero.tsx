@@ -62,7 +62,7 @@ export default function Hero() {
       <div className="relative z-10 text-center px-6 max-w-4xl">
         <FadeIn delay={0.15}>
           <div className="flex justify-center mb-8">
-            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/[0.1] border border-emerald-500/[0.2] backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/[0.1] border border-emerald-500/[0.2] backdrop-blur-md shadow-[0_0_20px_rgba(6,182,212,0.1)]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>

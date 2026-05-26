@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
@@ -10,9 +10,92 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+const AUTO_INTERVAL = 4000; // ms between slides
+
 interface ProjectCarouselProps {
   images: string[];
   imageType?: "phone" | "desktop" | "auto";
+}
+
+// ─── Shared: Nav Arrow Button ─────────────────────────────────────────────────
+function NavButton({
+  direction,
+  onClick,
+  visible = true,
+  small = false,
+}: {
+  direction: "prev" | "next";
+  onClick: () => void;
+  visible?: boolean;
+  small?: boolean;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.93 }}
+      className={cn(
+        "relative flex items-center justify-center rounded-full",
+        "bg-white/8 backdrop-blur-xl border border-white/12",
+        "text-white/70 hover:text-white",
+        "shadow-[0_4px_24px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]",
+        "hover:bg-white/14 hover:border-white/20",
+        "transition-colors duration-200",
+        small ? "p-2" : "p-3",
+        !visible && "opacity-0 pointer-events-none"
+      )}
+      aria-label={direction === "prev" ? "Previous slide" : "Next slide"}
+    >
+      {direction === "prev" ? (
+        <ChevronLeft className={small ? "w-4 h-4" : "w-5 h-5"} strokeWidth={2.2} />
+      ) : (
+        <ChevronRight className={small ? "w-4 h-4" : "w-5 h-5"} strokeWidth={2.2} />
+      )}
+    </motion.button>
+  );
+}
+
+// ─── Shared: Progress Dot Indicators ─────────────────────────────────────────
+function ProgressDots({
+  count,
+  current,
+  progress,
+  onSelect,
+}: {
+  count: number;
+  current: number;
+  progress: number; // 0–1, progress of the current slide's timer
+  onSelect: (idx: number) => void;
+}) {
+  if (count <= 1) return null;
+  return (
+    <div className="flex items-center gap-2">
+      {Array.from({ length: count }).map((_, idx) => {
+        const isActive = idx === current;
+        return (
+          <button
+            key={idx}
+            onClick={() => onSelect(idx)}
+            aria-label={`Go to slide ${idx + 1}`}
+            className={cn(
+              "relative h-1.5 rounded-full overflow-hidden transition-all duration-400",
+              isActive ? "w-8 bg-white/15" : "w-1.5 bg-white/20 hover:bg-white/40"
+            )}
+          >
+            {isActive && (
+              <motion.div
+                className="absolute inset-y-0 left-0 rounded-full bg-emerald-400"
+                initial={{ width: "0%" }}
+                animate={{ width: `${progress * 100}%` }}
+                transition={{ duration: 0, ease: "linear" }}
+                style={{ width: `${progress * 100}%` }}
+              />
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
 // ─── Phone Mockup Frame ───────────────────────────────────────────────────────
@@ -20,21 +103,21 @@ function PhoneFrame({ src, alt, index }: { src: string; alt: string; index: numb
   return (
     <motion.div
       key={index}
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       className="relative flex-shrink-0"
       style={{ width: "min(280px, 72vw)" }}
     >
       {/* Phone outer shell */}
       <div
-        className="relative rounded-[2.5rem] overflow-hidden select-none"
+        className="relative rounded-[2rem] overflow-hidden select-none"
         style={{
           background: "linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 40%, #0f0f12 100%)",
           padding: "3px",
           boxShadow:
-            "0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px -12px rgba(0,0,0,0.9), 0 0 60px -20px rgba(16,185,129,0.08), inset 0 1px 0 rgba(255,255,255,0.12)",
+            "0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px -12px rgba(0,0,0,0.9), 0 0 60px -20px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.12)",
         }}
       >
         {/* Side button – volume up */}
@@ -55,16 +138,16 @@ function PhoneFrame({ src, alt, index }: { src: string; alt: string; index: numb
 
         {/*
           CORNER RADIUS:
-          • Outer shell  → change "rounded-[3rem]"   on the outer <div> above  (↑ line 32)
-          • Inner screen → change "rounded-[2.75rem]" on the inner <div> below
+          • Outer shell  → change "rounded-[2.5rem]"  on the outer <div> above
+          • Inner screen → change "rounded-[2.25rem]" on the inner <div> below
           Tip: keep inner ~0.25rem smaller than outer so the bezel gap is visible.
         */}
         {/* Inner bezel */}
         <div
-          className="relative rounded-[2.25rem] overflow-hidden"
+          className="relative rounded-[1.9rem] overflow-hidden"
           style={{ background: "#000" }}
         >
-          {/* Screen content — fills full height, no notch */}
+          {/* Screen content */}
           <div className="relative" style={{ aspectRatio: "9/19.5" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -109,12 +192,65 @@ function PhoneFrame({ src, alt, index }: { src: string; alt: string; index: numb
 // ─── Desktop / Default Mode ───────────────────────────────────────────────────
 function DesktopCarousel({ images }: { images: string[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const startTimeRef = useRef<number>(Date.now());
+  const rafRef = useRef<number | null>(null);
 
-  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % images.length);
-  const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  const goTo = useCallback(
+    (idx: number) => {
+      setCurrentIndex(idx);
+      setProgress(0);
+      startTimeRef.current = Date.now();
+    },
+    []
+  );
+
+  const goNext = useCallback(
+    () => goTo((currentIndex + 1) % images.length),
+    [currentIndex, images.length, goTo]
+  );
+
+  const goPrev = useCallback(
+    () => goTo((currentIndex - 1 + images.length) % images.length),
+    [currentIndex, images.length, goTo]
+  );
+
+  // Auto-advance via requestAnimationFrame for smooth progress
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    const tick = () => {
+      if (!paused) {
+        const elapsed = Date.now() - startTimeRef.current;
+        const p = Math.min(elapsed / AUTO_INTERVAL, 1);
+        setProgress(p);
+        if (p >= 1) {
+          setCurrentIndex((prev) => (prev + 1) % images.length);
+          setProgress(0);
+          startTimeRef.current = Date.now();
+        }
+      } else {
+        // Keep updating startTime so progress doesn't jump on resume
+        startTimeRef.current = Date.now() - progress * AUTO_INTERVAL;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [images.length, paused, progress]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl group border border-white/10 bg-black/50">
+    <div
+      className="relative w-full overflow-hidden rounded-2xl group border border-white/10 bg-black/50"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+    >
       <div className="w-full aspect-[16/9] md:aspect-[21/9] flex items-center justify-center relative">
         <motion.div
           className="flex w-full h-full"
@@ -137,34 +273,22 @@ function DesktopCarousel({ images }: { images: string[] }) {
 
       {images.length > 1 && (
         <>
-          <div className="absolute inset-y-0 left-0 flex items-center px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={handlePrev}
-              className="p-2 rounded-full bg-black/50 text-white backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
+          {/* Prev button */}
+          <div className="absolute inset-y-0 left-0 flex items-center px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <NavButton direction="prev" onClick={goPrev} />
           </div>
-          <div className="absolute inset-y-0 right-0 flex items-center px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={handleNext}
-              className="p-2 rounded-full bg-black/50 text-white backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
+          {/* Next button */}
+          <div className="absolute inset-y-0 right-0 flex items-center px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
+            <NavButton direction="next" onClick={goNext} />
           </div>
-          <div className="absolute bottom-4 inset-x-0 flex justify-center gap-2 z-10">
-            {images.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  idx === currentIndex ? "w-6 bg-emerald-400" : "w-2 bg-white/30 hover:bg-white/50"
-                )}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
+          {/* Bottom indicators */}
+          <div className="absolute bottom-4 inset-x-0 flex justify-center z-10">
+            <ProgressDots
+              count={images.length}
+              current={currentIndex}
+              progress={progress}
+              onSelect={goTo}
+            />
           </div>
         </>
       )}
@@ -175,33 +299,110 @@ function DesktopCarousel({ images }: { images: string[] }) {
 // ─── Phone Gallery Mode ───────────────────────────────────────────────────────
 function PhoneCarousel({ images }: { images: string[] }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const startTimeRef = useRef<number>(Date.now());
+  const rafRef = useRef<number | null>(null);
 
-  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % images.length);
-  const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  // Swipe gesture tracking
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setPaused(true);
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = e.targetTouches[0].clientX; // Initialize end with start
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    setPaused(false);
+    if (!touchStartX.current || !touchEndX.current) return;
+
+    const diff = touchStartX.current - touchEndX.current;
+    const SWIPE_THRESHOLD = 50; // px required to trigger a swipe
+
+    if (diff > SWIPE_THRESHOLD) {
+      goNext();
+    } else if (diff < -SWIPE_THRESHOLD) {
+      goPrev();
+    }
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
+  const goTo = useCallback(
+    (idx: number) => {
+      setCurrentIndex(idx);
+      setProgress(0);
+      startTimeRef.current = Date.now();
+    },
+    []
+  );
+
+  const goNext = useCallback(
+    () => goTo((currentIndex + 1) % images.length),
+    [currentIndex, images.length, goTo]
+  );
+
+  const goPrev = useCallback(
+    () => goTo((currentIndex - 1 + images.length) % images.length),
+    [currentIndex, images.length, goTo]
+  );
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+
+    const tick = () => {
+      if (!paused) {
+        const elapsed = Date.now() - startTimeRef.current;
+        const p = Math.min(elapsed / AUTO_INTERVAL, 1);
+        setProgress(p);
+        if (p >= 1) {
+          setCurrentIndex((prev) => (prev + 1) % images.length);
+          setProgress(0);
+          startTimeRef.current = Date.now();
+        }
+      } else {
+        startTimeRef.current = Date.now() - progress * AUTO_INTERVAL;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [images.length, paused, progress]);
 
   return (
-    <div className="w-full flex flex-col items-center gap-8">
+    <div
+      className="w-full flex flex-col items-center gap-6 group"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Ambient glow behind phone */}
       <div className="relative flex items-center justify-center w-full">
-        {/* Decorative ambient gradient */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 60% 80% at 50% 50%, rgba(16,185,129,0.06) 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 80% at 50% 50%, rgba(6,182,212,0.06) 0%, transparent 70%)",
           }}
         />
 
-        {/* Single-phone display with nav */}
-        <div className="relative flex items-center gap-6 md:gap-10 py-8">
-          {images.length > 1 && (
-            <button
-              onClick={handlePrev}
-              className="p-2.5 rounded-full bg-white/5 text-zinc-400 hover:text-white border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md flex-shrink-0"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
+        {/* Phone + side nav buttons */}
+        <div className="relative flex items-center gap-5 md:gap-8 py-8">
+          <div className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300">
+            <NavButton direction="prev" onClick={goPrev} visible={images.length > 1} small />
+          </div>
 
           <AnimatePresence mode="wait">
             <PhoneFrame
@@ -212,39 +413,23 @@ function PhoneCarousel({ images }: { images: string[] }) {
             />
           </AnimatePresence>
 
-          {images.length > 1 && (
-            <button
-              onClick={handleNext}
-              className="p-2.5 rounded-full bg-white/5 text-zinc-400 hover:text-white border border-white/10 hover:bg-white/10 transition-all backdrop-blur-md flex-shrink-0"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-          )}
+          <div className="opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300">
+            <NavButton direction="next" onClick={goNext} visible={images.length > 1} small />
+          </div>
         </div>
       </div>
 
-      {/* Dot indicators */}
-      {images.length > 1 && (
-        <div className="flex items-center gap-2">
-          {images.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                idx === currentIndex
-                  ? "w-6 bg-emerald-400"
-                  : "w-2 bg-white/20 hover:bg-white/40"
-              )}
-              aria-label={`Go to screenshot ${idx + 1}`}
-            />
-          ))}
-        </div>
-      )}
+      {/* Progress dots */}
+      <ProgressDots
+        count={images.length}
+        current={currentIndex}
+        progress={progress}
+        onSelect={goTo}
+      />
 
-      {/* Screenshot counter label */}
+      {/* Slide counter */}
       {images.length > 1 && (
-        <p className="text-xs text-zinc-600 tracking-widest font-medium uppercase">
+        <p className="text-[10px] text-zinc-600 tracking-[0.18em] font-medium uppercase -mt-2">
           {currentIndex + 1} / {images.length}
         </p>
       )}

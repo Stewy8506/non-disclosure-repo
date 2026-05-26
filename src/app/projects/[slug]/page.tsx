@@ -101,7 +101,7 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
         </FadeIn>
 
         {/* Desktop two-column / Mobile single-column stacked layout */}
-        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 lg:items-start mb-20">
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 pb-20">
           {/* Left Column: Title, description, CTAs, mobile-carousel, overview, metadata, and tech stack */}
           <div className="flex-1 min-w-0">
             <FadeIn>
@@ -160,9 +160,33 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
 
               {/* Problem callout — only if data exists */}
               {project.problem && (
-                <div className="mb-8 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] px-6 py-5">
+                <div className="mb-6 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] px-6 py-5">
                   <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">The Problem</p>
                   <p className="text-zinc-300 leading-relaxed text-sm">{project.problem}</p>
+                </div>
+              )}
+
+              {/* Solution callout — only if data exists */}
+              {project.solution && (
+                <div className="mb-6 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] px-6 py-5">
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-2">The Solution</p>
+                  <p className="text-zinc-300 leading-relaxed text-sm">{project.solution}</p>
+                </div>
+              )}
+
+              {/* The Approach callout — only if data exists */}
+              {project.approach && (
+                <div className="mb-6 rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.04] px-6 py-5">
+                  <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-2">The Approach</p>
+                  <p className="text-zinc-300 leading-relaxed text-sm">{project.approach}</p>
+                </div>
+              )}
+
+              {/* Learnings callout — only if data exists */}
+              {project.learnings && (
+                <div className="mb-8 rounded-2xl border border-amber-500/15 bg-amber-500/[0.04] px-6 py-5">
+                  <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2">Key Learnings</p>
+                  <p className="text-zinc-300 leading-relaxed text-sm">{project.learnings}</p>
                 </div>
               )}
 
@@ -213,13 +237,15 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
           </div>
 
           {/* Desktop-only Phone Carousel (sticky column on the right side on desktop) */}
-          <div className="hidden lg:block lg:w-[320px] xl:w-[340px] flex-shrink-0 lg:sticky lg:top-32">
-            <FadeIn delay={0.15}>
-              <ProjectCarousel
-                images={images}
-                imageType={resolvedImageType}
-              />
-            </FadeIn>
+          <div className="hidden lg:block lg:w-[320px] xl:w-[340px] flex-shrink-0">
+            <div className="lg:sticky lg:top-[188px]">
+              <FadeIn delay={0.15}>
+                <ProjectCarousel
+                  images={images}
+                  imageType={resolvedImageType}
+                />
+              </FadeIn>
+            </div>
           </div>
         </div>
 
@@ -397,9 +423,33 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
 
         {/* Problem callout — only if data exists */}
         {project.problem && (
-          <div className="mb-8 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] px-6 py-5">
+          <div className="mb-6 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] px-6 py-5">
             <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">The Problem</p>
             <p className="text-zinc-300 leading-relaxed text-sm">{project.problem}</p>
+          </div>
+        )}
+
+        {/* Solution callout — only if data exists */}
+        {project.solution && (
+          <div className="mb-6 rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.04] px-6 py-5">
+            <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-2">The Solution</p>
+            <p className="text-zinc-300 leading-relaxed text-sm">{project.solution}</p>
+          </div>
+        )}
+
+        {/* The Approach callout — only if data exists */}
+        {project.approach && (
+          <div className="mb-6 rounded-2xl border border-cyan-500/15 bg-cyan-500/[0.04] px-6 py-5">
+            <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-2">The Approach</p>
+            <p className="text-zinc-300 leading-relaxed text-sm">{project.approach}</p>
+          </div>
+        )}
+
+        {/* Learnings callout — only if data exists */}
+        {project.learnings && (
+          <div className="mb-8 rounded-2xl border border-amber-500/15 bg-amber-500/[0.04] px-6 py-5">
+            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2">Key Learnings</p>
+            <p className="text-zinc-300 leading-relaxed text-sm">{project.learnings}</p>
           </div>
         )}
 

@@ -95,7 +95,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
                   scale: [0.95, 1.05, 0.95],
                 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="w-20 h-20 p-5 rounded-xl border border-emerald-500/40 flex items-center justify-center bg-emerald-500/[0.02] shadow-[0_0_30px_rgba(16,185,129,0.15)] relative overflow-hidden backdrop-blur-md"
+                className="w-20 h-20 p-5 rounded-xl border border-emerald-500/40 flex items-center justify-center bg-emerald-500/[0.02] shadow-[0_0_30px_rgba(6,182,212,0.15)] relative overflow-hidden backdrop-blur-md"
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-emerald-500/10 to-transparent" />
                 <Terminal className="w-10 h-10 text-emerald-400 relative z-10" strokeWidth={1.5} />
@@ -126,7 +126,7 @@ export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
               </div>
               <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden relative border border-white/[0.02]">
                 <motion.div
-                  className="absolute top-0 bottom-0 left-0 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                  className="absolute top-0 bottom-0 left-0 bg-emerald-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                   style={{ width: `${progress}%` }}
                   layoutId="progressBar"
                 />
