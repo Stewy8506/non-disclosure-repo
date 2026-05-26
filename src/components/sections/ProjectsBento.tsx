@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface ProjectsBentoProps {
-  projects: Record<string, unknown>[];
-  onSelect: (project: Record<string, unknown>) => void;
+  projects: any[];
+  onSelect: (project: any) => void;
 }
 
 export default function ProjectsBento({ projects, onSelect }: ProjectsBentoProps) {

@@ -13,7 +13,7 @@ const MarqueeRow = ({
   speed = 40, 
   direction = "left" 
 }: { 
-  items: Record<string, unknown>[], 
+  items: any[], 
   speed?: number, 
   direction?: "left" | "right" 
 }) => {
@@ -57,7 +57,7 @@ const MarqueeRow = ({
 }
 
 export default function Skills() {
-  const [skills, setSkills] = useState<Record<string, unknown>[]>([]);
+  const [skills, setSkills] = useState<any[]>([]);
   const [showAll, setShowAll] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
 
