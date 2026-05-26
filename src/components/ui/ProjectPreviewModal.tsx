@@ -22,7 +22,7 @@ function ModalPhoneFrame({ src, title, idx }: { src: string; title: string; idx:
       className="flex justify-center py-4"
     >
       <div
-        className="relative rounded-[3rem] overflow-hidden select-none"
+        className="relative rounded-[2rem] overflow-hidden select-none"
         style={{
           width: "min(260px, 80vw)",
           background: "linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 40%, #0f0f12 100%)",
@@ -41,14 +41,14 @@ function ModalPhoneFrame({ src, title, idx }: { src: string; title: string; idx:
           • Inner screen → change "rounded-[2.75rem]" on the inner <div> below
         */}
         {/* Inner screen — no notch, clean full-bleed */}
-        <div className="relative rounded-[2.75rem] overflow-hidden" style={{ background: "#000" }}>
+        <div className="relative rounded-[1.9rem] overflow-hidden" style={{ background: "#000" }}>
           <div className="relative" style={{ aspectRatio: "9/19.5" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={src} alt={`${title} screenshot ${idx + 1}`} className="w-full h-full object-cover object-top" draggable={false} />
-            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%, rgba(0,0,0,0.15) 100%)" }} />
+            <div className="absolute inset-0 pointer-events-none rounded-[1.9rem]" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%, rgba(0,0,0,0.15) 100%)" }} />
           </div>
         </div>
-        <div className="absolute inset-0 rounded-[3rem] pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%)" }} />
+        <div className="absolute inset-0 rounded-[2rem] pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%)" }} />
       </div>
     </motion.div>
   );
@@ -201,8 +201,8 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
             </button>
 
             {/* Left Column: Sticky Information */}
-            <div className="w-full lg:w-[45%] xl:w-[40%] h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950/50 relative z-10 shrink-0">
-              <motion.div 
+            <div className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950/50 relative z-10 shrink-0">
+              <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -221,8 +221,8 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
                 </motion.div>
 
                 {project.isCurrentlyWorkingOn && (
-                  <motion.div 
-                    variants={itemVariants} 
+                  <motion.div
+                    variants={itemVariants}
                     className="mb-8 px-5 py-3.5 rounded-xl border border-amber-500/10 bg-amber-500/[0.02] text-xs text-amber-400/70 leading-relaxed flex items-start gap-3"
                   >
                     <span className="flex h-1.5 w-1.5 rounded-full bg-amber-400/80 mt-1.5 flex-shrink-0" />
@@ -310,9 +310,9 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
             </div>
 
             {/* Right Column: Scrollable Image Feed */}
-            <div 
+            <div
               ref={scrollRef}
-              className="flex-1 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-zinc-950/20 relative"
+              className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-zinc-950/20 relative"
             >
               <div className="p-4 md:p-8 lg:p-12 space-y-8 md:space-y-12 lg:space-y-16">
                 {resolvedImageType === "phone" ? (

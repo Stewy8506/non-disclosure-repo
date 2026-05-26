@@ -38,5 +38,11 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+
+    // ⚙️ Configuration Rules (e.g. employment status settings)
+    match /config/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

@@ -136,7 +136,7 @@ function CinematicCard({
               {resolvedImageType === "phone" ? (
                 /* Pure CSS Phone Mockup Frame for Mobile Apps in Cinematic view */
                 <div
-                  className="relative rounded-[2.5rem] overflow-hidden select-none pointer-events-none shadow-[0_30px_60px_rgba(0,0,0,0.8)]"
+                  className="relative rounded-[2rem] overflow-hidden select-none pointer-events-none shadow-[0_30px_60px_rgba(0,0,0,0.8)]"
                   style={{
                     width: "min(220px, 50vw)",
                     background: "linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 40%, #0f0f12 100%)",
@@ -151,7 +151,7 @@ function CinematicCard({
                   <div className="absolute -right-[3px] top-[92px] w-[3px] h-10 rounded-r-full bg-zinc-700" />
 
                   {/* Inner Bezel Screen */}
-                  <div className="relative rounded-[2.25rem] overflow-hidden bg-black">
+                  <div className="relative rounded-[1.9rem] overflow-hidden bg-black">
                     <div className="relative" style={{ aspectRatio: "9/19.5" }}>
                       <Image
                         src={thumbnail}
@@ -161,9 +161,18 @@ function CinematicCard({
                         unoptimized={isRemote}
                         className="object-cover object-top"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/5" />
+                      <div className="absolute inset-0 rounded-[1.9rem] bg-gradient-to-tr from-black/20 via-transparent to-white/5 pointer-events-none" />
                     </div>
                   </div>
+
+                  {/* Outer shell reflection */}
+                  <div
+                    className="absolute inset-0 rounded-[2rem] pointer-events-none"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%)",
+                    }}
+                  />
                 </div>
               ) : (
                 /* Widescreen/Desktop screenshot style */

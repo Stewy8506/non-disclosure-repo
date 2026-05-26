@@ -158,7 +158,7 @@ function PhoneFrame({ src, alt, index }: { src: string; alt: string; index: numb
             />
             {/* Screen reflection overlay */}
             <div
-              className="absolute inset-0 pointer-events-none"
+              className="absolute inset-0 pointer-events-none rounded-[1.9rem]"
               style={{
                 background:
                   "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%, rgba(0,0,0,0.15) 100%)",
@@ -169,7 +169,7 @@ function PhoneFrame({ src, alt, index }: { src: string; alt: string; index: numb
 
         {/* Outer shell reflection */}
         <div
-          className="absolute inset-0 rounded-[3rem] pointer-events-none"
+          className="absolute inset-0 rounded-[2rem] pointer-events-none"
           style={{
             background:
               "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%)",

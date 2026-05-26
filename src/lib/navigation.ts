@@ -29,5 +29,16 @@ export function scrollToSection(sectionId: string, options?: { updateUrl?: boole
       "",
       `${window.location.pathname}${window.location.search}#${sectionId}`
     );
+
+    // Auto-clear the hash from URL bar after smooth scroll completes (approx 800ms)
+    setTimeout(() => {
+      if (window.location.hash === `#${sectionId}`) {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `${window.location.pathname}${window.location.search}`
+        );
+      }
+    }, 800);
   }
 }
