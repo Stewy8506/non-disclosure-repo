@@ -18,6 +18,11 @@
   to { opacity: 1; }
 }
 
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(200%); }
+}
+
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -88,4 +93,48 @@ body {
 
 .bg-gradient-radial {
   background: radial-gradient(circle at center, rgba(255,255,255,0.05) 0%, transparent 70%);
+}
+
+/* Diagram dot-grid background */
+.diagram-grid-bg {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Animated gradient border for diagram containers */
+@property --diagram-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes diagram-border-rotate {
+  to { --diagram-angle: 360deg; }
+}
+
+.diagram-border-animated {
+  position: relative;
+  isolation: isolate;
+}
+
+.diagram-border-animated::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--diagram-angle),
+    rgba(16, 185, 129, 0) 0%,
+    rgba(16, 185, 129, 0.5) 20%,
+    rgba(52, 211, 153, 0.8) 40%,
+    rgba(6, 182, 212, 0.5) 60%,
+    rgba(16, 185, 129, 0) 80%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: diagram-border-rotate 6s linear infinite;
+  pointer-events: none;
+  z-index: 0;
 }

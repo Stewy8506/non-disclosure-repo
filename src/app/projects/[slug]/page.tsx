@@ -1,11 +1,12 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import FadeIn from "@/components/ui/FadeIn";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Tag, Calendar, Network, Database } from "lucide-react";
 import { GitHubIcon } from "@/components/ui/BrandIcons";
 import Link from "next/link";
 import { Project } from "@/lib/projects";
 import MermaidDiagram from "@/components/ui/MermaidDiagram";
+import ProjectCarousel from "@/components/ui/ProjectCarousel";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import fs from "fs/promises";
@@ -80,164 +81,469 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
     notFound();
   }
 
-  return (
-    <div className="min-h-screen pt-32 pb-20 px-6 sm:px-8 max-w-4xl mx-auto">
-      <FadeIn>
-        <Link href="/#projects" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-8 text-sm">
-          <ArrowLeft className="w-4 h-4" /> Back to Projects
-        </Link>
-        
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-6 text-white">
-          {project.title}
-        </h1>
-        
-        <p className="text-xl text-zinc-300 mb-10 leading-relaxed">
-          {project.description}
-        </p>
+  const images = project.images || (project.image ? [project.image] : ["/projects/default.jpg"]);
 
-        <div className="flex flex-wrap items-center gap-4 mb-16">
+  // Resolve imageType: explicit field takes priority, otherwise infer from category
+  const resolvedImageType: "phone" | "desktop" | "auto" =
+    project.imageType ??
+    (project.category?.toLowerCase().includes("mobile") ? "phone" : "auto");
+
+  // Two-column layout specifically optimized for Phone/Mobile mockups to make usage of horizontal space
+  if (resolvedImageType === "phone") {
+    return (
+      <div className="min-h-screen pt-32 pb-24 px-6 sm:px-8 max-w-5xl mx-auto">
+        <FadeIn>
+          {/* Back link */}
+          <Link href="/#projects" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-10 text-sm font-medium group">
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Back to Projects
+          </Link>
+        </FadeIn>
+
+        {/* Desktop two-column / Mobile single-column stacked layout */}
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 lg:items-start mb-20">
+          {/* Left Column: Title, description, CTAs, mobile-carousel, overview, metadata, and tech stack */}
+          <div className="flex-1 min-w-0">
+            <FadeIn>
+              {/* Hero header */}
+              <div className="mb-10">
+                {project.category && (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[0.18em] uppercase text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1 rounded-full mb-5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    {project.category}
+                  </span>
+                )}
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter mb-5 text-white leading-[0.95]">
+                  {project.title}
+                </h1>
+                <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl">
+                  {project.description}
+                </p>
+              </div>
+
+              {/* CTA buttons */}
+              <div className="flex flex-wrap items-center gap-3 mb-12">
+                {project.link && (
+                  <a href={project.link} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-black font-semibold rounded-xl hover:bg-emerald-400 transition-colors text-sm">
+                    <ExternalLink className="w-4 h-4" /> Live Demo
+                  </a>
+                )}
+                {project.sourceCodeUrl && (
+                  <a href={project.sourceCodeUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-colors text-sm">
+                    <GitHubIcon className="w-4 h-4" /> Source Code
+                  </a>
+                )}
+              </div>
+            </FadeIn>
+
+            {/* Mobile-only Phone Carousel (shows in-line under title/CTAs on smaller screens) */}
+            <FadeIn delay={0.15} className="block lg:hidden mb-12">
+              <ProjectCarousel
+                images={images}
+                imageType={resolvedImageType}
+              />
+            </FadeIn>
+
+            {/* Overview & Metadata */}
+            <FadeIn delay={0.25}>
+              {/* Section label */}
+              <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-6 block">
+                Overview
+              </span>
+
+              {/* Overview text block with left accent */}
+              <div className="relative pl-5 mb-8 border-l-2 border-emerald-500/40">
+                <p className="text-xl text-zinc-200 leading-[1.8] font-light">
+                  {project.overview || project.description || "A deep dive into the architecture, challenges, and solutions built for this project."}
+                </p>
+              </div>
+
+              {/* Problem callout — only if data exists */}
+              {project.problem && (
+                <div className="mb-8 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] px-6 py-5">
+                  <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">The Problem</p>
+                  <p className="text-zinc-300 leading-relaxed text-sm">{project.problem}</p>
+                </div>
+              )}
+
+              {/* Metadata chips row */}
+              <div className="flex flex-wrap items-center gap-3 mb-10">
+                {project.category && (
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.07] text-sm text-zinc-300">
+                    <Tag className="w-3.5 h-3.5 text-zinc-500" />
+                    {project.category}
+                  </div>
+                )}
+                {project.date && (
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.07] text-sm text-zinc-300">
+                    <Calendar className="w-3.5 h-3.5 text-zinc-500" />
+                    {project.date}
+                  </div>
+                )}
+                {project.isCurrentlyWorkingOn && (
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400/[0.06] border border-amber-400/20 text-sm text-amber-400 font-medium">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                    </span>
+                    Active Project
+                  </div>
+                )}
+              </div>
+
+              {/* Tech stack */}
+              {project.tech && project.tech.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">
+                    Tech Stack
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {project.tech.map((tech: string) => (
+                      <span
+                        key={tech}
+                        className="px-3 py-1.5 bg-white/[0.04] border border-white/[0.08] rounded-full text-sm font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-colors cursor-default shadow-sm backdrop-blur-md"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </FadeIn>
+          </div>
+
+          {/* Desktop-only Phone Carousel (sticky column on the right side on desktop) */}
+          <div className="hidden lg:block lg:w-[320px] xl:w-[340px] flex-shrink-0 lg:sticky lg:top-32">
+            <FadeIn delay={0.15}>
+              <ProjectCarousel
+                images={images}
+                imageType={resolvedImageType}
+              />
+            </FadeIn>
+          </div>
+        </div>
+
+        {/* Dynamic Case Study Sections */}
+        {(project.architectureDiagram || project.databaseSchema || project.stateManagement || (project.challenges && project.challenges.length > 0)) && (
+          <div className="pt-16 border-t border-white/[0.06] space-y-24">
+            {/* Architecture & Database Schema */}
+            {(project.architectureDiagram || project.databaseSchema) && (
+              <FadeIn className="space-y-10">
+                <div className="flex flex-col gap-3">
+                  <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-emerald-400 w-fit">
+                    Technical Architecture
+                  </span>
+                  <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                    System Architecture & Design
+                  </h2>
+                  <p className="text-zinc-500 max-w-2xl leading-relaxed text-sm">
+                    A high-level blueprint of design decisions, communication pathways, and structural data relationships.
+                  </p>
+                </div>
+
+                {project.architectureDiagram && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-zinc-300 font-semibold">
+                      <Network className="w-4 h-4 text-emerald-400" />
+                      Core Architecture Flow
+                    </div>
+                    <MermaidDiagram code={project.architectureDiagram} id={`${project.id || 'proj'}-arch`} />
+                  </div>
+                )}
+
+                {project.databaseSchema && (
+                  <div className="space-y-3 pt-2">
+                    <div className="flex items-center gap-2 text-zinc-300 font-semibold">
+                      <Database className="w-4 h-4 text-cyan-400" />
+                      Database Schema
+                    </div>
+                    <MermaidDiagram code={project.databaseSchema} id={`${project.id || 'proj'}-db`} />
+                  </div>
+                )}
+              </FadeIn>
+            )}
+
+            {/* State Management */}
+            {project.stateManagement && (
+              <FadeIn className="space-y-6">
+                <div className="flex flex-col gap-3">
+                  <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-blue-400 w-fit">
+                    Data Flow
+                  </span>
+                  <h2 className="text-3xl font-bold tracking-tight text-white">
+                    State Management Strategy
+                  </h2>
+                </div>
+                <div className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-8 backdrop-blur-sm leading-relaxed text-zinc-300 text-sm">
+                  <p className="whitespace-pre-wrap">{project.stateManagement}</p>
+                </div>
+              </FadeIn>
+            )}
+
+            {/* Technical Challenges */}
+            {project.challenges && project.challenges.length > 0 && (
+              <FadeIn className="space-y-10">
+                <div className="flex flex-col gap-3">
+                  <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-red-400 w-fit">
+                    Post-Mortem
+                  </span>
+                  <h2 className="text-3xl font-bold tracking-tight text-white">
+                    Technical Challenges & Solutions
+                  </h2>
+                  <p className="text-zinc-500 max-w-2xl leading-relaxed text-sm">
+                    Real engineering hurdles faced during development, and the techniques used to resolve them.
+                  </p>
+                </div>
+
+                <div className="grid gap-5">
+                  {project.challenges.map((challenge, idx) => (
+                    <div
+                      key={idx}
+                      className="group rounded-3xl border border-white/[0.05] bg-white/[0.015] p-6 md:p-8 hover:border-white/[0.12] hover:bg-white/[0.03] transition-all duration-500 backdrop-blur-sm"
+                    >
+                      <div className="flex flex-col md:flex-row gap-6">
+                        <div className="md:w-1/3 space-y-1.5">
+                          <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                            Challenge {idx + 1}
+                          </div>
+                          <h3 className="text-base font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors leading-snug">
+                            {challenge.title}
+                          </h3>
+                        </div>
+                        <div className="md:w-2/3 space-y-4">
+                          <div className="space-y-1">
+                            <span className="text-[9px] font-bold text-red-400 uppercase tracking-widest">Problem</span>
+                            <p className="text-zinc-400 leading-relaxed text-sm">{challenge.description}</p>
+                          </div>
+                          <div className="space-y-1 pt-3 border-t border-white/[0.05]">
+                            <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Resolution</span>
+                            <p className="text-zinc-400 leading-relaxed text-sm">{challenge.solution}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </FadeIn>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Fallback / Standard Stacked Layout (e.g. for widescreen Desktop & Auto category projects)
+  return (
+    <div className="min-h-screen pt-32 pb-24 px-6 sm:px-8 max-w-4xl mx-auto">
+      <FadeIn>
+        {/* Back link */}
+        <Link href="/#projects" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-10 text-sm font-medium group">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          Back to Projects
+        </Link>
+
+        {/* Hero header */}
+        <div className="mb-10">
+          {project.category && (
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-[0.18em] uppercase text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-3 py-1 rounded-full mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              {project.category}
+            </span>
+          )}
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-5 text-white leading-[0.95]">
+            {project.title}
+          </h1>
+          <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl">
+            {project.description}
+          </p>
+        </div>
+
+        {/* CTA buttons */}
+        <div className="flex flex-wrap items-center gap-3 mb-16">
           {project.link && (
-            <a href={project.link} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-black font-medium rounded-lg hover:bg-emerald-400 transition-colors">
+            <a href={project.link} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-black font-semibold rounded-xl hover:bg-emerald-400 transition-colors text-sm">
               <ExternalLink className="w-4 h-4" /> Live Demo
             </a>
           )}
           {project.sourceCodeUrl && (
-            <a href={project.sourceCodeUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-white font-medium rounded-lg hover:bg-white/10 transition-colors">
+            <a href={project.sourceCodeUrl} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 bg-white/5 border border-white/10 text-white font-semibold rounded-xl hover:bg-white/10 transition-colors text-sm">
               <GitHubIcon className="w-4 h-4" /> Source Code
             </a>
           )}
         </div>
       </FadeIn>
 
-      <FadeIn delay={0.2}>
-        <div className="aspect-video w-full rounded-2xl overflow-hidden bg-zinc-900 border border-white/10 mb-16 relative">
-          <img src={project.image || "/projects/default.jpg"} alt={project.title} className="w-full h-full object-cover" />
-        </div>
+      {/* Carousel */}
+      <FadeIn delay={0.15} className="mb-20">
+        <ProjectCarousel
+          images={images}
+          imageType={resolvedImageType}
+        />
       </FadeIn>
 
-      <div className="grid md:grid-cols-3 gap-12">
-        <FadeIn delay={0.3} className="md:col-span-2 prose prose-invert max-w-none prose-emerald">
-          <h2>Overview</h2>
-          <p>
+      {/* Overview + Metadata */}
+      <FadeIn delay={0.25} className="mb-20">
+        {/* Section label */}
+        <span className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-6 block">
+          Overview
+        </span>
+
+        {/* Overview text block with left accent */}
+        <div className="relative pl-5 mb-8 border-l-2 border-emerald-500/40">
+          <p className="text-xl text-zinc-200 leading-[1.8] font-light">
             {project.overview || project.description || "A deep dive into the architecture, challenges, and solutions built for this project."}
           </p>
-          
-          <h3>Architecture & Tech Stack</h3>
-          <p>This project was built using modern tools to ensure scalability and maintainability.</p>
-          <ul>
-            {project.tech?.map((tech: string) => (
-              <li key={tech}>{tech}</li>
-            ))}
-          </ul>
-        </FadeIn>
+        </div>
 
-        <FadeIn delay={0.4} className="space-y-8">
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Category</h4>
-            <p className="text-zinc-300">{project.category || "General"}</p>
+        {/* Problem callout — only if data exists */}
+        {project.problem && (
+          <div className="mb-8 rounded-2xl border border-rose-500/15 bg-rose-500/[0.04] px-6 py-5">
+            <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-2">The Problem</p>
+            <p className="text-zinc-300 leading-relaxed text-sm">{project.problem}</p>
           </div>
-          <div>
-            <h4 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-3">Timeline</h4>
-            <p className="text-zinc-300">2023 - Present</p>
-          </div>
-        </FadeIn>
-      </div>
+        )}
 
-      {/* Dynamic Case Study Section */}
-      {(project.architectureDiagram || project.databaseSchema || project.stateManagement || (project.challenges && project.challenges.length > 0)) && (
-        <div className="mt-20 pt-16 border-t border-white/[0.08] space-y-20">
-          
-          {/* Architecture Section */}
-          {(project.architectureDiagram || project.databaseSchema) && (
-            <FadeIn className="space-y-12">
-              <div className="space-y-4 flex flex-col">
-                <span className="text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-emerald-400 w-fit">
-                  Technical Architecture
+        {/* Metadata chips row */}
+        <div className="flex flex-wrap items-center gap-3 mb-10">
+          {project.category && (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.07] text-sm text-zinc-300">
+              <Tag className="w-3.5 h-3.5 text-zinc-500" />
+              {project.category}
+            </div>
+          )}
+          {project.date && (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/[0.07] text-sm text-zinc-300">
+              <Calendar className="w-3.5 h-3.5 text-zinc-500" />
+              {project.date}
+            </div>
+          )}
+          {project.isCurrentlyWorkingOn && (
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400/[0.06] border border-amber-400/20 text-sm text-amber-400 font-medium">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+              </span>
+              Active Project
+            </div>
+          )}
+        </div>
+
+        {/* Tech stack */}
+        {project.tech && project.tech.length > 0 && (
+          <div>
+            <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">
+              Tech Stack
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {project.tech.map((tech: string) => (
+                <span
+                  key={tech}
+                  className="px-3 py-1.5 bg-white/[0.04] border border-white/[0.08] rounded-full text-sm font-medium text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-colors cursor-default shadow-sm backdrop-blur-md"
+                >
+                  {tech}
                 </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </FadeIn>
+
+      {/* Dynamic Case Study Sections */}
+      {(project.architectureDiagram || project.databaseSchema || project.stateManagement || (project.challenges && project.challenges.length > 0)) && (
+        <div className="pt-16 border-t border-white/[0.06] space-y-24">
+
+          {/* Architecture & Database Schema */}
+          {(project.architectureDiagram || project.databaseSchema) && (
+            <FadeIn className="space-y-10">
+              <div className="flex flex-col gap-3">
+                <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-emerald-400 w-fit">
+                  Technical Architecture
+                  </span>
                 <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                   System Architecture & Design
                 </h2>
-                <p className="text-zinc-400 max-w-2xl leading-relaxed text-sm">
-                  A high-level blueprint displaying the design decisions, communication pathways, and structural data relationships underlying this project.
+                <p className="text-zinc-500 max-w-2xl leading-relaxed text-sm">
+                  A high-level blueprint of design decisions, communication pathways, and structural data relationships.
                 </p>
               </div>
 
               {project.architectureDiagram && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-zinc-200">Core Architecture Flow</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-zinc-300 font-semibold">
+                    <Network className="w-4 h-4 text-emerald-400" />
+                    Core Architecture Flow
+                  </div>
                   <MermaidDiagram code={project.architectureDiagram} id={`${project.id || 'proj'}-arch`} />
                 </div>
               )}
 
               {project.databaseSchema && (
-                <div className="space-y-4 pt-4">
-                  <h3 className="text-lg font-semibold text-zinc-200">Database Schema</h3>
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2 text-zinc-300 font-semibold">
+                    <Database className="w-4 h-4 text-cyan-400" />
+                    Database Schema
+                  </div>
                   <MermaidDiagram code={project.databaseSchema} id={`${project.id || 'proj'}-db`} />
                 </div>
               )}
             </FadeIn>
           )}
 
-          {/* State Management Section */}
+          {/* State Management */}
           {project.stateManagement && (
             <FadeIn className="space-y-6">
-              <div className="space-y-4 flex flex-col">
-                <span className="text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-blue-400 w-fit">
+              <div className="flex flex-col gap-3">
+                <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-blue-400 w-fit">
                   Data Flow
                 </span>
                 <h2 className="text-3xl font-bold tracking-tight text-white">
                   State Management Strategy
                 </h2>
               </div>
-              <div className="glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] p-8 backdrop-blur-sm leading-relaxed text-zinc-300 space-y-4 max-w-none text-sm">
+              <div className="rounded-3xl border border-white/[0.06] bg-white/[0.02] p-8 backdrop-blur-sm leading-relaxed text-zinc-300 text-sm">
                 <p className="whitespace-pre-wrap">{project.stateManagement}</p>
               </div>
             </FadeIn>
           )}
 
-          {/* Technical Challenges Section */}
+          {/* Technical Challenges */}
           {project.challenges && project.challenges.length > 0 && (
             <FadeIn className="space-y-10">
-              <div className="space-y-4 flex flex-col">
-                <span className="text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-red-400 w-fit">
+              <div className="flex flex-col gap-3">
+                <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-red-400 w-fit">
                   Post-Mortem
                 </span>
                 <h2 className="text-3xl font-bold tracking-tight text-white">
                   Technical Challenges & Solutions
                 </h2>
-                <p className="text-zinc-400 max-w-2xl leading-relaxed text-sm">
-                  Real engineering hurdles faced during development, and the precise techniques utilized to resolve them.
+                <p className="text-zinc-500 max-w-2xl leading-relaxed text-sm">
+                  Real engineering hurdles faced during development, and the techniques used to resolve them.
                 </p>
               </div>
 
-              <div className="grid gap-6">
+              <div className="grid gap-5">
                 {project.challenges.map((challenge, idx) => (
-                  <div 
+                  <div
                     key={idx}
-                    className="group glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] p-6 md:p-8 hover:border-white/[0.12] hover:bg-white/[0.03] transition-all duration-500 backdrop-blur-sm"
+                    className="group rounded-3xl border border-white/[0.05] bg-white/[0.015] p-6 md:p-8 hover:border-white/[0.12] hover:bg-white/[0.03] transition-all duration-500 backdrop-blur-sm"
                   >
                     <div className="flex flex-col md:flex-row gap-6">
-                      <div className="md:w-1/3 space-y-2">
-                        <div className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">
+                      <div className="md:w-1/3 space-y-1.5">
+                        <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
                           Challenge {idx + 1}
                         </div>
-                        <h3 className="text-lg font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors">
+                        <h3 className="text-base font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors leading-snug">
                           {challenge.title}
                         </h3>
                       </div>
-                      
                       <div className="md:w-2/3 space-y-4">
                         <div className="space-y-1">
-                          <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Problem</span>
-                          <p className="text-zinc-300 leading-relaxed text-sm">
-                            {challenge.description}
-                          </p>
+                          <span className="text-[9px] font-bold text-red-400 uppercase tracking-widest">Problem</span>
+                          <p className="text-zinc-400 leading-relaxed text-sm">{challenge.description}</p>
                         </div>
-                        <div className="space-y-1 pt-2 border-t border-white/[0.06]">
-                          <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Resolution</span>
-                          <p className="text-zinc-300 leading-relaxed text-sm">
-                            {challenge.solution}
-                          </p>
+                        <div className="space-y-1 pt-3 border-t border-white/[0.05]">
+                          <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Resolution</span>
+                          <p className="text-zinc-400 leading-relaxed text-sm">{challenge.solution}</p>
                         </div>
                       </div>
                     </div>
@@ -246,7 +552,6 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
               </div>
             </FadeIn>
           )}
-
         </div>
       )}
     </div>

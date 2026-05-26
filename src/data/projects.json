@@ -9,6 +9,7 @@
     "sourceCodeUrl": "https://github.com/Stewy8506/RN-Habit-Tracker",
     "liveDemoUrl": "",
     "category": "Mobile App",
+    "imageType": "phone",
     "images": ["/projects/habit-tracker.jpg"],
     "order": 0
   },

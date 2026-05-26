@@ -9,6 +9,7 @@ export type Project = {
   tech?: string[];
   image?: string;
   images?: string[];
+  imageType?: "phone" | "desktop" | "auto";
   hasLiveDemo?: boolean;
   liveDemoUrl?: string;
   link?: string;

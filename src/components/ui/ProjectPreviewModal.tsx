@@ -3,12 +3,95 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ArrowRight, ExternalLink } from "lucide-react";
+import { X, ArrowRight, ExternalLink, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { GitHubIcon } from "./BrandIcons";
 import { getProjectLiveUrl, type Project } from "@/lib/projects";
 import Link from "next/link";
-import MermaidDiagram from "./MermaidDiagram";
+import { useRouter } from "next/navigation";
+
+// Inline phone frame for modal — mirrors ProjectCarousel phone design
+function ModalPhoneFrame({ src, title, idx }: { src: string; title: string; idx: number }) {
+  return (
+    <motion.div
+      key={idx}
+      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+      whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="flex justify-center py-4"
+    >
+      <div
+        className="relative rounded-[3rem] overflow-hidden select-none"
+        style={{
+          width: "min(260px, 80vw)",
+          background: "linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 40%, #0f0f12 100%)",
+          padding: "3px",
+          boxShadow:
+            "0 0 0 1px rgba(255,255,255,0.08), 0 40px 100px -16px rgba(0,0,0,0.95), 0 0 60px -20px rgba(16,185,129,0.10), inset 0 1px 0 rgba(255,255,255,0.12)",
+        }}
+      >
+        {/* Side buttons */}
+        <div className="absolute -left-[3px] top-[88px] w-[3px] h-8 rounded-l-full" style={{ background: "linear-gradient(180deg, #3a3a3e, #252528)" }} />
+        <div className="absolute -left-[3px] top-[132px] w-[3px] h-8 rounded-l-full" style={{ background: "linear-gradient(180deg, #3a3a3e, #252528)" }} />
+        <div className="absolute -right-[3px] top-[108px] w-[3px] h-12 rounded-r-full" style={{ background: "linear-gradient(180deg, #3a3a3e, #252528)" }} />
+        {/*
+          CORNER RADIUS (modal phone):
+          • Outer shell  → change "rounded-[3rem]"    on the outer <div> (className above)
+          • Inner screen → change "rounded-[2.75rem]" on the inner <div> below
+        */}
+        {/* Inner screen — no notch, clean full-bleed */}
+        <div className="relative rounded-[2.75rem] overflow-hidden" style={{ background: "#000" }}>
+          <div className="relative" style={{ aspectRatio: "9/19.5" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={src} alt={`${title} screenshot ${idx + 1}`} className="w-full h-full object-cover object-top" draggable={false} />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%, rgba(0,0,0,0.15) 100%)" }} />
+          </div>
+        </div>
+        <div className="absolute inset-0 rounded-[3rem] pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 40%)" }} />
+      </div>
+    </motion.div>
+  );
+}
+
+// "Read Full Case Study" button with immediate loading feedback
+function CaseStudyButton({ href, onClose }: { href: string; onClose: () => void }) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
+    onClose();
+    router.push(href);
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      className="group relative w-full overflow-hidden rounded-xl bg-white text-black font-bold text-sm h-14 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-80 disabled:cursor-default"
+      disabled={loading}
+    >
+      <span className="relative z-10 flex items-center gap-2">
+        {loading ? (
+          <>
+            <Loader2 size={16} className="animate-spin" />
+            Opening…
+          </>
+        ) : (
+          <>
+            Read Full Case Study
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </>
+        )}
+      </span>
+      {!loading && (
+        <div className="absolute inset-0 bg-zinc-200 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+      )}
+    </button>
+  );
+}
 
 interface ProjectPreviewModalProps {
   project: Project | null;
@@ -29,16 +112,35 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
     if (incomingProject) setProject(incomingProject);
   }, [incomingProject]);
 
-  // Prevent background scrolling when open
+  // Robust scroll-lock that works across all browsers (incl. iOS Safari)
   useEffect(() => {
     if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
       document.body.style.overflow = "hidden";
-      // Reset scroll position on open
+      // Reset modal scroll position on open
       if (scrollRef.current) scrollRef.current.scrollTop = 0;
     } else {
-      document.body.style.overflow = "unset";
+      const scrollY = Math.abs(parseInt(document.body.style.top || "0", 10));
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = "";
+      window.scrollTo(0, scrollY);
     }
-    return () => { document.body.style.overflow = "unset"; };
+    return () => {
+      const scrollY = Math.abs(parseInt(document.body.style.top || "0", 10));
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = "";
+      if (scrollY) window.scrollTo(0, scrollY);
+    };
   }, [isOpen]);
 
   if (!project || !mounted || typeof document === 'undefined') return null;
@@ -47,6 +149,11 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
     ? project.images
     : (project?.image ? [project.image] : ["/projects/default.jpg"]);
   const liveUrl = project ? getProjectLiveUrl(project) : "";
+
+  // Same fallback as slug page — infer phone from category when field missing in Firestore
+  const resolvedImageType: "phone" | "desktop" | "auto" =
+    project.imageType ??
+    (project.category?.toLowerCase().includes("mobile") ? "phone" : "auto");
 
   // Stagger variants for content
   const containerVariants = {
@@ -178,16 +285,10 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
 
                   {/* Actions */}
                   <div className="flex flex-col gap-3 pt-4">
-                    <Link
+                    <CaseStudyButton
                       href={`/projects/${project.id || project.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
-                      onClick={onClose}
-                      className="group relative w-full overflow-hidden rounded-xl bg-white text-black font-bold text-sm h-14 flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all"
-                    >
-                      <span className="relative z-10 flex items-center gap-2">
-                        Read Full Case Study <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                      </span>
-                      <div className="absolute inset-0 bg-zinc-200 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                    </Link>
+                      onClose={onClose}
+                    />
 
                     <div className="flex flex-col sm:flex-row gap-3 w-full">
                       {liveUrl && (
@@ -222,93 +323,35 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
               className="flex-1 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-zinc-950/20 relative"
             >
               <div className="p-4 md:p-8 lg:p-12 space-y-8 md:space-y-12 lg:space-y-16">
-                {images.map((img: string, idx: number) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-                    whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="relative w-full rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl group"
-                  >
-                    {/* Maintain aspect ratio natively by rendering next/image without 'fill' if we want natural height, 
-                        or we can use a huge aspect ratio container. Let's use a dynamic aspect ratio wrapper. */}
-                    <Image
-                      src={img}
-                      alt={`${project.title} screenshot ${idx + 1}`}
-                      width={1600}
-                      height={1200}
-                      sizes="(max-width: 1024px) 100vw, 60vw"
-                      className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-1000 ease-out"
-                      unoptimized={img.startsWith('http')}
-                    />
-                  </motion.div>
-                ))}
-
-                {/* Dynamic Case Study Additions in Modal */}
-                {(project.architectureDiagram || project.databaseSchema || project.stateManagement || (project.challenges && project.challenges.length > 0)) && (
-                  <div className="pt-12 border-t border-white/5 space-y-12">
-                    
-                    {/* Architecture & DB schema */}
-                    {(project.architectureDiagram || project.databaseSchema) && (
-                      <div className="space-y-8">
-                        <h4 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase border-b border-white/5 pb-4">
-                          System Layouts
-                        </h4>
-
-                        {project.architectureDiagram && (
-                          <div className="space-y-3">
-                            <span className="text-xs font-semibold text-zinc-400">Architecture Flow</span>
-                            <MermaidDiagram code={project.architectureDiagram} id={`${project.id || 'modal'}-modal-arch`} />
-                          </div>
-                        )}
-
-                        {project.databaseSchema && (
-                          <div className="space-y-3">
-                            <span className="text-xs font-semibold text-zinc-400">Database ERD</span>
-                            <MermaidDiagram code={project.databaseSchema} id={`${project.id || 'modal'}-modal-db`} />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* State Management */}
-                    {project.stateManagement && (
-                      <div className="space-y-4">
-                        <h4 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase border-b border-white/5 pb-4">
-                          State Management
-                        </h4>
-                        <div className="glass-effect rounded-2xl border border-white/[0.04] bg-white/[0.01] p-6 text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                          {project.stateManagement}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Challenges */}
-                    {project.challenges && project.challenges.length > 0 && (
-                      <div className="space-y-6">
-                        <h4 className="text-xs font-semibold tracking-widest text-zinc-500 uppercase border-b border-white/5 pb-4">
-                          Technical Challenges
-                        </h4>
-                        <div className="grid gap-4">
-                          {project.challenges.map((challenge, idx) => (
-                            <div key={idx} className="glass-effect rounded-2xl border border-white/[0.04] bg-white/[0.01] p-5 text-sm space-y-3">
-                              <h5 className="font-bold text-zinc-200">{challenge.title}</h5>
-                              <div className="space-y-1">
-                                <span className="text-[9px] font-bold text-rose-400 uppercase tracking-wider">Problem</span>
-                                <p className="text-zinc-400 leading-relaxed text-xs">{challenge.description}</p>
-                              </div>
-                              <div className="space-y-1 pt-2 border-t border-white/[0.04]">
-                                <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-wider">Solution</span>
-                                <p className="text-zinc-400 leading-relaxed text-xs">{challenge.solution}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
+                {resolvedImageType === "phone" ? (
+                  // Phone layout — stacked phone mockups
+                  <div className="space-y-4">
+                    {images.map((img: string, idx: number) => (
+                      <ModalPhoneFrame key={idx} src={img} title={project.title} idx={idx} />
+                    ))}
                   </div>
+                ) : (
+                  // Desktop / default layout — natural aspect ratio images
+                  images.map((img: string, idx: number) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                      whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                      viewport={{ once: true, margin: "-100px" }}
+                      transition={{ duration: 0.8, ease: "easeOut" }}
+                      className="relative w-full rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl group"
+                    >
+                      <Image
+                        src={img}
+                        alt={`${project.title} screenshot ${idx + 1}`}
+                        width={1600}
+                        height={1200}
+                        sizes="(max-width: 1024px) 100vw, 60vw"
+                        className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-1000 ease-out"
+                        unoptimized={img.startsWith('http')}
+                      />
+                    </motion.div>
+                  ))
                 )}
               </div>
             </div>
