@@ -70,7 +70,7 @@ export default function EasterEggTips() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(4px)" }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="fixed bottom-24 right-6 z-[9000] hidden md:flex items-center gap-3 bg-zinc-950/80 backdrop-blur-3xl border border-white/10 p-3 pr-4 rounded-xl shadow-2xl max-w-sm"
+          className="fixed bottom-10 right-6 z-[9000] hidden md:flex items-center gap-3 bg-zinc-950/80 backdrop-blur-3xl border border-white/10 p-3 pr-4 rounded-xl shadow-2xl max-w-sm"
         >
           <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
             <Lightbulb className="w-4 h-4 text-yellow-500" />
@@ -78,7 +78,7 @@ export default function EasterEggTips() {
           <p className="text-sm text-zinc-300 leading-snug">
             {currentTip}
           </p>
-          <button 
+          <button
             onClick={() => setIsVisible(false)}
             className="absolute top-2 right-2 text-zinc-500 hover:text-white transition-colors"
           >
