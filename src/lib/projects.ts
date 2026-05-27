@@ -12,7 +12,7 @@ export type Project = {
   tech?: string[];
   image?: string;
   images?: string[];
-  imageType?: "phone" | "desktop" | "auto";
+  imageType?: "phone" | "desktop" | "embedded" | "auto";
   hasLiveDemo?: boolean;
   liveDemoUrl?: string;
   link?: string;
@@ -45,7 +45,7 @@ export const DEFAULT_PROJECT_CATEGORY = PROJECT_CATEGORIES[0];
 export const DEFAULT_SKILL_CATEGORY = SKILL_CATEGORIES[0];
 
 export function normalizeProjectCategory(category?: string) {
-  return PROJECT_CATEGORIES.find((option) => option === category) || DEFAULT_PROJECT_CATEGORY;
+  return category?.trim() || DEFAULT_PROJECT_CATEGORY;
 }
 
 export function normalizeSkillCategory(category?: string) {

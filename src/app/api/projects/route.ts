@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
       tech: body.tech || [],
       link: body.link || "",
       category: normalizeProjectCategory(body.category),
+      imageType: body.imageType || "auto",
       images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
       isCurrentlyWorkingOn: body.isCurrentlyWorkingOn || false,
       architectureDiagram: body.architectureDiagram || "",

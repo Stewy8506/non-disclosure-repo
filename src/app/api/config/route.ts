@@ -12,7 +12,7 @@ async function getLocalConfig() {
     const data = await fs.readFile(CONFIG_PATH, "utf8");
     return JSON.parse(data);
   } catch (error) {
-    return { employed: false }; // default: employed is no (false), so available for opportunities text is shown
+    return { employed: false, categories: [{name: "Mobile App", imageType: "phone"}, {name: "Embedded Systems", imageType: "embedded"}, {name: "AI Product", imageType: "desktop"}, {name: "Website", imageType: "desktop"}] }; 
   }
 }
 
@@ -42,9 +42,11 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { employed } = body;
+    const { employed, categories } = body;
 
-    const newConfig = { employed: !!employed };
+    const newConfig: any = {};
+    if (employed !== undefined) newConfig.employed = !!employed;
+    if (categories !== undefined) newConfig.categories = categories;
 
     // Always write to local config first for robustness in local/dev setup
     try {

@@ -30,6 +30,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       tech: body.tech,
       link: body.link,
       category: normalizeProjectCategory(body.category),
+      imageType: body.imageType || "auto",
       images: body.images || (body.image ? [body.image] : ["/projects/default.jpg"]),
       ...(body.solution !== undefined && { solution: body.solution }),
       ...(body.approach !== undefined && { approach: body.approach }),

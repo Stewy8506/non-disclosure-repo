@@ -1,26 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Command, Wifi, BatteryMedium, Search, MessageSquare, CornerDownLeft, FileText, Settings, AppWindow, Volume2, VolumeX, Lock, Terminal } from "lucide-react";
+import { motion } from "framer-motion";
+import { Command } from "lucide-react";
 import MenuDropdown, { MenuItem } from "../ui/MenuDropdown";
 import ToastContainer, { toast } from "../ui/Toast";
 import ChatWindow from "../ui/ChatWindow";
 import { usePathname } from "next/navigation";
-import { useSoundEffect } from "@/hooks/useSoundEffect";
-import Magnetic from "../ui/Magnetic";
 import { scrollToSection } from "@/lib/navigation";
-
-const SPOTLIGHT_ITEMS = [
-  { title: "About Anuvab", category: "Navigation", desc: "Background, timeline, and professional bio", icon: FileText, action: "about" },
-  { title: "Technical Ecosystem", category: "Navigation", desc: "Skills, frameworks, and programming languages", icon: Settings, action: "skills" },
-  { title: "Featured Projects", category: "Navigation", desc: "Check out web, mobile, and embedded creations", icon: AppWindow, action: "projects" },
-  { title: "Get in Touch", category: "Navigation", desc: "Contact details and message submission console", icon: FileText, action: "contact" },
-  { title: "Guestbook Wall", category: "Navigation", desc: "Sign the guest wall and read thoughts from visitors", icon: MessageSquare, action: "guestbook" },
-  { title: "Join Global Chat", category: "Lobby", desc: "Real-time anonymous discussions with other peers", icon: MessageSquare, action: "chat" },
-  { title: "Download Resume", category: "Utility", desc: "Get Anuvab's latest PDF resume directly", icon: FileText, action: "resume" },
-  { title: "Admin Portal", category: "System", desc: "Utility tools, analytics, and contact manager", icon: Settings, action: "admin" }
-];
+import MusicPlayer from "./MusicPlayer";
+import SystemTray from "./SystemTray";
+import SpotlightSearch from "./SpotlightSearch";
 
 export default function MenuBar() {
   const pathname = usePathname();
@@ -29,11 +19,8 @@ export default function MenuBar() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchIndex, setSearchIndex] = useState(0);
-
+  
   const menuRef = useRef<HTMLDivElement>(null);
-  const spotlightInputRef = useRef<HTMLInputElement>(null);
 
   // Check auth status for Admin Portal
   const [isAdmin, setIsAdmin] = useState(false);
@@ -52,142 +39,8 @@ export default function MenuBar() {
         setIsAdmin(false);
       }
     };
-
     checkAuth();
   }, [isSpotlightOpen]);
-
-  // Lofi Audio Stream state and ref (YouTube Player API backend)
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5); // Default to 50%
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const playerRef = useRef<any>(null);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { playThocc } = useSoundEffect();
-
-  // Initialize YouTube Iframe Player on mount (client-side only)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    // 1. Create a hidden element for YouTube player
-    let div = document.getElementById("youtube-lofi-player");
-    if (!div) {
-      div = document.createElement("div");
-      div.id = "youtube-lofi-player";
-      (div as HTMLElement).style.display = "none";
-      (div as HTMLElement).style.position = "absolute";
-      (div as HTMLElement).style.width = "0px";
-      (div as HTMLElement).style.height = "0px";
-      (div as HTMLElement).style.opacity = "0";
-      (div as HTMLElement).style.pointerEvents = "none";
-      document.body.appendChild(div);
-    }
-
-    // 2. Load YouTube Iframe API script if not present
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (!(window as any).YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-
-    // Define or override global callback
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).onYouTubeIframeAPIReady = () => {
-      initPlayer();
-    };
-
-    const initPlayer = () => {
-      try {
-        if (playerRef.current) return;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        playerRef.current = new (window as any).YT.Player("youtube-lofi-player", {
-          height: "0",
-          width: "0",
-          videoId: "CFGLoQIhmow", // Yasumu - We Met (requested soothing track)
-          playerVars: {
-            autoplay: 0,
-            controls: 0,
-            disablekb: 1,
-            fs: 0,
-            loop: 1,
-            playlist: "CFGLoQIhmow",
-            modestbranding: 1,
-            rel: 0,
-            showinfo: 0,
-          },
-          events: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onReady: (event: any) => {
-              event.target.setVolume(volume * 100);
-            },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onStateChange: (event: any) => {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              if (event.data === (window as any).YT.PlayerState.ENDED) {
-                event.target.playVideo();
-              }
-            }
-          },
-        });
-      } catch (e) {
-        console.error("YouTube Player initialization failed", e);
-      }
-    };
-
-    // If script is already loaded by other sessions, initialize immediately
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((window as any).YT && (window as any).YT.Player) {
-      initPlayer();
-    }
-
-    return () => {
-      // Cleanup player
-      if (playerRef.current && typeof playerRef.current.destroy === "function") {
-        try {
-          playerRef.current.destroy();
-        } catch { }
-        playerRef.current = null;
-      }
-      const existingDiv = document.getElementById("youtube-lofi-player");
-      if (existingDiv) {
-        existingDiv.remove();
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [volume]);
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseFloat(e.target.value);
-    setVolume(val);
-    if (playerRef.current && typeof playerRef.current.setVolume === "function") {
-      playerRef.current.setVolume(val * 100);
-    }
-  };
-
-  const toggleMusic = () => {
-    if (!playerRef.current || typeof playerRef.current.playVideo !== "function") {
-      toast("Player is loading... please try again in a moment.", "info");
-      return;
-    }
-
-    try {
-      if (isPlaying) {
-        playerRef.current.pauseVideo();
-        setIsPlaying(false);
-        toast("Soothing Stream Paused", "info");
-      } else {
-        playerRef.current.setVolume(volume * 100);
-        playerRef.current.playVideo();
-        setIsPlaying(true);
-        toast("Playing: Lofi Music 🎧", "success");
-      }
-    } catch (e) {
-      console.error("Playback toggle failed", e);
-      toast("Playback blocked. Please interact with the page first.", "error");
-    }
-  };
 
   // Time & date cycle
   useEffect(() => {
@@ -217,31 +70,6 @@ export default function MenuBar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
-
-  // Cmd+K or Ctrl+K shortcut for Spotlight
-  useEffect(() => {
-    const handleGlobalKeys = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setIsSpotlightOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", handleGlobalKeys);
-    return () => window.removeEventListener("keydown", handleGlobalKeys);
-  }, []);
-
-  // Reset indices and autofocus input when Spotlight is opened
-  useEffect(() => {
-    if (isSpotlightOpen) {
-      setTimeout(() => {
-        setSearchQuery("");
-        setSearchIndex(0);
-        spotlightInputRef.current?.focus();
-      }, 50);
-    }
-  }, [isSpotlightOpen]);
-
   const handleMenuHover = (menu: string) => {
     if (activeMenu) {
       setActiveMenu(menu);
@@ -256,36 +84,6 @@ export default function MenuBar() {
     }
   };
 
-  // WiFi Action
-  const handleWifiClick = () => {
-    const isOnline = typeof navigator !== "undefined" ? navigator.onLine : true;
-    if (isOnline) {
-      toast("Wi-Fi Connected: 'anv-os-secure' (Signal strength: Strong, 150 Mbps)", "success");
-    } else {
-      toast("Wi-Fi Disconnected: No active adapters detected.", "error");
-    }
-  };
-
-  // Battery Action
-  const handleBatteryClick = async () => {
-    if (typeof navigator !== "undefined" && "getBattery" in navigator) {
-      try {
-        const battery: unknown = await (navigator as unknown as { getBattery: () => Promise<unknown> }).getBattery();
-        const navBattery = battery as { level: number; charging: boolean; chargingTime: number; dischargingTime: number };
-        const levelPct = Math.round(navBattery.level * 100);
-        const state = navBattery.charging ? "Charging ⚡" : "Discharging 🔋";
-        const remain = navBattery.chargingTime === Infinity || navBattery.dischargingTime === Infinity
-          ? "Adapter Connected"
-          : `${Math.round(navBattery.charging ? navBattery.chargingTime / 60 : navBattery.dischargingTime / 60)} mins remaining`;
-        toast(`Battery Level: ${levelPct}% (${state} - ${remain})`, "info");
-      } catch {
-        toast("Battery Level: 100% (AC Power Line Connected)", "info");
-      }
-    } else {
-      toast("Battery Level: 100% (AC Power Line Connected)", "info");
-    }
-  };
-
   // Clock format and full date action
   const handleClockClick = () => {
     setIs24Hour((prev) => !prev);
@@ -297,56 +95,6 @@ export default function MenuBar() {
       year: "numeric",
     });
     toast(`System Date: ${dateStr} (Switched format)`, "success");
-  };
-
-  // Spotlight Action Trigger
-  const triggerSearchAction = (action: string) => {
-    setIsSpotlightOpen(false);
-
-    if (["about", "skills", "projects", "contact", "guestbook"].includes(action)) {
-      scrollToSection(action);
-      toast(`Scrolled to ${action.toUpperCase()} section`, "success");
-    } else if (action === "chat") {
-      setIsChatOpen(true);
-    } else if (action === "resume") {
-      const link = document.createElement("a");
-      link.href = "/resume.pdf";
-      link.download = "Anuvab_Das_Resume.pdf";
-      link.click();
-      toast("Downloading resume...", "success");
-    } else if (action === "admin") {
-      if (!isAdmin) {
-        toast("Admin Portal requires authentication. Please log in first.", "error");
-        return;
-      }
-      window.open("/admin", "_blank");
-      toast("Opening Admin console...", "info");
-    }
-  };
-
-  // Filter items in Spotlight Search
-  const filteredSearchItems = SPOTLIGHT_ITEMS.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Handle keys inside Spotlight Search modal
-  const handleSearchKeys = (e: React.KeyboardEvent) => {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSearchIndex((prev) => (prev + 1) % filteredSearchItems.length);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSearchIndex((prev) => (prev - 1 + filteredSearchItems.length) % filteredSearchItems.length);
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (filteredSearchItems[searchIndex]) {
-        triggerSearchAction(filteredSearchItems[searchIndex].action);
-      }
-    } else if (e.key === "Escape") {
-      setIsSpotlightOpen(false);
-    }
   };
 
   const menuData: Record<string, MenuItem[]> = {
@@ -365,7 +113,11 @@ export default function MenuBar() {
       { divider: true, label: "" },
       {
         label: "Download Resume", shortcut: "⌘D", action: () => {
-          triggerSearchAction("resume");
+          const link = document.createElement("a");
+          link.href = "/resume.pdf";
+          link.download = "Anuvab_Das_Resume.pdf";
+          link.click();
+          toast("Downloading resume...", "success");
           setActiveMenu(null);
         }
       },
@@ -460,97 +212,11 @@ export default function MenuBar() {
         {/* Right side */}
         <div className="flex items-center gap-4 md:text-white/80">
           <div className="flex items-center gap-2 md:gap-3">
-            {/* 🎵 Lofi Music Stream Control (Hover to show volume dropdown) */}
-            <div id="tour-lofi" className="group relative flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg hover:bg-white/5 transition-all duration-300">
-              <button
-                onClick={toggleMusic}
-                className="flex items-center justify-center p-0.5 rounded active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-                title={isPlaying ? "Pause Lofi Stream" : "Stream Soothing Lofi"}
-              >
-                {isPlaying ? (
-                  <Volume2 className="w-4 h-4 md:w-3.5 md:h-3.5 text-sky-400 animate-pulse" />
-                ) : (
-                  <VolumeX className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-400 hover:text-white" />
-                )}
-              </button>
-
-              {/* Dropdown Volume Slider */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto flex items-center justify-center p-3 bg-zinc-900/90 border border-white/10 rounded-lg backdrop-blur-xl shadow-xl transition-all duration-300 ease-out z-50 origin-top scale-95 group-hover:scale-100">
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  className="w-24 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-sky-400 focus:outline-none"
-                  style={{
-                    WebkitAppearance: "none",
-                    outline: "none",
-                  }}
-                  title={`Volume: ${Math.round(volume * 100)}%`}
-                />
-              </div>
-            </div>
-
-
-
-            {/* 💬 Global Chat Trigger */}
-            <Magnetic strength={0.4}>
-              <button
-                id="tour-chat"
-                onClick={() => setIsChatOpen(true)}
-                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-                title="Open Global Chat"
-              >
-                <MessageSquare className="w-4 h-4 md:w-3.5 md:h-3.5 text-emerald-400" />
-              </button>
-            </Magnetic>
-
-            {/* 📶 WiFi Diagnostic */}
-            <Magnetic strength={0.4}>
-              <button
-                onClick={handleWifiClick}
-                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-                title="WiFi Status"
-              >
-                <Wifi className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
-              </button>
-            </Magnetic>
-
-            {/* 🔍 Search / Spotlight Trigger */}
-            <Magnetic strength={0.4}>
-              <button
-                id="tour-spotlight"
-                onClick={() => setIsSpotlightOpen(true)}
-                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-                title="Spotlight Search (Cmd+K)"
-              >
-                <Search className="w-4 h-4 md:w-3.5 md:h-3.5 text-zinc-300 hover:text-white" />
-              </button>
-            </Magnetic>
-
-            {/* 💻 Terminal Trigger */}
-            <Magnetic strength={0.4}>
-              <button
-                onClick={() => window.dispatchEvent(new CustomEvent('toggleTerminal'))}
-                className="hidden md:flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-                title="Open Terminal (Cmd+Q)"
-              >
-                <Terminal className="w-4 h-4 md:w-3.5 md:h-3.5 text-emerald-400 hover:text-white" />
-              </button>
-            </Magnetic>
-
-            {/* 🔋 Battery Diagnostic */}
-            <Magnetic strength={0.4}>
-              <button
-                onClick={handleBatteryClick}
-                className="flex items-center justify-center p-1 rounded hover:bg-white/10 active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
-                title="Power & Battery Status"
-              >
-                <BatteryMedium className="w-5 h-5 md:w-4 md:h-4 text-zinc-300 hover:text-white" />
-              </button>
-            </Magnetic>
+            <MusicPlayer />
+            <SystemTray 
+              setIsChatOpen={setIsChatOpen} 
+              setIsSpotlightOpen={setIsSpotlightOpen} 
+            />
           </div>
 
           {/* ⏰ Clock Trigger */}
@@ -568,121 +234,12 @@ export default function MenuBar() {
       <ChatWindow isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* 🔍 SPOTLIGHT SEARCH OVERLAY */}
-      <AnimatePresence>
-        {isSpotlightOpen && (
-          <div className="fixed inset-0 z-[9999] flex items-start justify-center pt-24 px-4 pointer-events-none">
-            {/* Background mask */}
-            <div
-              onClick={() => setIsSpotlightOpen(false)}
-              className="absolute inset-0 bg-black/30 backdrop-blur-[2px] pointer-events-auto"
-            />
-
-            {/* Spotlight Card */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: -10 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              className="relative w-full max-w-xl bg-zinc-950/90 border border-white/10 rounded-2xl shadow-2xl p-3 flex flex-col pointer-events-auto backdrop-blur-2xl"
-              onKeyDown={handleSearchKeys}
-            >
-              {/* Query Input */}
-              <div className="flex items-center gap-3 px-3 py-2 border-b border-white/5">
-                <Search className="w-5 h-5 text-zinc-400" />
-                <input
-                  ref={spotlightInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setSearchIndex(0);
-                  }}
-                  placeholder="Spotlight Search (Use arrows to navigate, Enter to select)"
-                  className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder-zinc-500 text-sm py-1"
-                />
-                <div className="hidden sm:flex items-center gap-1 bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[10px] text-zinc-400 select-none">
-                  ESC
-                </div>
-              </div>
-
-              {/* Search Results List */}
-              <div className="mt-2 max-h-80 overflow-y-auto scrollbar-thin">
-                {filteredSearchItems.length === 0 ? (
-                  <div className="text-center py-8 text-xs text-zinc-500 font-medium">
-                    No results found for &quot;{searchQuery}&quot;
-                  </div>
-                ) : (
-                  filteredSearchItems.map((item, idx) => {
-                    const isSelected = idx === searchIndex;
-                    const IconComponent = item.icon;
-                    const isDisabledAdmin = item.action === "admin" && !isAdmin;
-
-                    return (
-                      <div
-                        key={item.title}
-                        onClick={() => {
-                          if (isDisabledAdmin) {
-                            toast("Admin Portal requires authentication. Please log in first.", "error");
-                            return;
-                          }
-                          triggerSearchAction(item.action);
-                        }}
-                        onMouseEnter={() => {
-                          if (!isDisabledAdmin) {
-                            setSearchIndex(idx);
-                          }
-                        }}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${isDisabledAdmin
-                            ? isSelected
-                              ? "bg-zinc-800/50 text-zinc-500 opacity-60 cursor-not-allowed"
-                              : "opacity-40 cursor-not-allowed text-zinc-500"
-                            : isSelected
-                              ? "bg-emerald-500 text-white"
-                              : "hover:bg-white/5 text-zinc-300"
-                          }`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className={`p-2 rounded-lg ${isDisabledAdmin
-                              ? isSelected ? "bg-white/10 text-zinc-500" : "bg-white/5 text-zinc-600"
-                              : isSelected ? "bg-white/20 text-white" : "bg-white/5 text-zinc-400"
-                            } shrink-0`}>
-                            <IconComponent className="w-4 h-4" />
-                          </div>
-                          <div className="truncate">
-                            <p className="text-xs font-semibold">{item.title}</p>
-                            <p className={`text-[10px] mt-0.5 truncate ${isDisabledAdmin
-                                ? "text-zinc-600"
-                                : isSelected ? "text-white/80" : "text-zinc-500"
-                              }`}>
-                              {item.desc}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          {isDisabledAdmin ? (
-                            <span className="flex items-center gap-1 text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-red-950/30 border border-red-900/30 text-red-400 font-sans">
-                              <Lock className="w-2.5 h-2.5" /> Locked
-                            </span>
-                          ) : (
-                            <span className={`text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${isSelected ? "bg-white/25 text-white" : "bg-white/5 text-zinc-500"
-                              }`}>
-                              {item.category}
-                            </span>
-                          )}
-                          {isSelected && !isDisabledAdmin && (
-                            <CornerDownLeft className="w-3.5 h-3.5 opacity-80" />
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      <SpotlightSearch 
+        isSpotlightOpen={isSpotlightOpen} 
+        setIsSpotlightOpen={setIsSpotlightOpen} 
+        isAdmin={isAdmin} 
+        setIsChatOpen={setIsChatOpen} 
+      />
     </>
   );
 }
