@@ -170,7 +170,7 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.98, opacity: 0, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative w-full h-full max-w-[1600px] flex flex-col lg:flex-row bg-[#09090b] text-zinc-300 border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-y-auto lg:overflow-hidden rounded-[2rem] md:rounded-[3rem]"
+            className="relative w-full h-full max-w-[1600px] flex flex-col lg:flex-row bg-gradient-to-br from-zinc-900/95 to-black text-zinc-300 border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.1)] overflow-y-auto lg:overflow-hidden rounded-[2rem] md:rounded-[3rem] backdrop-blur-3xl"
             onClick={(e) => e.stopPropagation()}
             data-lenis-prevent
           >
@@ -184,7 +184,7 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
 
             {/* Left Column: Sticky Information */}
             <div 
-              className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950/50 relative z-10 shrink-0"
+              className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden border-b lg:border-b-0 lg:border-r border-white/5 bg-gradient-to-br from-zinc-900/40 to-zinc-950/80 relative z-10 shrink-0"
               data-lenis-prevent
             >
               <motion.div
@@ -297,7 +297,7 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
             {/* Right Column: Scrollable Image Feed */}
             <div
               ref={scrollRef}
-              className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-zinc-950/20 relative"
+              className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-black/40 relative"
               data-lenis-prevent
             >
               <div className="p-4 md:p-8 lg:p-12 space-y-8 md:space-y-12 lg:space-y-16">

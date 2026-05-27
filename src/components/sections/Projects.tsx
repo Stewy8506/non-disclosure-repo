@@ -152,7 +152,7 @@ function ProjectListCard({ project, idx, onClick }: { project: Project; idx: num
       data-cursor="view"
     >
       <HoverSpotlight 
-        className="relative w-full glass-effect rounded-3xl border border-white/[0.04] bg-white/[0.01] group overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(255,255,255,0.02)] h-full"
+        className="relative w-full glass-effect rounded-2xl group overflow-hidden transition-all duration-500 hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] h-full"
         innerClassName={cn(
           "flex flex-col w-full h-full",
           isEven ? "md:flex-row" : "md:flex-row-reverse"
@@ -205,10 +205,10 @@ function ProjectListCard({ project, idx, onClick }: { project: Project; idx: num
       </div>
 
       {/* Content Half */}
-      <div className="p-8 md:p-12 md:w-1/2 flex flex-col justify-center relative z-10">
+      <div className="p-6 md:p-8 md:w-1/2 flex flex-col justify-center relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full bg-white/[0.05] border border-white/10 text-emerald-400">
+            <span className="font-mono text-xs font-medium text-zinc-500 uppercase tracking-widest px-3 py-1 rounded-xl bg-white/[0.05] border border-white/10">
               {project.category}
             </span>
             {project.isCurrentlyWorkingOn && (
@@ -232,17 +232,17 @@ function ProjectListCard({ project, idx, onClick }: { project: Project; idx: num
           </div>
         </div>
 
-        <h3 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight group-hover:text-white transition-colors">
+        <h3 className="text-3xl md:text-4xl font-black mb-4 tracking-tighter leading-none group-hover:text-white transition-colors">
           {project.title}
         </h3>
         
-        <p className="text-base text-muted leading-relaxed mb-8">
+        <p className="text-base text-zinc-300 leading-relaxed mb-8">
           {project.description}
         </p>
 
         <div className="flex flex-wrap gap-2">
           {project.tech?.map((t) => (
-            <span key={t} className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded bg-white/[0.03] text-zinc-400 border border-white/[0.05]">
+            <span key={t} className="font-mono text-xs font-medium text-zinc-500 uppercase tracking-wider px-2 py-1 rounded-xl bg-white/[0.03] border border-white/[0.05]">
               {t}
             </span>
           ))}

@@ -74,8 +74,8 @@ const Contact = () => {
         transition={{ duration: 0.6 }}
         className="text-center mb-16"
       >
-        <h2 className="text-4xl md:text-5xl font-bold mb-4">Get In Touch</h2>
-        <p className="text-gray-400 max-w-2xl mx-auto">
+        <h2 className="text-4xl md:text-6xl font-black mb-5 tracking-tighter leading-none">Get In Touch</h2>
+        <p className="text-zinc-300 text-lg max-w-2xl mx-auto leading-relaxed text-balance">
           I&apos;m currently open to new opportunities and collaborations. 
           Whether you have a project in mind or just want to say hi, feel free to reach out!
         </p>
@@ -89,11 +89,11 @@ const Contact = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="space-y-6"
         >
-          <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
+          <h3 className="text-3xl font-black mb-6 tracking-tighter leading-none">Contact Information</h3>
           
           <a 
             href="mailto:dasanuvab38@gmail.com"
-            className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/20 hover:border-white/20 transition-all group duration-300"
+            className="flex items-center gap-4 p-4 rounded-xl glass-effect hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] hover:-translate-y-1 transition-all group duration-300"
           >
             <div className="p-3 rounded-xl bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
               <Mail size={24} />
@@ -108,7 +108,7 @@ const Contact = () => {
             href="https://www.linkedin.com/in/anv-dev/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/20 hover:border-white/20 transition-all group duration-300"
+            className="flex items-center gap-4 p-4 rounded-xl glass-effect hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] hover:-translate-y-1 transition-all group duration-300"
           >
             <div className="p-3 rounded-xl bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform">
               <LinkedInIcon className="h-6 w-6" />
@@ -123,7 +123,7 @@ const Contact = () => {
             href="https://github.com/Stewy8506"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/20 hover:border-white/20 transition-all group duration-300"
+            className="flex items-center gap-4 p-4 rounded-xl glass-effect hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] hover:-translate-y-1 transition-all group duration-300"
           >
             <div className="p-3 rounded-xl bg-gray-500/20 text-gray-400 group-hover:scale-110 transition-transform">
               <GitHubIcon className="h-6 w-6" />
@@ -140,7 +140,7 @@ const Contact = () => {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="space-y-4 bg-white/5 pt-10 pb-8 px-8 rounded-3xl border border-white/10 backdrop-blur-sm relative"
+          className="space-y-4 glass-effect pt-10 pb-8 px-6 md:px-8 rounded-2xl relative transition-all duration-500 hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]"
           onSubmit={handleSubmit}
         >
           {/* macOS Window Controls */}
@@ -152,7 +152,7 @@ const Contact = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400 ml-1">Name</label>
+              <label className="font-mono text-xs font-medium text-zinc-500 ml-1 uppercase tracking-widest">Name</label>
               <input 
                 type="text" 
                 value={name}
@@ -163,7 +163,7 @@ const Contact = () => {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-400 ml-1">Email</label>
+              <label className="font-mono text-xs font-medium text-zinc-500 ml-1 uppercase tracking-widest">Email</label>
               <input 
                 type="email" 
                 value={email}
@@ -175,7 +175,7 @@ const Contact = () => {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-400 ml-1">Message</label>
+            <label className="font-mono text-xs font-medium text-zinc-500 ml-1 uppercase tracking-widest">Message</label>
             <textarea 
               rows={4}
               value={message}

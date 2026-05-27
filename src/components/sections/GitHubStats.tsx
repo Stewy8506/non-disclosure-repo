@@ -31,7 +31,7 @@ export default function GitHubStats() {
   return (
     <FadeIn delay={0.3} className="flex-1 w-full" data-cursor="scale">
       <a href={data.html_url} target="_blank" rel="noreferrer" className="block w-full h-full outline-none">
-        <div className="group relative h-full glass-effect rounded-3xl p-6 border border-white/[0.04] bg-white/[0.01] overflow-hidden transition-all duration-500 hover:border-white/[0.12] hover:bg-white/[0.03] hover:shadow-[0_0_40px_rgba(52,211,153,0.1)] flex flex-col justify-between">
+        <div className="group relative h-full glass-effect rounded-2xl p-6 overflow-hidden transition-all duration-500 hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] flex flex-col justify-between">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-emerald-500/10 rounded-full blur-[70px] pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           
           <div className="relative z-10 flex items-center justify-between w-full mb-6">
@@ -39,11 +39,11 @@ export default function GitHubStats() {
               <motion.div 
                 whileHover={{ rotate: 360, scale: 1.1 }}
                 transition={{ duration: 0.5, ease: "backOut" }}
-                className="p-2.5 rounded-2xl bg-white/5 border border-white/10 text-white group-hover:bg-emerald-500/20 group-hover:text-emerald-400 group-hover:border-emerald-500/30 transition-colors"
+                className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white group-hover:bg-emerald-500/20 group-hover:text-emerald-400 group-hover:border-emerald-500/30 transition-colors"
               >
                 <GithubIcon className="w-5 h-5" />
               </motion.div>
-              <span className="font-semibold text-white tracking-tight">GitHub Activity</span>
+              <span className="text-2xl font-black text-white tracking-tighter leading-none">GitHub Activity</span>
             </div>
             
             <div className="flex gap-1 group-hover:scale-110 transition-transform duration-300">
@@ -85,15 +85,15 @@ export default function GitHubStats() {
              ))}
           </div>
           
-          <div className="relative z-10 flex items-center justify-around w-full mt-auto bg-white/5 rounded-2xl p-4 border border-white/5 group-hover:bg-white/10 group-hover:border-white/10 transition-colors">
+          <div className="relative z-10 flex items-center justify-around w-full mt-auto bg-white/5 rounded-xl p-4 border border-white/5 group-hover:bg-white/10 group-hover:border-white/10 transition-colors">
             <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-white group-hover:text-emerald-400 transition-colors">{data.public_repos}</span>
-              <span className="text-[10px] uppercase tracking-widest text-zinc-400 mt-1 font-semibold">Repos</span>
+              <span className="text-2xl font-black text-white group-hover:text-emerald-400 transition-colors">{data.public_repos}</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-medium">Repos</span>
             </motion.div>
             <div className="w-px h-8 bg-white/10" />
             <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center">
-              <span className="text-2xl font-bold text-white group-hover:text-emerald-400 transition-colors">{data.total_commits}</span>
-              <span className="text-[10px] uppercase tracking-widest text-zinc-400 mt-1 font-semibold">Commits</span>
+              <span className="text-2xl font-black text-white group-hover:text-emerald-400 transition-colors">{data.total_commits}</span>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-medium">Commits</span>
             </motion.div>
           </div>
         </div>

@@ -1,6 +1,11 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: var(--font-fira-code), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-bitcount: var(--font-bitcount), "bitcount-prop-single", "Bitcount Prop Single", var(--font-sans), sans-serif;
+  --font-quicksand: var(--font-quicksand), "Quicksand", var(--font-sans), sans-serif;
+  
   --color-background: #000000;
   --color-foreground: #ffffff;
   --color-graphite: #0a0a0a;
@@ -23,8 +28,12 @@
 }
 
 :root {
-  --background: #000000;
+  --background: #09090b;
   --foreground: #ffffff;
+}
+
+::selection {
+  @apply bg-emerald-500 text-white;
 }
 
 @keyframes page-in {
@@ -81,7 +90,7 @@ body {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-dm-sans), sans-serif;
 }
 
 .no-scrollbar {
@@ -120,7 +129,7 @@ body {
 }
 
 .glass-effect {
-  @apply bg-white/[0.02] backdrop-blur-md border border-white/[0.05];
+  @apply bg-zinc-950/75 backdrop-blur-md border border-white/10;
 }
 
 .text-balance {
@@ -199,5 +208,3 @@ body {
     transform: scale(0) rotate(90deg);
   }
 }
-
-

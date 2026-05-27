@@ -25,7 +25,7 @@ export default function NoiseOverlay() {
         }
       `}} />
       <div 
-        className="pointer-events-none fixed inset-[-50%] z-50 opacity-[0.04] mix-blend-overlay noise-bg" 
+        className="pointer-events-none fixed inset-[-50%] z-50 opacity-[0.03] mix-blend-overlay noise-bg" 
         style={{ willChange: 'transform' }}
       />
     </>

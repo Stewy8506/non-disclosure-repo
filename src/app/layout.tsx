@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Fira_Code, Bitcount_Prop_Single, Quicksand } from "next/font/google";
 import "./globals.css";
 import MenuBar from "@/components/layout/MenuBar";
 import Dock from "@/components/layout/Dock";
@@ -13,13 +13,24 @@ import TerminalWindow from "@/components/ui/TerminalWindow";
 import ChatWindow from "@/components/ui/ChatWindow";
 import KonamiCode from "@/components/ui/KonamiCode";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const firaCode = Fira_Code({
+  variable: "--font-fira-code",
+  subsets: ["latin"],
+});
+
+const bitcount = Bitcount_Prop_Single({
+  variable: "--font-bitcount",
+  subsets: ["latin"],
+  weight: ["100"],
+});
+
+const quicksand = Quicksand({
+  variable: "--font-quicksand",
   subsets: ["latin"],
 });
 
@@ -42,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${dmSans.variable} ${firaCode.variable} ${bitcount.variable} ${quicksand.variable} antialiased`}>
         <ClientLayoutWrapper>
           <HashCanonicalizer />
           <NoiseOverlay />

@@ -136,14 +136,15 @@ export default function Dock() {
               className="group relative flex items-center justify-center"
             >
               {/* Tooltip */}
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-800/95 backdrop-blur-md text-white text-xs font-medium rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-800/95 backdrop-blur-md text-white text-[11px] uppercase tracking-wider font-semibold rounded-lg border border-white/10 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150 whitespace-nowrap pointer-events-none shadow-xl">
                 {item.name}
               </div>
               
               <motion.div 
-                whileHover={{ scale: 1.35, y: -10 }}
+                initial={{ opacity: 0.8 }}
+                whileHover={{ scale: 1.05, y: -4, opacity: 1, boxShadow: "0 15px 35px -5px rgba(0,0,0,0.8)" }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg border border-white/20 relative z-10 hover:z-20`}
+                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-md border border-white/10 relative z-10 hover:z-20`}
               >
                 <item.icon className="w-6 h-6 text-white drop-shadow-md" />
               </motion.div>
@@ -170,14 +171,15 @@ export default function Dock() {
               className="group relative flex items-center justify-center"
             >
               {/* Tooltip */}
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-800/95 backdrop-blur-md text-white text-xs font-medium rounded-lg border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl">
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-800/95 backdrop-blur-md text-white text-[11px] uppercase tracking-wider font-semibold rounded-lg border border-white/10 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-150 whitespace-nowrap pointer-events-none shadow-xl">
                 {item.name}
               </div>
               
               <motion.div 
-                whileHover={{ scale: 1.35, y: -10 }}
+                initial={{ opacity: 0.8 }}
+                whileHover={{ scale: 1.05, y: -4, opacity: 1, boxShadow: "0 15px 35px -5px rgba(0,0,0,0.8)" }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg border border-white/20 relative z-10 hover:z-20`}
+                className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-md border border-white/10 relative z-10 hover:z-20`}
               >
                 <item.icon className="w-6 h-6 text-white drop-shadow-md" />
               </motion.div>

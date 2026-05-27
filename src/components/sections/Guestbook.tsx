@@ -27,7 +27,7 @@ export default function Guestbook() {
 
   useEffect(() => {
     if (!db) return;
-    
+
     const q = query(
       collection(db, "guestbook"),
       orderBy("timestamp", "desc"),
@@ -86,9 +86,9 @@ export default function Guestbook() {
 
       {/* Grid Layout matching rest of the page structure */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start max-w-6xl mx-auto">
-        
+
         {/* Left Column: Form Section */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -103,12 +103,12 @@ export default function Guestbook() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-400 ml-1">Name</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
                 onFocus={() => playThocc()}
-                placeholder="John Doe" 
+                placeholder="John Doe"
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-white focus:outline-none transition-colors text-white placeholder-zinc-500"
                 maxLength={30}
                 required
@@ -118,11 +118,11 @@ export default function Guestbook() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-400 ml-1">Message</label>
-              <textarea 
+              <textarea
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onFocus={() => playThocc()}
-                placeholder="Your message here..." 
+                placeholder="Your message here..."
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-white focus:outline-none transition-colors text-white placeholder-zinc-500 h-28 resize-none"
                 maxLength={150}
                 required
@@ -130,16 +130,16 @@ export default function Guestbook() {
               />
             </div>
 
-            <motion.button 
+            <motion.button
               whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
               whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
               onClick={() => playThocc()}
-              type="submit" 
+              type="submit"
               disabled={isSubmitting || !db}
               className="w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
               data-cursor="button"
             >
-              {isSubmitting ? "Signing..." : "Send Message"} 
+              {isSubmitting ? "Signing..." : "Send Message"}
               <Send className="w-4 h-4" />
             </motion.button>
           </form>
@@ -147,51 +147,43 @@ export default function Guestbook() {
 
         {/* Right Column: Miniatures Board */}
         <div className="lg:col-span-8">
-          <motion.div 
+          <motion.div
             layout
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar"
+            className="flex flex-col gap-10 max-h-[520px] overflow-y-auto pl-2 pr-6 custom-scrollbar"
             data-lenis-prevent
           >
             <AnimatePresence mode="popLayout">
               {messages.map((msg, index) => (
-                <motion.div 
+                <motion.div
                   key={msg.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.98, y: 15 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.4, ease: "easeOut", delay: index * 0.04 }}
-                  whileHover={{ y: -4 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.05 }}
+                  className="relative pl-6 py-1 border-l-2 border-white/5 hover:border-emerald-500/40 transition-colors duration-500 group"
                   onMouseEnter={() => playThocc()}
-                  className="h-40"
                 >
-                  <HoverSpotlight 
-                    className="glass-effect rounded-2xl border border-white/[0.04] bg-white/[0.01] hover:border-white/[0.12] hover:bg-white/[0.03] transition-all duration-300 h-full cursor-default"
-                    innerClassName="p-6 flex flex-col justify-between h-full"
-                    glowColor="rgba(255, 255, 255, 0.05)"
-                  >
-                    <p className="text-zinc-300 text-sm font-medium leading-relaxed overflow-y-auto custom-scrollbar flex-grow pr-1">
-                      &ldquo;{msg.message}&rdquo;
-                    </p>
+                  <div className="absolute -left-[5px] top-4 w-2 h-2 rounded-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.8)] scale-0 group-hover:scale-100" />
 
-                    <div className="flex items-center gap-3 pt-3 border-t border-white/[0.06] mt-4">
-                      {/* Generative dynamic slate-monochrome badge */}
-                      <div className="w-7 h-7 rounded-full bg-white/5 border border-white/10 text-zinc-400 flex items-center justify-center font-bold text-[10px] tracking-wide uppercase select-none">
-                        {msg.name.substring(0, 2)}
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-zinc-200">{msg.name}</span>
-                        <span className="text-[9px] text-muted tracking-wider uppercase">Visitor</span>
-                      </div>
-                    </div>
-                  </HoverSpotlight>
+                  <p className="text-zinc-300 text-lg md:text-xl font-light leading-relaxed tracking-wide italic mb-4 text-balance px-2 overflow-visible">
+                    &ldquo;{msg.message}&rdquo;
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold text-zinc-100 tracking-tight">{msg.name}</span>
+                    <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                    <span className="text-xs text-zinc-500 tracking-wider uppercase font-medium">
+                      {msg.timestamp?.toDate ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(msg.timestamp.toDate()) : "Just now"}
+                    </span>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </motion.div>
 
           {messages.length === 0 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-center py-24 border border-dashed border-white/10 rounded-2xl bg-white/[0.01] flex items-center justify-center"

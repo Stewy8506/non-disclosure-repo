@@ -32,14 +32,14 @@ const MarqueeRow = ({
         {[...items, ...items, ...items].map((item, idx) => (
           <HoverSpotlight 
             key={`${item.id}-${idx}`}
-            className="rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-all duration-300 cursor-default group"
-            innerClassName="flex items-center gap-4 px-8 py-5 w-full h-full"
+            className="rounded-xl glass-effect hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] transition-all duration-300 cursor-default group"
+            innerClassName="flex items-center gap-4 px-6 py-5 w-full h-full"
           >
             <div className="w-8 h-8 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
               <img 
                 src={`https://cdn.simpleicons.org/${item.slug}${item.white ? '/white' : ''}`} 
                 alt={item.name}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain p-0.5"
                 width={32}
                 height={32}
                 loading="lazy"
@@ -191,14 +191,14 @@ export default function Skills() {
                       className="cursor-default"
                     >
                       <HoverSpotlight 
-                        className="rounded-2xl glass-effect border border-white/[0.05] bg-white/[0.02] hover:bg-white/[0.06] hover:border-white/[0.15] hover:-translate-y-2 transition-all duration-300 group h-full"
+                        className="rounded-xl glass-effect hover:border-zinc-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)] hover:-translate-y-2 transition-all duration-300 group h-full"
                         innerClassName="flex flex-col items-center justify-center gap-4 p-6 w-full h-full"
                       >
                         <div className="w-12 h-12 group-hover:scale-110 transition-transform duration-300 flex items-center justify-center drop-shadow-md">
                           <img 
                             src={`https://cdn.simpleicons.org/${skill.slug}${skill.white ? '/white' : ''}`} 
                             alt={skill.name}
-                            className="w-full h-full object-contain"
+                            className="w-full h-full object-contain p-1"
                             width={48}
                             height={48}
                             loading="lazy"
