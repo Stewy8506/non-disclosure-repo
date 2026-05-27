@@ -11,6 +11,8 @@ import { collection, getDocs } from "firebase/firestore";
 import fs from "fs/promises";
 import path from "path";
 import DynamicCaseStudySections from "@/components/projects/DynamicCaseStudySections";
+import ShareProject from "@/components/projects/ShareProject";
+
 
 const LOCAL_DATA_PATH = path.join(process.cwd(), "src/data/projects.json");
 
@@ -105,7 +107,7 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 pb-20">
           {/* Left Column: Title, description, CTAs, mobile-carousel, overview, metadata, and tech stack */}
           <div className="flex-1 min-w-0">
-            <FadeIn>
+            <FadeIn className="relative z-10">
               {/* Hero header */}
               <div className="mb-10">
                 {project.category && (
@@ -123,7 +125,7 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
               </div>
 
               {/* CTA buttons */}
-              <div className="flex flex-wrap items-center gap-3 mb-12">
+              <div className="flex flex-wrap items-center gap-3 mb-12 relative z-20">
                 {project.link && (
                   <a href={project.link} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-black font-semibold rounded-xl hover:bg-emerald-400 transition-colors text-sm">
                     <ExternalLink className="w-4 h-4" /> Live Demo
@@ -134,6 +136,7 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
                     <GitHubIcon className="w-4 h-4" /> Source Code
                   </a>
                 )}
+                <ShareProject project={project} />
               </div>
             </FadeIn>
 
@@ -253,7 +256,7 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
   // Fallback / Standard Stacked Layout (e.g. for widescreen Desktop & Auto category projects)
   return (
     <div className="min-h-screen pt-32 pb-24 px-6 sm:px-8 max-w-4xl mx-auto">
-      <FadeIn>
+      <FadeIn className="relative z-10">
         {/* Back link */}
         <Link href="/#projects" className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-10 text-sm font-medium group">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
@@ -277,7 +280,7 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
         </div>
 
         {/* CTA buttons */}
-        <div className="flex flex-wrap items-center gap-3 mb-16">
+        <div className="flex flex-wrap items-center gap-3 mb-16 relative z-20">
           {project.link && (
             <a href={project.link} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-black font-semibold rounded-xl hover:bg-emerald-400 transition-colors text-sm">
               <ExternalLink className="w-4 h-4" /> Live Demo
@@ -288,6 +291,7 @@ export default async function ProjectCaseStudy(props: { params: Promise<{ slug: 
               <GitHubIcon className="w-4 h-4" /> Source Code
             </a>
           )}
+          <ShareProject project={project} />
         </div>
       </FadeIn>
 

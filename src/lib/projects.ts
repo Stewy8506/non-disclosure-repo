@@ -61,3 +61,17 @@ export function getProjectLiveUrl(project: Project) {
   if (!isWebsiteProject(project) || project.hasLiveDemo === false) return "";
   return project.liveDemoUrl || project.link || "";
 }
+
+export function getProjectShortCode(project: Project): string {
+  if (!project.title) return "p";
+  
+  const initials = project.title
+    .split(/\s+/)
+    .map(w => w[0])
+    .join("")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  
+  if (initials.length >= 2) return initials;
+  return project.title.toLowerCase().substring(0, 3).replace(/[^a-z0-9]/g, "");
+}
