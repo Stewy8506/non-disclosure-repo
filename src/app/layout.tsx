@@ -9,11 +9,9 @@ import ClientLayoutWrapper from "@/components/layout/ClientLayoutWrapper";
 import NoiseOverlay from "@/components/ui/NoiseOverlay";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import HashCanonicalizer from "@/components/layout/HashCanonicalizer";
-import PresenceCursors from "@/components/ui/PresenceCursors";
 import TerminalWindow from "@/components/ui/TerminalWindow";
 import ChatWindow from "@/components/ui/ChatWindow";
 import KonamiCode from "@/components/ui/KonamiCode";
-import OnboardingTour from "@/components/ui/OnboardingTour";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,8 +48,6 @@ export default function RootLayout({
           <NoiseOverlay />
           <DynamicBackground />
           <CustomCursor />
-          <PresenceCursors />
-          <OnboardingTour />
           <TerminalWindow />
           <ChatWindow />
           <KonamiCode />

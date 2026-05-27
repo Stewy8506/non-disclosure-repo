@@ -57,30 +57,54 @@ export default function AppWindow({
     let isMounted = true;
     
     // Tiny delay ensures Framer Motion has bound the ref to `controls` before starting the animation.
-    // This completely eliminates the "window doesn't pop up" race condition on mount.
     const timer = setTimeout(() => {
       if (!isMounted) return;
       
-      if (windowData?.isMinimized) {
-        controls.start({
-          opacity: 0,
-          scaleX: 0.01,
-          scaleY: 0.02,
-          x: targetX,
-          y: targetY,
-          skewX: 12,
-        });
+      if (isMobile) {
+        if (windowData?.isMinimized) {
+          // If minimized on mobile (shouldn't happen via UI anymore, but just in case)
+          controls.start({
+            y: "100%",
+            opacity: 0,
+            scaleX: 1,
+            scaleY: 1,
+            skewX: 0,
+          });
+        } else {
+          // Slide up from bottom
+          controls.start({
+            y: 0,
+            opacity: 1,
+            scaleX: 1,
+            scaleY: 1,
+            skewX: 0,
+            width: "100vw",
+            height: "90vh",
+          });
+        }
       } else {
-        controls.start({
-          opacity: 1,
-          scaleX: 1,
-          scaleY: 1,
-          skewX: 0,
-          width: windowData?.isMaximized ? "100vw" : defaultWidth,
-          height: windowData?.isMaximized ? "100vh" : defaultHeight,
-          x: windowData?.isMaximized ? 0 : 0,
-          y: windowData?.isMaximized ? 0 : 0,
-        });
+        // Desktop Genie Animation
+        if (windowData?.isMinimized) {
+          controls.start({
+            opacity: 0,
+            scaleX: 0.01,
+            scaleY: 0.02,
+            x: targetX,
+            y: targetY,
+            skewX: 12,
+          });
+        } else {
+          controls.start({
+            opacity: 1,
+            scaleX: 1,
+            scaleY: 1,
+            skewX: 0,
+            width: windowData?.isMaximized ? "100vw" : defaultWidth,
+            height: windowData?.isMaximized ? "100vh" : defaultHeight,
+            x: windowData?.isMaximized ? 0 : 0,
+            y: windowData?.isMaximized ? 0 : 0,
+          });
+        }
       }
     }, 50);
 
@@ -88,7 +112,7 @@ export default function AppWindow({
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [windowData?.isMaximized, windowData?.isMinimized, defaultWidth, defaultHeight, controls, targetX, targetY]);
+  }, [windowData?.isMaximized, windowData?.isMinimized, defaultWidth, defaultHeight, controls, targetX, targetY, isMobile]);
 
   if (!windowData || !windowData.isOpen) return null;
 
@@ -111,7 +135,7 @@ export default function AppWindow({
         key={`app-window-${id}`}
         ref={windowRef}
         id={`app-window-${id}`}
-        drag={!windowData.isMaximized}
+        drag={isMobile ? false : !windowData.isMaximized}
         dragConstraints={{
           top: -viewport.height / 2 + 50,
           bottom: viewport.height / 2 - 50,
@@ -120,14 +144,11 @@ export default function AppWindow({
         }}
         dragMomentum={false}
         onMouseDown={() => focusWindow(id)}
-        initial={{ 
-          opacity: 0, 
-          scaleX: 0.8, 
-          scaleY: 0.8, 
-          x: 0, 
-          y: 20, 
-          skewX: 0 
-        }}
+        initial={
+          isMobile 
+            ? { opacity: 0, y: "100%", x: 0, scaleX: 1, scaleY: 1, skewX: 0 }
+            : { opacity: 0, scaleX: 0.8, scaleY: 0.8, x: 0, y: 20, skewX: 0 }
+        }
         animate={controls}
         transition={{ 
           type: "spring", 
@@ -137,72 +158,97 @@ export default function AppWindow({
         }}
         style={{
           pointerEvents: windowData.isMinimized ? "none" : "auto",
-          position: windowData.isMaximized ? "fixed" : "relative",
-          top: windowData.isMaximized ? 0 : undefined,
-          left: windowData.isMaximized ? 0 : undefined,
-          minWidth: windowData.isMaximized ? "100vw" : minWidth,
-          minHeight: windowData.isMaximized ? "100vh" : minHeight,
+          position: isMobile ? "fixed" : (windowData.isMaximized ? "fixed" : "relative"),
+          top: isMobile ? "auto" : (windowData.isMaximized ? 0 : undefined),
+          bottom: isMobile ? 0 : undefined,
+          left: isMobile ? 0 : (windowData.isMaximized ? 0 : undefined),
+          minWidth: isMobile ? "100vw" : (windowData.isMaximized ? "100vw" : minWidth),
+          minHeight: isMobile ? "90vh" : (windowData.isMaximized ? "100vh" : minHeight),
           transformOrigin: "bottom center", // Key to macOS Genie squeeze
         }}
         className={`flex flex-col overflow-hidden bg-zinc-950/80 backdrop-blur-3xl border ${
           isActive ? "border-white/20 shadow-2xl" : "border-white/10 shadow-lg"
-        } ${windowData.isMaximized ? "rounded-none" : "rounded-xl"}`}
+        } ${isMobile ? "rounded-t-3xl rounded-b-none border-b-0" : windowData.isMaximized ? "rounded-none" : "rounded-xl"}`}
       >
-        {/* Traffic Lights / Title Bar */}
+        {/* Header / Title Bar */}
         <div
           className={`flex items-center px-4 py-3 border-b border-white/10 drag-handle select-none ${
-            !windowData.isMaximized ? "cursor-grab active:cursor-grabbing" : ""
-          } ${isActive ? "bg-white/5" : "bg-transparent"}`}
-          onDoubleClick={() => maximizeWindow(id)}
+            (!isMobile && !windowData.isMaximized) ? "cursor-grab active:cursor-grabbing" : ""
+          } ${isActive ? "bg-white/5" : "bg-transparent"} ${isMobile ? "justify-between" : ""}`}
+          onDoubleClick={() => !isMobile && maximizeWindow(id)}
         >
-          <div className="flex items-center gap-2 group">
-            {/* Close Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                closeWindow(id);
-              }}
-              className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-400 flex items-center justify-center transition-colors outline-none"
-              title="Close"
-            >
-              <X className="w-2 h-2 text-red-950 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-            
-            {/* Minimize Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                minimizeWindow(id);
-              }}
-              className="w-3 h-3 rounded-full bg-amber-500/80 hover:bg-amber-400 flex items-center justify-center transition-colors outline-none"
-              title="Minimize"
-            >
-              <Minus className="w-2 h-2 text-amber-950 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-            
-            {/* Maximize Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                maximizeWindow(id);
-              }}
-              className="w-3 h-3 rounded-full bg-emerald-500/80 hover:bg-emerald-400 flex items-center justify-center transition-colors outline-none"
-              title="Maximize"
-            >
-              {windowData.isMaximized ? (
-                <Minimize2 className="w-2 h-2 text-emerald-950 opacity-0 group-hover:opacity-100 transition-opacity" />
-              ) : (
-                <Maximize2 className="w-2 h-2 text-emerald-950 opacity-0 group-hover:opacity-100 transition-opacity" />
-              )}
-            </button>
-          </div>
+          {isMobile && (
+            <div className="flex-1 flex justify-start">
+              {/* Optional: Add a grab handle pill for mobile aesthetic */}
+              <div className="w-10 h-1.5 bg-white/20 rounded-full mx-auto absolute left-1/2 -translate-x-1/2 top-2"></div>
+            </div>
+          )}
+
+          {!isMobile && (
+            <div className="flex items-center gap-2 group flex-shrink-0">
+              {/* Close Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeWindow(id);
+                }}
+                className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-400 flex items-center justify-center transition-colors outline-none"
+                title="Close"
+              >
+                <X className="w-2 h-2 text-red-950 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+              
+              {/* Minimize Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  minimizeWindow(id);
+                }}
+                className="w-3 h-3 rounded-full bg-amber-500/80 hover:bg-amber-400 flex items-center justify-center transition-colors outline-none"
+                title="Minimize"
+              >
+                <Minus className="w-2 h-2 text-amber-950 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+              
+              {/* Maximize Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  maximizeWindow(id);
+                }}
+                className="w-3 h-3 rounded-full bg-emerald-500/80 hover:bg-emerald-400 flex items-center justify-center transition-colors outline-none"
+                title="Maximize"
+              >
+                {windowData.isMaximized ? (
+                  <Minimize2 className="w-2 h-2 text-emerald-950 opacity-0 group-hover:opacity-100 transition-opacity" />
+                ) : (
+                  <Maximize2 className="w-2 h-2 text-emerald-950 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+            </div>
+          )}
 
           {/* Window Title */}
-          <div className="flex-1 text-center pr-10">
+          <div className={`flex-1 text-center ${!isMobile ? "pr-10" : ""}`}>
             <span className={`text-xs font-medium tracking-wide ${isActive ? "text-zinc-300" : "text-zinc-500"}`}>
               {windowData.title}
             </span>
           </div>
+
+          {/* Mobile Done Button */}
+          {isMobile && (
+            <div className="flex-1 flex justify-end">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeWindow(id);
+                }}
+                className="text-sky-400 font-semibold text-sm hover:text-sky-300 active:scale-95 transition-all outline-none"
+              >
+                Done
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Window Content */}

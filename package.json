@@ -15,7 +15,6 @@
     "@types/three": "^0.184.1",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
-    "driver.js": "^1.4.0",
     "firebase": "^12.13.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.16.0",

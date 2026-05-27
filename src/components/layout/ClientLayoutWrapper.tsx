@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import LoadingScreen from "../ui/LoadingScreen";
 import OnboardingTour from "../ui/OnboardingTour";
 import PresenceCursors from "../ui/PresenceCursors";
+import EasterEggTips from "../ui/EasterEggTips";
 import RadialMenu from "../radial-menu";
 
 export default function ClientLayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -19,6 +20,7 @@ export default function ClientLayoutWrapper({ children }: { children: React.Reac
         <>
           <OnboardingTour />
           <PresenceCursors />
+          <EasterEggTips />
           <RadialMenu />
         </>
       )}
