@@ -141,6 +141,7 @@ export default function RadialMenu() {
       const target = e.target as HTMLElement;
       if (target.closest(INTERACTIVE_SELECTOR)) return;
 
+      // Only suppress the native context menu when the radial menu will open
       suppressMenuRef.current = true;
       const pos = { x: e.clientX, y: e.clientY };
 

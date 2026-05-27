@@ -4,22 +4,27 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lightbulb, X } from "lucide-react";
 
-const TIPS = [
-  "Easter Egg: Try entering the Konami Code (↑ ↑ ↓ ↓ ← → ← → B A)",
-  "Pro Tip: Press Cmd+K (or Ctrl+K) anywhere to instantly open Spotlight Search.",
-  "Did you know? You can open the Terminal and type 'help' for a list of commands.",
-  "Double-click any window's title bar to maximize it instantly.",
-  "Check out the Lofi Player in the menu bar to stream music while you browse.",
+const TIPS: { text: string; desktopOnly?: boolean }[] = [
+  { text: "Easter Egg: Try entering the Konami Code (↑ ↑ ↓ ↓ ← → ← → B A)" },
+  { text: "Pro Tip: Press Cmd+K (or Ctrl+K) anywhere to instantly open Spotlight Search.", desktopOnly: true },
+  { text: "Did you know? You can open the Terminal and type 'help' for a list of commands.", desktopOnly: true },
+  { text: "Double-click any window's title bar to maximize it instantly.", desktopOnly: true },
+  { text: "Check out the Lofi Player in the menu bar to stream music while you browse." },
 ];
+
 
 export default function EasterEggTips() {
   const [currentTip, setCurrentTip] = useState<string | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [seenTips, setSeenTips] = useState<Set<number>>(new Set());
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
   useEffect(() => {
+    const desktop = typeof window !== "undefined" && window.innerWidth >= 768;
+    setIsDesktop(desktop);
     // Only run on desktop
-    if (typeof window !== "undefined" && window.innerWidth < 768) return;
+    if (!desktop) return;
 
     // Show first tip after 30 seconds
     let initialTimeout = setTimeout(() => {
@@ -38,17 +43,16 @@ export default function EasterEggTips() {
   }, [seenTips]);
 
   const showRandomTip = () => {
-    if (seenTips.size >= TIPS.length) {
-      // Reset if all tips shown
+    const available = TIPS.map((tip, i) => ({ tip, i }))
+      .filter(({ tip, i }) => !seenTips.has(i) && (isDesktop || !tip.desktopOnly));
+
+    if (available.length === 0) {
       setSeenTips(new Set());
+      return;
     }
 
-    const availableTips = TIPS.map((_, i) => i).filter((i) => !seenTips.has(i));
-    if (availableTips.length === 0) return;
-
-    const randomIndex = availableTips[Math.floor(Math.random() * availableTips.length)];
-    
-    setCurrentTip(TIPS[randomIndex]);
+    const { tip, i: randomIndex } = available[Math.floor(Math.random() * available.length)];
+    setCurrentTip(tip.text);
     setIsVisible(true);
     setSeenTips((prev) => new Set(prev).add(randomIndex));
 

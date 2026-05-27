@@ -14,7 +14,8 @@ const TOUR_STEPS = [
   {
     id: "#tour-lofi",
     title: "Lofi Player",
-    description: "Click here to stream soothing lofi music while you explore. Hover over it to reveal the volume slider!",
+    description: "Click here to stream soothing lofi music while you explore.",
+    descriptionDesktop: "Click to stream lofi music. Right-click the icon to reveal the volume slider!",
     icon: Volume2,
   },
   {
@@ -26,7 +27,8 @@ const TOUR_STEPS = [
   {
     id: "#tour-spotlight",
     title: "Spotlight Search",
-    description: "Looking for something specific? Press Cmd+K (or Ctrl+K) or click here to search quickly.",
+    description: "Looking for something specific? Click here to search across the portfolio quickly.",
+    descriptionDesktop: "Looking for something specific? Press Cmd+K (or Ctrl+K) or click here to search quickly.",
     icon: Search,
   }
 ];
@@ -206,7 +208,9 @@ export default function OnboardingTour() {
             </div>
             
             {/* Description */}
-            <p className="text-zinc-400 text-sm leading-relaxed mb-4">{currentStep.description}</p>
+            <p className="text-zinc-400 text-sm leading-relaxed mb-4">
+              {!isMobile && "descriptionDesktop" in currentStep ? (currentStep as typeof currentStep & { descriptionDesktop: string }).descriptionDesktop : currentStep.description}
+            </p>
             
             {/* Footer / Controls */}
             <div className={`flex items-center justify-between pt-4 border-t border-white/5 ${isMobile ? "mt-auto" : "mt-3"}`}>

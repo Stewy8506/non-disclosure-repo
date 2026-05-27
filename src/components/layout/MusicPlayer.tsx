@@ -1,29 +1,55 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Volume2, VolumeX, Loader2 } from "lucide-react";
 import { toast } from "../ui/Toast";
 import { useSoundEffect } from "@/hooks/useSoundEffect";
+
+const MOBILE_VOLUME = 0.75; // locked volume on phone
 
 export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [volume, setVolume] = useState(0.5); // Default to 50%
+  const [showSlider, setShowSlider] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const playerRef = useRef<any>(null);
-  
-  // Track if we've initialized the player
   const initializedRef = useRef(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { playThocc } = useSoundEffect();
+
+  // Detect mobile once on mount
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Close slider when clicking outside
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+      setShowSlider(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (showSlider) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSlider, handleClickOutside]);
 
   const initYouTubePlayer = () => {
     if (typeof window === "undefined" || initializedRef.current) return;
     setIsLoading(true);
     initializedRef.current = true;
 
-    // 1. Create a hidden element for YouTube player
     let div = document.getElementById("youtube-lofi-player");
     if (!div) {
       div = document.createElement("div");
@@ -37,6 +63,8 @@ export default function MusicPlayer() {
       document.body.appendChild(div);
     }
 
+    const startVol = isMobile ? MOBILE_VOLUME : volume;
+
     const initPlayer = () => {
       try {
         if (playerRef.current) return;
@@ -44,9 +72,9 @@ export default function MusicPlayer() {
         playerRef.current = new (window as any).YT.Player("youtube-lofi-player", {
           height: "0",
           width: "0",
-          videoId: "CFGLoQIhmow", // Yasumu - We Met (requested soothing track)
+          videoId: "CFGLoQIhmow",
           playerVars: {
-            autoplay: 1, // Start playing immediately after it loads
+            autoplay: 1,
             controls: 0,
             disablekb: 1,
             fs: 0,
@@ -59,7 +87,7 @@ export default function MusicPlayer() {
           events: {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onReady: (event: any) => {
-              event.target.setVolume(volume * 100);
+              event.target.setVolume(startVol * 100);
               setIsLoading(false);
               setIsPlaying(true);
               toast("Playing: Lofi Music 🎧", "success");
@@ -70,7 +98,7 @@ export default function MusicPlayer() {
               if (event.data === (window as any).YT.PlayerState.ENDED) {
                 event.target.playVideo();
               }
-            }
+            },
           },
         });
       } catch (e) {
@@ -79,7 +107,6 @@ export default function MusicPlayer() {
       }
     };
 
-    // 2. Load YouTube Iframe API script if not present
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!(window as any).YT) {
       const tag = document.createElement("script");
@@ -90,8 +117,6 @@ export default function MusicPlayer() {
       } else {
         document.head.appendChild(tag);
       }
-      
-      // Define or override global callback
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).onYouTubeIframeAPIReady = () => {
         initPlayer();
@@ -112,7 +137,6 @@ export default function MusicPlayer() {
   const toggleMusic = () => {
     if (isLoading) return;
 
-    // Deferred Loading Strategy: Only load the massive YouTube API when they click play
     if (!initializedRef.current) {
       initYouTubePlayer();
       return;
@@ -129,7 +153,8 @@ export default function MusicPlayer() {
         setIsPlaying(false);
         toast("Soothing Stream Paused", "info");
       } else {
-        playerRef.current.setVolume(volume * 100);
+        const vol = isMobile ? MOBILE_VOLUME : volume;
+        playerRef.current.setVolume(vol * 100);
         playerRef.current.playVideo();
         setIsPlaying(true);
         toast("Playing: Lofi Music 🎧", "success");
@@ -140,10 +165,24 @@ export default function MusicPlayer() {
     }
   };
 
+  // Right-click opens the volume slider (desktop only)
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isMobile) return;
+    setShowSlider((prev) => !prev);
+  };
+
   return (
-    <div id="tour-lofi" className="group relative flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg hover:bg-white/5 transition-all duration-300">
+    <div
+      id="tour-lofi"
+      ref={wrapperRef}
+      className="relative flex items-center gap-1.5 px-1.5 py-0.5 rounded-lg hover:bg-white/5 transition-all duration-300"
+      onContextMenu={handleContextMenu}
+    >
       <button
         onClick={toggleMusic}
+        onContextMenu={handleContextMenu}
         className="flex items-center justify-center p-0.5 rounded active:scale-95 transition-all text-white/90 cursor-pointer outline-none border-0 bg-transparent"
         title={isPlaying ? "Pause Lofi Stream" : "Stream Soothing Lofi"}
         aria-label={isPlaying ? "Pause Background Music" : "Play Background Music"}
@@ -157,23 +196,44 @@ export default function MusicPlayer() {
         )}
       </button>
 
-      {/* Dropdown Volume Slider */}
-      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto flex items-center justify-center p-3 bg-zinc-900/90 border border-white/10 rounded-lg backdrop-blur-xl shadow-xl transition-all duration-300 ease-out z-50 origin-top scale-95 group-hover:scale-100">
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.05"
-          value={volume}
-          onChange={handleVolumeChange}
-          className="w-24 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer accent-sky-400 focus:outline-none"
-          style={{
-            WebkitAppearance: "none",
-            outline: "none",
-          }}
-          title={`Volume: ${Math.round(volume * 100)}%`}
-        />
-      </div>
+      {/* Vertical Volume Slider — desktop right-click only */}
+      {!isMobile && showSlider && (
+        <div
+          className="absolute top-full left-1/2 -translate-x-1/2 mt-3 flex flex-col items-center gap-2 p-3 bg-zinc-900/95 border border-white/10 rounded-xl backdrop-blur-xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150"
+          style={{ transformOrigin: "top center" }}
+        >
+          {/* Volume % label */}
+          <span className="text-[10px] font-semibold text-sky-400 tabular-nums select-none">
+            {Math.round(volume * 100)}%
+          </span>
+
+          {/* Vertical range input */}
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={volume}
+            onChange={handleVolumeChange}
+            className="appearance-none cursor-pointer focus:outline-none"
+            style={{
+              writingMode: "vertical-lr" as React.CSSProperties["writingMode"],
+              direction: "rtl",
+              WebkitAppearance: "slider-vertical",
+              width: "4px",
+              height: "80px",
+              accentColor: "rgb(56 189 248)",
+              background: `linear-gradient(to top, rgb(56 189 248) ${volume * 100}%, rgba(255,255,255,0.15) ${volume * 100}%)`,
+              borderRadius: "999px",
+              outline: "none",
+            }}
+            title={`Volume: ${Math.round(volume * 100)}%`}
+          />
+
+          {/* Low vol icon at bottom */}
+          <VolumeX className="w-3 h-3 text-zinc-500" />
+        </div>
+      )}
     </div>
   );
 }
