@@ -64,7 +64,7 @@ export default function Dock() {
   // 2. Dynamic Running Apps (Only show in Dock if running/open)
   const activeApps = [];
 
-  if (windows["terminal"]?.isOpen) {
+  if (windows["terminal"]?.isOpen || windows["terminal"]?.isClosing) {
     activeApps.push({
       name: "Terminal",
       icon: Terminal,
@@ -76,7 +76,7 @@ export default function Dock() {
     });
   }
 
-  if (windows["chat"]?.isOpen) {
+  if (windows["chat"]?.isOpen || windows["chat"]?.isClosing) {
     activeApps.push({
       name: "Chat Lobby",
       icon: MessageSquare,

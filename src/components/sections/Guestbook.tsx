@@ -150,6 +150,7 @@ export default function Guestbook() {
           <motion.div 
             layout
             className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar"
+            data-lenis-prevent
           >
             <AnimatePresence mode="popLayout">
               {messages.map((msg, index) => (

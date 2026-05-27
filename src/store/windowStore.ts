@@ -9,6 +9,7 @@ export interface AppWindowData {
   isOpen: boolean;
   isMinimized: boolean;
   isMaximized: boolean;
+  isClosing: boolean;
   zIndex: number;
   props?: any;
 }
@@ -19,6 +20,7 @@ interface WindowStore {
   activeWindowId: string | null;
   openWindow: (id: string, type: WindowType, title: string, props?: any) => void;
   closeWindow: (id: string) => void;
+  destroyWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
   maximizeWindow: (id: string) => void;
   focusWindow: (id: string) => void;
@@ -44,6 +46,7 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
           isOpen: true,
           isMinimized: false,
           isMaximized: windows[id]?.isMaximized || false,
+          isClosing: false,
           zIndex: newZIndex,
           props,
         },
@@ -54,13 +57,22 @@ export const useWindowStore = create<WindowStore>((set, get) => ({
   },
 
   closeWindow: (id) => {
+    // Mark as closing so AppWindow can run its exit animation
+    set((state) => ({
+      windows: {
+        ...state.windows,
+        [id]: { ...state.windows[id], isClosing: true },
+      },
+      activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
+    }));
+  },
+
+  destroyWindow: (id) => {
+    // Called by AppWindow after the exit animation completes
     set((state) => {
       const newWindows = { ...state.windows };
       delete newWindows[id];
-      return {
-        windows: newWindows,
-        activeWindowId: state.activeWindowId === id ? null : state.activeWindowId,
-      };
+      return { windows: newWindows };
     });
   },
 

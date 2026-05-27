@@ -50,6 +50,28 @@
   animation: fade-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Lenis smooth scrolling support */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
 html,
 body {
   max-width: 100vw;

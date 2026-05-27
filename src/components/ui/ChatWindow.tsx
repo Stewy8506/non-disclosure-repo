@@ -208,7 +208,10 @@ export default function ChatWindow() {
         </div>
 
         {/* MESSAGES CONSOLE */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin select-text">
+        <div 
+          className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin select-text"
+          data-lenis-prevent
+        >
           {loading ? (
             <div className="h-full flex items-center justify-center flex-col gap-2">
               <div className="w-6 h-6 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />

@@ -21,7 +21,14 @@ export function scrollToSection(sectionId: string, options?: { updateUrl?: boole
   const section = document.getElementById(sectionId);
   if (!section) return;
 
-  section.scrollIntoView({ behavior: "smooth" });
+  const lenisInstance = (window as any).lenis;
+  if (lenisInstance) {
+    lenisInstance.scrollTo(section, {
+      duration: 1.4,
+    });
+  } else {
+    section.scrollIntoView({ behavior: "smooth" });
+  }
 
   if (options?.updateUrl !== false) {
     window.history.replaceState(

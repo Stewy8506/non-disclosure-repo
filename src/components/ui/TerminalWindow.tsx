@@ -175,6 +175,7 @@ export default function TerminalWindow() {
             ref={scrollRef}
             className="flex-1 p-4 overflow-y-auto text-sm text-emerald-500/90 leading-relaxed custom-scrollbar relative z-10"
             style={{ textShadow: "0 0 5px rgba(6, 182, 212, 0.4)" }}
+            data-lenis-prevent
           >
             {history.map((entry) => (
               <div key={entry.id} className="mb-1">

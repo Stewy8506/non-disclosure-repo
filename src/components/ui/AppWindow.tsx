@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { X, Minus, Maximize2, Minimize2 } from "lucide-react";
 import { useWindowStore } from "@/store/windowStore";
 
+
 interface AppWindowProps {
   id: string;
   children: React.ReactNode;
@@ -24,10 +25,12 @@ export default function AppWindow({
 }: AppWindowProps) {
   const windowData = useWindowStore((state) => state.windows[id]);
   const closeWindow = useWindowStore((state) => state.closeWindow);
+  const destroyWindow = useWindowStore((state) => state.destroyWindow);
   const minimizeWindow = useWindowStore((state) => state.minimizeWindow);
   const maximizeWindow = useWindowStore((state) => state.maximizeWindow);
   const focusWindow = useWindowStore((state) => state.focusWindow);
   const activeWindowId = useWindowStore((state) => state.activeWindowId);
+
 
   const windowRef = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
@@ -49,17 +52,17 @@ export default function AppWindow({
 
   // Genie animation vertical and horizontal targets matching the Dock icons
   const targetY = viewport.height / 2 - (isMobile ? 50 : 60);
-  
+
   // Align precisely with the Dock app positions (in pixels relative to center)
   const targetX = id === "terminal" ? 60 : id === "chat" ? 120 : 0;
 
   useEffect(() => {
     let isMounted = true;
-    
+
     // Tiny delay ensures Framer Motion has bound the ref to `controls` before starting the animation.
     const timer = setTimeout(() => {
       if (!isMounted) return;
-      
+
       if (isMobile) {
         if (windowData?.isMinimized) {
           // If minimized on mobile (shouldn't happen via UI anymore, but just in case)
@@ -114,7 +117,33 @@ export default function AppWindow({
     };
   }, [windowData?.isMaximized, windowData?.isMinimized, defaultWidth, defaultHeight, controls, targetX, targetY, isMobile]);
 
-  if (!windowData || !windowData.isOpen) return null;
+  // Closing animation — genie-shrink to the dock
+  useEffect(() => {
+    if (!windowData?.isClosing) return;
+
+    const shrinkTo = isMobile
+      ? { y: "100%", opacity: 0, scaleX: 1, scaleY: 0.4, skewX: 0 }
+      : {
+          opacity: 0,
+          scaleX: 0.01,
+          scaleY: 0.02,
+          x: targetX,
+          y: targetY,
+          skewX: 12,
+        };
+
+    controls.start({
+      ...shrinkTo,
+      transition: {
+        duration: 0.32,
+        ease: [0.4, 0, 1, 1], // sharp ease-in — fast acceleration into dock
+      },
+    }).then(() => {
+      destroyWindow(id);
+    });
+  }, [windowData?.isClosing, isMobile, controls, targetX, targetY, id, destroyWindow]);
+
+  if (!windowData || (!windowData.isOpen && !windowData.isClosing)) return null;
 
   return (
     <div
@@ -145,19 +174,19 @@ export default function AppWindow({
         dragMomentum={false}
         onMouseDown={() => focusWindow(id)}
         initial={
-          isMobile 
+          isMobile
             ? { opacity: 0, y: "100%", x: 0, scaleX: 1, scaleY: 1, skewX: 0 }
             : { opacity: 0, scaleX: 0.8, scaleY: 0.8, x: 0, y: 20, skewX: 0 }
         }
         animate={controls}
-        transition={{ 
-          type: "spring", 
-          stiffness: 140, 
-          damping: 17, 
-          mass: 0.8 
+        transition={{
+          type: "spring",
+          stiffness: 140,
+          damping: 17,
+          mass: 0.8
         }}
         style={{
-          pointerEvents: windowData.isMinimized ? "none" : "auto",
+          pointerEvents: windowData.isMinimized || windowData.isClosing ? "none" : "auto",
           position: isMobile ? "fixed" : (windowData.isMaximized ? "fixed" : "relative"),
           top: isMobile ? "auto" : (windowData.isMaximized ? 0 : undefined),
           bottom: isMobile ? 0 : undefined,
@@ -166,15 +195,13 @@ export default function AppWindow({
           minHeight: isMobile ? "90vh" : (windowData.isMaximized ? "100vh" : minHeight),
           transformOrigin: "bottom center", // Key to macOS Genie squeeze
         }}
-        className={`flex flex-col overflow-hidden bg-zinc-950/80 backdrop-blur-3xl border ${
-          isActive ? "border-white/20 shadow-2xl" : "border-white/10 shadow-lg"
-        } ${isMobile ? "rounded-t-3xl rounded-b-none border-b-0" : windowData.isMaximized ? "rounded-none" : "rounded-xl"}`}
+        className={`flex flex-col overflow-hidden bg-zinc-950/80 backdrop-blur-3xl border ${isActive ? "border-white/20 shadow-2xl" : "border-white/10 shadow-lg"
+          } ${isMobile ? "rounded-t-3xl rounded-b-none border-b-0" : windowData.isMaximized ? "rounded-none" : "rounded-xl"}`}
       >
         {/* Header / Title Bar */}
         <div
-          className={`flex items-center px-4 py-3 border-b border-white/10 drag-handle select-none ${
-            (!isMobile && !windowData.isMaximized) ? "cursor-grab active:cursor-grabbing" : ""
-          } ${isActive ? "bg-white/5" : "bg-transparent"} ${isMobile ? "justify-between" : ""}`}
+          className={`flex items-center px-4 py-3 border-b border-white/10 drag-handle select-none ${(!isMobile && !windowData.isMaximized) ? "cursor-grab active:cursor-grabbing" : ""
+            } ${isActive ? "bg-white/5" : "bg-transparent"} ${isMobile ? "justify-between" : ""}`}
           onDoubleClick={() => !isMobile && maximizeWindow(id)}
         >
           {isMobile && (
@@ -197,7 +224,7 @@ export default function AppWindow({
               >
                 <X className="w-2 h-2 text-red-950 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
-              
+
               {/* Minimize Button */}
               <button
                 onClick={(e) => {
@@ -209,7 +236,7 @@ export default function AppWindow({
               >
                 <Minus className="w-2 h-2 text-amber-950 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
-              
+
               {/* Maximize Button */}
               <button
                 onClick={(e) => {
@@ -238,7 +265,7 @@ export default function AppWindow({
           {/* Mobile Done Button */}
           {isMobile && (
             <div className="flex-1 flex justify-end">
-              <button 
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   closeWindow(id);

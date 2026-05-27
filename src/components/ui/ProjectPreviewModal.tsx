@@ -172,6 +172,7 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className="relative w-full h-full max-w-[1600px] flex flex-col lg:flex-row bg-[#09090b] text-zinc-300 border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-y-auto lg:overflow-hidden rounded-[2rem] md:rounded-[3rem]"
             onClick={(e) => e.stopPropagation()}
+            data-lenis-prevent
           >
             {/* Close Button - Floating absolute */}
             <button
@@ -182,7 +183,10 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
             </button>
 
             {/* Left Column: Sticky Information */}
-            <div className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950/50 relative z-10 shrink-0">
+            <div 
+              className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden border-b lg:border-b-0 lg:border-r border-white/5 bg-zinc-950/50 relative z-10 shrink-0"
+              data-lenis-prevent
+            >
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -294,6 +298,7 @@ export default function ProjectPreviewModal({ project: incomingProject, isOpen, 
             <div
               ref={scrollRef}
               className="w-full lg:w-1/2 h-auto lg:h-full overflow-visible lg:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-zinc-950/20 relative"
+              data-lenis-prevent
             >
               <div className="p-4 md:p-8 lg:p-12 space-y-8 md:space-y-12 lg:space-y-16">
                 {resolvedImageType === "phone" ? (
