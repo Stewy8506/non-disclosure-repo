@@ -117,7 +117,7 @@ function PhoneFrame({ src, alt, index }: { src: string; alt: string; index: numb
         className="relative rounded-[2rem] overflow-hidden select-none"
         style={{
           background: "linear-gradient(145deg, #2a2a2e 0%, #1a1a1e 40%, #0f0f12 100%)",
-          padding: "3px",
+          padding: "2px",
           boxShadow:
             "0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px -12px rgba(0,0,0,0.9), 0 0 60px -20px rgba(6,182,212,0.08), inset 0 1px 0 rgba(255,255,255,0.12)",
         }}
