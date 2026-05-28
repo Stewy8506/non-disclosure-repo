@@ -87,25 +87,10 @@ export default function DynamicBackground() {
     <div className="fixed inset-0 -z-10 bg-black pointer-events-none">
       <Canvas
         camera={{ position: [0, 0, 15], fov: 60 }}
-        gl={{ preserveDrawingBuffer: true, alpha: true, antialias: false }} // Disable antialias for speed
+        gl={{ alpha: true, antialias: false }} // Disable antialias for speed
         dpr={isMobile ? 1 : [1, 1.5]} // Strictly cap DPR on mobile to prevent fill-rate death
-        onCreated={({ gl }) => {
-          gl.autoClearColor = false;
-        }}
       >
         <fog attach="fog" args={["#000000", 8, 25]} />
-
-        {/* Motion blur / trail fade layer */}
-        <mesh position={[0, 0, -10]} renderOrder={1}>
-          <planeGeometry args={[1000, 1000]} />
-          <meshBasicMaterial
-            color="#000000"
-            transparent
-            opacity={0.25}
-            depthWrite={false}
-            depthTest={false}
-          />
-        </mesh>
 
         <group renderOrder={2}>
           <ParticleField isMobile={isMobile} />

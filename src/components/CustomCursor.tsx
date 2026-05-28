@@ -21,6 +21,11 @@ const CustomCursor = () => {
   const cursorY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
+    // Disable on touch devices
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
@@ -74,12 +79,13 @@ const CustomCursor = () => {
     <>
       {/* The actual mouse pointer dot */}
       <motion.div
-        className="hidden md:flex fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference items-center justify-center overflow-hidden"
+        className="hidden md:flex fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] items-center justify-center overflow-hidden shadow-[0_0_4px_rgba(0,0,0,0.5)]"
         style={{
           x: cursorX,
           y: cursorY,
           translateX: "-50%",
           translateY: "-50%",
+          willChange: "transform",
         }}
         animate={{
           opacity: isVisible ? 1 : 0,
@@ -116,12 +122,13 @@ const CustomCursor = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="hidden md:flex fixed pointer-events-none z-[9999] mix-blend-difference"
+            className="hidden md:flex fixed pointer-events-none z-[9999]"
             style={{
               top: targetRect.top,
               left: targetRect.left,
               width: targetRect.width,
               height: targetRect.height,
+              willChange: "transform, width, height, top, left",
             }}
           >
             {/* Top-Left Corner */}

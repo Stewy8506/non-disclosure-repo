@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useLoading } from "../layout/ClientLayoutWrapper";
@@ -13,6 +13,15 @@ interface TextRevealProps {
 
 export default function TextReveal({ children, className, delay = 0 }: TextRevealProps) {
   const { isSiteReady } = useLoading();
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const words = children.split(" ");
 
   const container = {
@@ -27,7 +36,7 @@ export default function TextReveal({ children, className, delay = 0 }: TextRevea
     visible: {
       opacity: 1,
       y: 0,
-      filter: "blur(0px)",
+      ...(isMobile ? {} : { filter: "blur(0px)" }),
       transition: {
         type: "spring" as const,
         damping: 12,
@@ -37,7 +46,7 @@ export default function TextReveal({ children, className, delay = 0 }: TextRevea
     hidden: {
       opacity: 0,
       y: 20,
-      filter: "blur(4px)",
+      ...(isMobile ? {} : { filter: "blur(4px)" }),
       transition: {
         type: "spring" as const,
         damping: 12,
@@ -51,7 +60,12 @@ export default function TextReveal({ children, className, delay = 0 }: TextRevea
       <div className={cn("flex flex-wrap opacity-0", className)}>
         {words.map((word, index) => (
           <span
-            style={{ marginRight: "0.25em", transform: "translateY(20px)", filter: "blur(4px)" }}
+            style={{ 
+              marginRight: "0.25em", 
+              transform: "translateY(20px)", 
+              filter: isMobile ? "none" : "blur(4px)",
+              willChange: "transform, opacity, filter"
+            }}
             key={index}
             className="inline-block"
           >
@@ -73,7 +87,7 @@ export default function TextReveal({ children, className, delay = 0 }: TextRevea
       {words.map((word, index) => (
         <motion.span
           variants={child}
-          style={{ marginRight: "0.25em" }}
+          style={{ marginRight: "0.25em", willChange: "transform, opacity, filter" }}
           key={index}
           className="inline-block"
         >

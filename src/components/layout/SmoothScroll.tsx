@@ -5,6 +5,11 @@ import Lenis from "lenis";
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
+    // Disable Lenis on touch devices to prioritize native scrolling performance
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      return;
+    }
+
     // Instantiate Lenis with curated parameters for a premium "heavy" inertial feel
     const lenis = new Lenis({
       duration: 1.4, // Slightly longer duration for luxury weight
