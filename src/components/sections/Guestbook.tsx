@@ -23,7 +23,7 @@ export default function Guestbook() {
   const [inputName, setInputName] = useState("");
   const [inputMessage, setInputMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { playThocc, playPop } = useSoundEffect();
+  const { playThocc, playHover, playClick, playPop } = useSoundEffect();
 
   useEffect(() => {
     if (!db) return;
@@ -107,7 +107,7 @@ export default function Guestbook() {
                 type="text"
                 value={inputName}
                 onChange={(e) => setInputName(e.target.value)}
-                onFocus={() => playThocc()}
+                onFocus={() => playHover()}
                 placeholder="John Doe"
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-white focus:outline-none transition-colors text-white placeholder-zinc-500"
                 maxLength={30}
@@ -121,7 +121,7 @@ export default function Guestbook() {
               <textarea
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onFocus={() => playThocc()}
+                onFocus={() => playHover()}
                 placeholder="Your message here..."
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-white focus:outline-none transition-colors text-white placeholder-zinc-500 h-28 resize-none"
                 maxLength={150}
@@ -133,7 +133,7 @@ export default function Guestbook() {
             <motion.button
               whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
               whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-              onClick={() => playThocc()}
+              onClick={() => playClick()}
               type="submit"
               disabled={isSubmitting || !db}
               className="w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
@@ -162,7 +162,7 @@ export default function Guestbook() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.05 }}
                   className="relative pl-6 py-1 border-l-2 border-white/5 hover:border-emerald-500/40 transition-colors duration-500 group"
-                  onMouseEnter={() => playThocc()}
+                  onMouseEnter={() => playHover()}
                 >
                   <div className="absolute -left-[5px] top-4 w-2 h-2 rounded-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_12px_rgba(16,185,129,0.8)] scale-0 group-hover:scale-100" />
 

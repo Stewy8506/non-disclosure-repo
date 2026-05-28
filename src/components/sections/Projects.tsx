@@ -15,7 +15,7 @@ import HoverSpotlight from "../ui/HoverSpotlight";
 import { getProjectLiveUrl, type Project } from "@/lib/projects";
 
 export default function Projects({ limit }: { limit?: number }) {
-  const { playThocc } = useSoundEffect();
+  const { playThocc, playHover, playClick } = useSoundEffect();
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filter, setFilter] = useState("All");
@@ -65,8 +65,8 @@ export default function Projects({ limit }: { limit?: number }) {
             {categories.map((cat) => (
               <button
                 key={cat}
-                onMouseEnter={playThocc}
-                onClick={() => setFilter(cat as string)}
+                onMouseEnter={playHover}
+                onClick={() => { playClick(); setFilter(cat as string); }}
                 className={cn(
                   "px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 border",
                   filter === cat 
@@ -104,7 +104,7 @@ export default function Projects({ limit }: { limit?: number }) {
 
       {limit && (
         <div className="mt-16 flex justify-center">
-          <Link href="/projects" className="px-8 py-4 rounded-full bg-white text-black font-semibold tracking-wide hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+          <Link href="/projects" onMouseEnter={playHover} onClick={playClick} className="px-8 py-4 rounded-full bg-white text-black font-semibold tracking-wide hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]">
             View All Projects
           </Link>
         </div>
@@ -121,7 +121,7 @@ export default function Projects({ limit }: { limit?: number }) {
 
 // Alternating Full-Width Case Studies
 function ProjectListCard({ project, idx, onClick }: { project: Project; idx: number; onClick?: () => void }) {
-  const { playThocc } = useSoundEffect();
+  const { playHover, playClick } = useSoundEffect();
   const isEven = idx % 2 === 0;
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -139,10 +139,13 @@ function ProjectListCard({ project, idx, onClick }: { project: Project; idx: num
   
   return (
     <motion.div
-      onClick={onClick}
+      onClick={(e) => {
+        playClick();
+        if (onClick) onClick();
+      }}
       onMouseEnter={() => {
         setIsHovered(true);
-        playThocc();
+        playHover();
       }}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -189,8 +192,10 @@ function ProjectListCard({ project, idx, onClick }: { project: Project; idx: num
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
+                  playClick();
                   setCurrentImageIdx(i);
                 }}
+                onMouseEnter={playHover}
                 className={cn(
                   "w-1.5 h-1.5 rounded-full transition-all duration-300",
                   i === currentImageIdx ? "bg-white w-3" : "bg-white/40 hover:bg-white/80"
@@ -220,12 +225,12 @@ function ProjectListCard({ project, idx, onClick }: { project: Project; idx: num
           </div>
           <div className="flex gap-4">
             {project.sourceCodeUrl && (
-              <a href={project.sourceCodeUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+              <a href={project.sourceCodeUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); playClick(); }} onMouseEnter={playHover}>
                 <GitHubIcon className="w-5 h-5 text-muted hover:text-white transition-colors" />
               </a>
             )}
             {liveUrl && (
-              <a href={liveUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+              <a href={liveUrl} target="_blank" rel="noopener noreferrer" onClick={e => { e.stopPropagation(); playClick(); }} onMouseEnter={playHover}>
                 <ExternalLink className="w-5 h-5 text-muted hover:text-white transition-colors" />
               </a>
             )}

@@ -11,7 +11,7 @@ import { useWindowStore, WindowType } from "@/store/windowStore";
 
 export default function Dock() {
   const pathname = usePathname();
-  const { playThocc } = useSoundEffect();
+  const { playThocc, playHover, playClick } = useSoundEffect();
   const { scrollY } = useScroll();
   const [isHidden, setIsHidden] = useState(false);
 
@@ -90,7 +90,7 @@ export default function Dock() {
 
   const handleItemClick = (e: React.MouseEvent, item: any) => {
     e.preventDefault();
-    playThocc();
+    playClick();
     
     if (item.type === "link") {
       scrollToSection(item.href.slice(1));
@@ -131,7 +131,7 @@ export default function Dock() {
             <a
               href={item.href}
               onClick={(event) => handleItemClick(event, item)}
-              onMouseEnter={playThocc}
+              onMouseEnter={playHover}
               data-cursor="none"
               className="group relative flex items-center justify-center"
             >
@@ -166,7 +166,7 @@ export default function Dock() {
             <a
               href="#"
               onClick={(event) => handleItemClick(event, item)}
-              onMouseEnter={playThocc}
+              onMouseEnter={playHover}
               data-cursor="none"
               className="group relative flex items-center justify-center"
             >
@@ -200,7 +200,7 @@ export default function Dock() {
             key={item.name} 
             href={item.href} 
             onClick={(event) => handleItemClick(event, item)}
-            onMouseEnter={playThocc}
+            onMouseEnter={playHover}
             data-cursor="none" 
             className="flex flex-col items-center justify-center gap-0.5 opacity-70 hover:opacity-100 active:scale-95 transition-all"
           >
@@ -222,7 +222,7 @@ export default function Dock() {
             key={item.name} 
             href="#" 
             onClick={(event) => handleItemClick(event, item)}
-            onMouseEnter={playThocc}
+            onMouseEnter={playHover}
             data-cursor="none" 
             className="flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-all relative group"
           >

@@ -3,6 +3,7 @@
 import { HTMLMotionProps, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { useSoundEffect } from "@/hooks/useSoundEffect";
 import Magnetic from "./Magnetic";
 
 interface ButtonProps extends HTMLMotionProps<"button"> {
@@ -16,6 +17,8 @@ export default function Button({
   className,
   ...props
 }: ButtonProps) {
+  const { playHover, playClick } = useSoundEffect();
+
   const variants = {
     primary: "bg-white text-black hover:bg-gray-200",
     secondary: "bg-zinc-800 text-white hover:bg-zinc-700",
@@ -36,6 +39,14 @@ export default function Button({
           className
         )}
         {...props}
+        onMouseEnter={(e) => {
+          playHover();
+          if (props.onMouseEnter) props.onMouseEnter(e);
+        }}
+        onClick={(e) => {
+          playClick();
+          if (props.onClick) props.onClick(e);
+        }}
       >
         {children}
       </motion.button>

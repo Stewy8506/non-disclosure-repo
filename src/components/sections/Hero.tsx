@@ -13,7 +13,7 @@ import { GitHubIcon, LinkedInIcon } from "../ui/BrandIcons";
 import { useLoading } from "../layout/ClientLayoutWrapper";
 
 export default function Hero() {
-  const { playThocc } = useSoundEffect();
+  const { playThocc, playHover, playClick } = useSoundEffect();
 
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
@@ -115,15 +115,15 @@ export default function Hero() {
                 variant="primary"
                 className="group flex items-center justify-center gap-2 w-full whitespace-nowrap"
                 data-cursor="button"
-                onMouseEnter={playThocc}
-                onClick={() => handleScroll("projects")}
+                onMouseEnter={playHover}
+                onClick={() => { playClick(); handleScroll("projects"); }}
               >
                 View Projects
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Magnetic>
             <Magnetic strength={0.2}>
-              <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1} className="w-full flex" onMouseEnter={playThocc}>
+              <a href="/resume.pdf" download="Anuvab_Resume.pdf" tabIndex={-1} className="w-full flex" onMouseEnter={playHover} onClick={playClick}>
                 <Button variant="outline" className="group flex items-center justify-center gap-2 w-full whitespace-nowrap" data-cursor="button">
                   Download Resume
                   <Download className="w-4 h-4 group-hover:-translate-y-1 transition-transform" />
@@ -181,6 +181,7 @@ export default function Hero() {
                       key={i}
                       className={`relative inline-block origin-bottom bg-clip-text text-transparent ${textStyles}`}
                       data-cursor={isAnuvab ? "target" : undefined}
+                      onHoverStart={isAnuvab ? () => playClick() : undefined}
                       whileHover={isAnuvab ? {
                         y: -14,
                         scale: 1.08,
@@ -249,13 +250,26 @@ export default function Hero() {
 
           {/* THE LIVE TERMINAL WIDGET */}
           <FadeIn delay={0.2} className="w-full mb-12">
-            <div className="border border-white/10 bg-black/40 backdrop-blur-md rounded-xl p-6 relative overflow-hidden flex flex-col">
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <motion.div 
+                initial={{ boxShadow: "0 10px 30px -15px rgba(6, 182, 212, 0.15)" }}
+                whileHover={{ 
+                  scale: 1.02, 
+                  y: -4,
+                  boxShadow: "0 25px 50px -12px rgba(6, 182, 212, 0.35)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="border border-white/10 hover:border-cyan-500/30 bg-black/40 backdrop-blur-md rounded-xl p-6 relative overflow-hidden flex flex-col group cursor-crosshair"
+              >
 
               {/* Widget Header */}
               <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <TerminalSquare className="w-4 h-4 text-emerald-500" />
-                  <span className="font-mono text-[10px] text-emerald-500 tracking-[0.2em] uppercase">
+                  <TerminalSquare className="w-4 h-4 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                  <span className="font-mono text-[10px] text-cyan-400 group-hover:text-cyan-300 tracking-[0.2em] uppercase transition-colors">
                     Live.Terminal
                   </span>
                 </div>
@@ -270,13 +284,14 @@ export default function Hero() {
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                   </div>
                   <div className="text-zinc-500 mb-1.5">$ whoami</div>
-                  <div className="text-emerald-400 mb-3">anuvab_das</div>
+                  <div className="text-cyan-400 mb-3">anuvab_das</div>
                   <div className="text-zinc-500 mb-1.5">$ get_status --current</div>
                   <div className="text-white">Building high-performance apps...</div>
-                  <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.8, repeat: Infinity }} className="w-2 h-3.5 bg-emerald-500 mt-2" />
+                  <motion.div animate={{ opacity: [1, 0, 1] }} transition={{ duration: 0.8, repeat: Infinity }} className="w-2 h-3.5 bg-cyan-500 mt-2" />
                 </div>
               </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </FadeIn>
 
           {/* THE ACTION HUB */}
@@ -287,8 +302,8 @@ export default function Hero() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => { playThocc(); handleScroll("projects"); }}
-                  onMouseEnter={playThocc}
+                  onClick={() => { playClick(); handleScroll("projects"); }}
+                  onMouseEnter={playHover}
                   className="group flex items-center gap-3 text-white hover:text-emerald-400 transition-colors"
                 >
                   <span className="font-mono text-xs text-zinc-500 group-hover:text-emerald-500 transition-colors">01.</span>
@@ -304,7 +319,8 @@ export default function Hero() {
                   href="/resume.pdf"
                   download="Anuvab_Resume.pdf"
                   tabIndex={-1}
-                  onMouseEnter={playThocc}
+                  onMouseEnter={playHover}
+                  onClick={playClick}
                   className="group flex items-center gap-3 text-zinc-400 hover:text-white transition-colors"
                 >
                   <span className="font-mono text-xs text-zinc-600 group-hover:text-white transition-colors">02.</span>
@@ -315,9 +331,9 @@ export default function Hero() {
             </div>
 
             <div className="flex items-center gap-8 mt-8 w-full justify-center">
-              <motion.a whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }} href="https://github.com/Stewy8506" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-emerald-400 transition-colors" onClick={playThocc}><GitHubIcon className="w-7 h-7" /></motion.a>
-              <motion.a whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }} href="https://www.linkedin.com/in/anv-dev/" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-emerald-400 transition-colors" onClick={playThocc}><LinkedInIcon className="w-7 h-7" /></motion.a>
-              <motion.button whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }} onClick={() => { playThocc(); handleScroll("contact"); }} className="text-zinc-500 hover:text-emerald-400 transition-colors"><Mail className="w-7 h-7" /></motion.button>
+              <motion.a whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }} href="https://github.com/Stewy8506" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-emerald-400 transition-colors" onMouseEnter={playHover} onClick={playClick}><GitHubIcon className="w-7 h-7" /></motion.a>
+              <motion.a whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }} href="https://www.linkedin.com/in/anv-dev/" target="_blank" rel="noreferrer" className="text-zinc-500 hover:text-emerald-400 transition-colors" onMouseEnter={playHover} onClick={playClick}><LinkedInIcon className="w-7 h-7" /></motion.a>
+              <motion.button whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }} onMouseEnter={playHover} onClick={() => { playClick(); handleScroll("contact"); }} className="text-zinc-500 hover:text-emerald-400 transition-colors"><Mail className="w-7 h-7" /></motion.button>
             </div>
           </FadeIn>
 

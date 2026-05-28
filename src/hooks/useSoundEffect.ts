@@ -16,24 +16,104 @@ export const useSoundEffect = () => {
     }
   }, []);
 
+  const getAudioContext = useCallback(() => {
+    let audioCtx = audioCtxRef.current;
+    if (!audioCtx) {
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextClass) return null;
+      audioCtx = new AudioContextClass();
+      audioCtxRef.current = audioCtx;
+    }
+    
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }, []);
+
+  const playHover = useCallback(() => {
+    try {
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
+
+      const t = audioCtx.currentTime;
+      const masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0.03, t); // Very quiet
+      masterGain.connect(audioCtx.destination);
+
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, t);
+      osc.frequency.exponentialRampToValueAtTime(600, t + 0.05);
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.5, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      osc.start(t);
+      osc.stop(t + 0.06);
+    } catch {
+      // Ignore audio errors gracefully
+    }
+  }, [getAudioContext]);
+
+  const playClick = useCallback(() => {
+    try {
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
+
+      const t = audioCtx.currentTime;
+      const masterGain = audioCtx.createGain();
+      masterGain.gain.setValueAtTime(0.06, t); 
+      masterGain.connect(audioCtx.destination);
+
+      // Gentle, soothing sine wave (soft water-drop / tap)
+      const osc = audioCtx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(450, t);
+      osc.frequency.exponentialRampToValueAtTime(300, t + 0.08);
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.7, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+
+      // Tiny high-end sine for a subtle "glassy" tap definition
+      const snapOsc = audioCtx.createOscillator();
+      snapOsc.type = 'sine';
+      snapOsc.frequency.setValueAtTime(900, t);
+      snapOsc.frequency.exponentialRampToValueAtTime(600, t + 0.03);
+
+      const snapGain = audioCtx.createGain();
+      snapGain.gain.setValueAtTime(0.15, t);
+      snapGain.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+
+      snapOsc.connect(snapGain);
+      snapGain.connect(masterGain);
+
+      osc.start(t);
+      snapOsc.start(t);
+      osc.stop(t + 0.1);
+      snapOsc.stop(t + 0.04);
+    } catch {
+      // Ignore audio errors gracefully
+    }
+  }, [getAudioContext]);
+
   const playThocc = useCallback(() => {
     try {
-      let audioCtx = audioCtxRef.current;
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (!AudioContextClass) return;
-        audioCtx = new AudioContextClass();
-        audioCtxRef.current = audioCtx;
-      }
-      
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
 
       const t = audioCtx.currentTime;
 
       const masterGain = audioCtx.createGain();
-      masterGain.gain.setValueAtTime(0.12, t); 
+      masterGain.gain.setValueAtTime(0.05, t); // Reduced from 0.12
       masterGain.connect(audioCtx.destination);
 
       const popOsc = audioCtx.createOscillator();
@@ -67,27 +147,18 @@ export const useSoundEffect = () => {
     } catch {
       // Ignore audio errors gracefully
     }
-  }, []);
+  }, [getAudioContext]);
 
   const playPop = useCallback((intensity: number = 1) => {
     try {
-      let audioCtx = audioCtxRef.current;
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (!AudioContextClass) return;
-        audioCtx = new AudioContextClass();
-        audioCtxRef.current = audioCtx;
-      }
-      
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      const audioCtx = getAudioContext();
+      if (!audioCtx) return;
 
       const t = audioCtx.currentTime;
 
       // Scale master gain and pitch based on intensity
       const masterGain = audioCtx.createGain();
-      masterGain.gain.setValueAtTime(0.15 + (intensity * 0.2), t); 
+      masterGain.gain.setValueAtTime(0.06 + (intensity * 0.08), t); // Reduced from 0.15 + ...
       masterGain.connect(audioCtx.destination);
 
       // 1. The "Thump" - scale frequency down for higher intensity (heavier)
@@ -133,7 +204,7 @@ export const useSoundEffect = () => {
     } catch {
       // Ignore audio errors gracefully
     }
-  }, []);
+  }, [getAudioContext]);
 
-  return { playThocc, playPop };
+  return { playThocc, playPop, playHover, playClick };
 };
